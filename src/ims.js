@@ -25,16 +25,37 @@ const CLIENT_ID = "client_id";
 const CLIENT_SECRET = "client_secret";
 const SCOPE = "scope";
 
-async function sendPost(postUrl, postData) {
+async function sendRequest(method, url, token, data) {
 
     const options = {
-        uri: postUrl,
-        method: 'POST',
-        form: postData,
+        uri: url,
+        method: method,
+        headers: {
+            'User-Agent': 'aio-cli-ims'
+        },
         json: true
     }
 
+    if (data) {
+        if (method === 'GET') {
+            options.qs = data;
+        } else {
+            options.form = data;
+        }
+    }
+
+    if (token) {
+        options.auth = { bearer: token };
+    }
+
     return rp(options);
+}
+async function sendGet(getUrl, token, getData) {
+    return sendRequest('GET', getUrl, token, getData);
+}
+
+async function sendPost(postUrl, token, postData) {
+    return sendRequest('POST', postUrl, token, postData);
 }
 
 function _getTokenPayloadJson(token) {
@@ -124,6 +145,34 @@ class Ims {
 
     /**
      *
+     * @param {string} api The IMS API to GET, e.g. /ims/profile/v1
+     * @param {string} token The IMS access token to call the API
+     * @param {Map} parameters A map of request parameters
+     *
+     * @returns a promise resolving to the result of the request
+     */
+    async get(api, token, parameters) {
+        debug("get(%s, %s, %o)", api, token, parameters);
+
+        return sendGet(this.getApiUrl(api), token, parameters);
+    }
+
+    /**
+     *
+     * @param {string} api The IMS API to GET, e.g. /ims/profile/v1
+     * @param {string} token The IMS access token to call the API
+     * @param {Map} parameters A map of request parameters
+     *
+     * @returns a promise resolving to the result of the request
+     */
+    async post(api, token, parameters) {
+        debug("post(%s, %s, %o)", api, token, parameters);
+
+        return sendPost(this.getApiUrl(api), token, parameters);
+    }
+
+    /**
+     *
      * @param {string} authCode
      * @param {string} clientId
      * @param {string} clientSecret
@@ -156,7 +205,7 @@ class Ims {
             Promise.reject(`Unknown type of authCode: ${tokenType}`);
         }
 
-        return sendPost(this.getApiUrl("/ims/token/v1"), postData)
+        return sendPost(this.getApiUrl("/ims/token/v1"), undefined, postData)
             .then(response => toTokenResult(response));
     }
 
@@ -177,7 +226,7 @@ class Ims {
             jwt_token: signedJwtToken
         }
 
-        return sendPost(this.getApiUrl("/ims/exchange/jwt"), postData)
+        return sendPost(this.getApiUrl("/ims/exchange/jwt"), undefined, postData)
             .then(response => toTokenResult(response));
     }
 
@@ -201,7 +250,7 @@ class Ims {
             client_secret: clientSecret
         };
 
-        return sendPost(this.getApiUrl("/ims/invalidate_token/v2"), postData);
+        return sendPost(this.getApiUrl("/ims/invalidate_token/v2"), undefined, postData);
     }
 }
 
