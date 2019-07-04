@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const rp = require('request-promise-native')
-const debug = require('debug')('@adobe/aio-cli-ims');
+const debug = require('debug')('@adobe/aio-cli-ims/ims');
 
 const IMS_ENDPOINTS = {
     stage: "https://ims-na1-stg1.adobelogin.com",
@@ -252,6 +252,21 @@ class Ims {
 
         return sendPost(this.getApiUrl("/ims/invalidate_token/v2"), undefined, postData);
     }
+}
+
+Ims.fromToken = async token => {
+    debug("Ims.fromToken(%s)", token);
+    const as = _getTokenPayloadJson(token).as;
+    if (as) {
+        const url = `https://${as}.adobelogin.com`;
+        for (const env in IMS_ENDPOINTS) {
+            if (url === IMS_ENDPOINTS[env]) {
+                debug("  > %s=%s", env, IMS_ENDPOINTS[env]);
+                return Promise.resolve({ token, ims: new Ims(env) });
+            }
+        }
+    }
+    return Promise.reject(new Error("Cannot resolve to IMS environment from token"));
 }
 
 module.exports = {
