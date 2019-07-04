@@ -6,7 +6,8 @@
   "bugs": "https://github.com/fmeschbe/aio-cli-ims/issues",
   "dependencies": {
     "@adobe/aio-cli-config": "^1.0.7",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "debug": "4.x"
   },
   "devDependencies": {
     "eslint": "^4",
