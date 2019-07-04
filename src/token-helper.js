@@ -100,11 +100,15 @@ class ImsTokenManager {
         if (imsLoginPlugins) {
             for (const imsLoginPlugin of imsLoginPlugins) {
                 debug("  > Trying: %s", imsLoginPlugin);
-                const { supports, imsLogin } = require(imsLoginPlugin);
-                if (supports(config)) {
-                    const result = imsLogin(ims, config);
-                    debug("  > result: %o", result);
-                    return result;
+                try {
+                    const { supports, imsLogin } = require(imsLoginPlugin);
+                    if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function' ) {
+                        const result = imsLogin(ims, config);
+                        debug("  > result: %o", result);
+                        return result;
+                    }
+                } catch (e) {
+                    debug("  > Ignoring failure loading or calling plugin %s: %o", imsLoginPlugin, e);
                 }
             }
         }
