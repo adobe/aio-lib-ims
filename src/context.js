@@ -10,6 +10,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const debug = require('debug')('@adobe/adobeio-cna-core-ims/context');
+
 const IMS = '$ims';
 const IMS_CURRENT = `${IMS}.$current`;
 const IMS_PLUGINS = `${IMS}.$plugins`;
@@ -32,22 +34,27 @@ class Context {
      * method with local=false.
      */
     get current() {
+        debug("get current");
         return this._cliConfig.get(IMS_CURRENT);
     }
 
     set current(contextName) {
+        debug("set current=%s", contextName);
         this.setCurrent(contextName, true);
     }
 
-    setCurrent(contextName, local) {
+    setCurrent(contextName, local=false) {
+        debug("setCurrent(%s, %s)", contextName, !!local);
         this._cliConfig.set(IMS_CURRENT, contextName, !!local);
     }
 
     get plugins() {
+        debug("get plugins");
         return this._cliConfig.get(IMS_PLUGINS);
     }
 
     set plugins(plugins) {
+        debug("set plugins=%o", plugins);
         this.setPlugins(plugins, true);
     }
 
@@ -56,7 +63,8 @@ class Context {
      * @param {string[]} plugins The array of plugin names used for creating access tokens
      * @param {boolean} local Whether to store this as local (true) or global (false) configuration
      */
-    setPlugins(plugins, local) {
+    setPlugins(plugins, local=false) {
+        debug("setPlugins(%o, %s)", plugins, !!local);
         this._cliConfig.set(IMS_PLUGINS, plugins, !!local);
     }
 
@@ -64,6 +72,7 @@ class Context {
      * Returns the names of the configured IMS contexts as an array of strings.
      */
     keys() {
+        debug("keys()");
         return Object.keys(this._cliConfig.get(IMS)).filter(x => !x.startsWith('$'));
     }
 
@@ -78,6 +87,8 @@ class Context {
      * @param {string} contextName Name of the context information to return.
      */
     get(contextName) {
+        debug("get(%s)", contextName);
+
         if (!contextName) {
             contextName = this.current;
         }
@@ -94,11 +105,13 @@ class Context {
     }
 
     async set(contextName, contextData, local=false) {
+        debug("set(%s, %o, %s)", contextName, contextData, !!local);
+
         if (!contextName) {
             contextName = this.current;
         }
         if (contextName) {
-            return this._cliConfig.set(`$ims.${contextName}`, contextData, local);
+            return this._cliConfig.set(`$ims.${contextName}`, contextData, !!local);
         }
 
         Promise.reject("Missing IMS context label to set context data for");
