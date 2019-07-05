@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims');
-const debug = require('debug')('@adobe/aio-cli-ims/token-helper');
+const debug = require('debug')('@adobe/adobeio-cna-core-ims/token-helper');
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
