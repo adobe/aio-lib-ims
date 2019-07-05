@@ -17,13 +17,9 @@ const debug = require('debug')('@adobe/adobeio-cna-core-ims/token-helper');
  * This is the default list of NPM packages used as plugins to create tokens
  * as part of the getToken(contextName) function.
  */
-const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/adobeio-cna-core-ims-jwt', '@adobe/adobeio-cna-core-ims-oauth', '@adobe/adobeio-cna-core-ims-service'];
+const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/adobeio-cna-core-ims-jwt', '@adobe/adobeio-cna-core-ims-oauth'];
 
 class ImsTokenManager {
-
-    constructor(imsLoginPlugins) {
-        this._imsLoginPlugins = imsLoginPlugins;
-    }
 
     async getToken(contextName) {
         debug("getToken(%s)", contextName);
@@ -64,12 +60,6 @@ class ImsTokenManager {
         return this.__context;
     }
 
-    get _createTokenPlugins() {
-        return this._imsLoginPlugins
-            || this._context.plugins
-            || DEFAULT_CREATE_TOKEN_PLUGINS;
-    }
-
     async _resolveContext(contextName) {
         const context = this._context.get(contextName);
         debug("LoginCommand:contextData - %O", context);
@@ -96,7 +86,7 @@ class ImsTokenManager {
     async _generateToken(ims, config, reason) {
         debug("generateToken(reason=%s)", reason);
 
-        const imsLoginPlugins = this._createTokenPlugins;
+        const imsLoginPlugins =  DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins);
         if (imsLoginPlugins) {
             for (const imsLoginPlugin of imsLoginPlugins) {
                 debug("  > Trying: %s", imsLoginPlugin);
@@ -169,7 +159,7 @@ class ImsTokenManager {
 }
 
 module.exports = {
-    getToken: (contextName, imsLoginPlugins) => new ImsTokenManager(imsLoginPlugins).getToken(contextName),
+    getToken: (contextName) => new ImsTokenManager().getToken(contextName),
 
     /**
      * Invalidates the access and optionally refresh of an IMS context.
@@ -186,5 +176,5 @@ module.exports = {
      * @param {boolean} force Whether to invalidate just the access token or
      *              to also invalidate the refresh token.
      */
-    invalidateToken: (contextName, force) => new ImsTokenManager(undefined).invalidateToken(contextName, !!force)
+    invalidateToken: (contextName, force) => new ImsTokenManager().invalidateToken(contextName, !!force)
 }
