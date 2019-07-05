@@ -9,7 +9,7 @@
     "@adobe/adobeio-cna-core-ims-jwt": "^0.0.0",
     "@adobe/adobeio-cna-core-ims-oauth": "^0.0.0",
     "request-promise-native": "^1.0.5",
-    "debug": "4.x"
+    "debug": "^4.1.1"
   },
   "devDependencies": {
     "eslint": "^4",
