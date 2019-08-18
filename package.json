@@ -1,15 +1,17 @@
 {
-  "name": "@adobe/adobeio-cna-core-ims",
+  "name": "@adobe/aio-cna-core-ims",
   "description": "IMS Support Module providing low level IMS HTTP API access as well as higher level support for getting tokens.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "author": "Adobe",
-  "bugs": "https://github.com/fmeschbe/aio-cli-ims/issues",
+  "bugs": "https://github.com/adobe/aio-cna-core-ims/issues",
   "dependencies": {
     "@adobe/aio-cli-config": "^1.0.7",
-    "@adobe/adobeio-cna-core-ims-jwt": "^0.0.0",
-    "@adobe/adobeio-cna-core-ims-oauth": "^0.0.0",
     "request-promise-native": "^1.0.5",
     "debug": "^4.1.1"
+  },
+  "peerDependencies": {
+    "@adobe/aio-cna-core-ims-jwt": "^1",
+    "@adobe/aio-cna-core-ims-oauth": "^1"
   },
   "devDependencies": {
     "eslint": "^4",
@@ -24,14 +26,14 @@
   "files": [
     "/src"
   ],
-  "homepage": "https://github.com/fmeschbe/aio-cli-ims",
+  "homepage": "https://github.com/adobe/aio-cna-core-ims",
   "keywords": [
-    "aio-cli",
+    "aio-cna",
     "ims"
   ],
   "license": "Apache-2.0",
   "main": "src/index.js",
-  "repository": "fmeschbe/aio-cli-ims",
+  "repository": "https://github.com/adobe/aio-cna-core-ims",
   "scripts": {
     "posttest": "eslint src",
     "test": "npm run unit-tests",

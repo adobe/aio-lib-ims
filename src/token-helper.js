@@ -11,13 +11,14 @@ governing permissions and limitations under the License.
 */
 
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims');
-const debug = require('debug')('@adobe/adobeio-cna-core-ims/token-helper');
+const debug = require('debug')('@adobe/aio-cna-core-ims/token-helper');
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
  * as part of the getToken(contextName) function.
+ * @private
  */
-const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/adobeio-cna-core-ims-jwt', '@adobe/adobeio-cna-core-ims-oauth'];
+const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-cna-core-ims-jwt', '@adobe/aio-cna-core-ims-oauth'];
 
 class ImsTokenManager {
 
