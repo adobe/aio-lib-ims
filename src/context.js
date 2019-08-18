@@ -20,7 +20,7 @@ class Context {
 
     get _cliConfig() {
         if (!this._config) {
-            this._config = require('@adobe/aio-cli-config')
+            this._config = require('@adobe/aio-cna-core-config')
             this._config.reload()
         }
         return this._config
