@@ -18,6 +18,7 @@
     "eslint-config-oclif": "^1",
     "jest": "^23.0.1",
     "jest-junit": "^5.0.0",
+    "jsdoc-to-markdown": "^5.0.0",
     "stdout-stderr": "^0.1.9"
   },
   "engines": {
@@ -38,7 +39,7 @@
     "posttest": "eslint src",
     "test": "npm run unit-tests",
     "unit-tests": "jest --ci",
-    "prepack": "",
+    "docs": "jsdoc2md --template jsdoc2md/api.hbs src/*.js > api.md",
     "postpack": "",
     "version": "git add README.md"
   },

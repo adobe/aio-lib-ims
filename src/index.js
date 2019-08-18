@@ -22,16 +22,47 @@ const {
     CLIENT_SECRET,
     SCOPE
 } = require('./ims');
+
+/**
+ * The `@adobe/aio-cna-core-ims` module offers three kinds of elements:
+ *
+ * 1. Managing configuration contexts for token creation and use
+ * 2. Creating and invalidating tokens
+ * 3. Providing low level access to IMS API
+ *
+ * @exports @adobe/aio-cna-core-ims
+ */
 module.exports = {
+    /** @see (#getTokenData) */
     getTokenData,
 
+    /** @see (#Ims) */
     Ims,
+
+    /** @see (#ACCESS_TOKEN) */
     ACCESS_TOKEN,
+
+    /** @see (#REFRESH_TOKEN) */
     REFRESH_TOKEN,
+
+    /** @see (#AUTHORIZATION_CODE) */
     AUTHORIZATION_CODE,
+
+    /** @see (#CLIENT_ID) */
     CLIENT_ID,
+
+    /** @see (#CLIENT_SECRET) */
     CLIENT_SECRET,
+
+    /** @see (#SCOPE) */
     SCOPE,
+
+    /**
+     * The `context` object manages the IMS configuration contexts on behalf of
+     * the Adobe I/O CNA Core IMS Library.
+     *
+     * @see The [`context`](#context) object
+     */
     context,
 
     /**
