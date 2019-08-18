@@ -16,7 +16,7 @@ const IMS = '$ims';
 const IMS_CURRENT = `${IMS}.$current`;
 const IMS_PLUGINS = `${IMS}.$plugins`;
 
-class Context {
+const context = {
 
     get _cliConfig() {
         if (!this._config) {
@@ -24,7 +24,7 @@ class Context {
             this._config.reload()
         }
         return this._config
-    }
+    },
 
     /**
      * The current context name.
@@ -36,22 +36,22 @@ class Context {
     get current() {
         debug("get current");
         return this._cliConfig.get(IMS_CURRENT);
-    }
+    },
 
     set current(contextName) {
         debug("set current=%s", contextName);
         this.setCurrent(contextName, true);
-    }
+    },
 
     setCurrent(contextName, local=false) {
         debug("setCurrent(%s, %s)", contextName, !!local);
         this._cliConfig.set(IMS_CURRENT, contextName, !!local);
-    }
+    },
 
     get plugins() {
         debug("get plugins");
         return this._cliConfig.get(IMS_PLUGINS);
-    }
+    },
 
     set plugins(plugins) {
         debug("set plugins=%o", plugins);
@@ -66,7 +66,7 @@ class Context {
     setPlugins(plugins, local=false) {
         debug("setPlugins(%o, %s)", plugins, !!local);
         this._cliConfig.set(IMS_PLUGINS, plugins, !!local);
-    }
+    },
 
     /**
      * Returns the names of the configured IMS contexts as an array of strings.
@@ -74,7 +74,7 @@ class Context {
     keys() {
         debug("keys()");
         return Object.keys(this._cliConfig.get(IMS)).filter(x => !x.startsWith('$'));
-    }
+    },
 
     /**
      * Returns an object representing the named context.
@@ -102,7 +102,7 @@ class Context {
 
         // missing context and no current context
         return { name: contextName, data: undefined };
-    }
+    },
 
     async set(contextName, contextData, local=false) {
         debug("set(%s, %o, %s)", contextName, contextData, !!local);
@@ -119,5 +119,5 @@ class Context {
 }
 
 module.exports = {
-    context: new Context()
+    context
 };
