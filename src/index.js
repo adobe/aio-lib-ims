@@ -11,9 +11,28 @@ governing permissions and limitations under the License.
 */
 
 const { IMS_TOKEN_MANAGER } = require('./token-helper');
+const { context } = require('./context');
+const {
+    getTokenData,
+    Ims,
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
+    AUTHORIZATION_CODE,
+    CLIENT_ID,
+    CLIENT_SECRET,
+    SCOPE
+} = require('./ims');
 module.exports = {
-    ...require('./ims'),
-    ...require('./context'),
+    getTokenData,
+
+    Ims,
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
+    AUTHORIZATION_CODE,
+    CLIENT_ID,
+    CLIENT_SECRET,
+    SCOPE,
+    context,
 
     /**
      * Returns an access token for the given context name.
