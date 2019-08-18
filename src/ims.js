@@ -113,6 +113,18 @@ async function toTokenResult(apiResponse) {
     return result;
 }
 
+/**
+ * Returns the decoded token value as JavaScript object.
+ *
+ * @param {string} token The token to decode and extract the token value from
+ *
+ * @returns {object} The decoded token payload data without header and signature
+ */
+function getTokenData(token) {
+    const [header, payload, sig] = token.split(".", 3);
+    return JSON.parse(Buffer.from(payload, 'base64'));
+}
+
 class Ims {
 
     /**
@@ -270,6 +282,7 @@ Ims.fromToken = async token => {
 }
 
 module.exports = {
+    getTokenData,
     Ims,
     ACCESS_TOKEN,
     REFRESH_TOKEN,
