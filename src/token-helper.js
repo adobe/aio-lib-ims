@@ -20,7 +20,7 @@ const debug = require('debug')('@adobe/aio-cna-core-ims/token-helper');
  */
 const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-cna-core-ims-jwt', '@adobe/aio-cna-core-ims-oauth'];
 
-class ImsTokenManager {
+const IMS_TOKEN_MANAGER  = {
 
     async getToken(contextName) {
         debug("getToken(%s)", contextName);
@@ -28,7 +28,7 @@ class ImsTokenManager {
         return this._resolveContext(contextName)
             .then(context => { return { ...context, result: this._getOrCreateToken(context.data) } })
             .then(result => this._persistTokens(result.name, result.data, result.result));
-    }
+    },
 
     async invalidateToken(contextName, force) {
         debug("invalidateToken(%s, %s)", contextName, force);
@@ -52,14 +52,14 @@ class ImsTokenManager {
                 }
                 this._context.set(name, data);
             });
-    }
+    },
 
     get _context() {
         if (!this.__context) {
             this.__context = require('./context').context;
         }
         return this.__context;
-    }
+    },
 
     async _resolveContext(contextName) {
         const context = this._context.get(contextName);
@@ -70,19 +70,19 @@ class ImsTokenManager {
         } else {
             return Promise.reject(new Error(`IMS context '${context.name}' is not configured`));
         }
-    }
+    },
 
     async _getOrCreateToken(config) {
         const ims = new Ims(config.env);
         return this.getTokenIfValid(config.access_token)
             .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
             .catch(reason => this._generateToken(ims, config, reason));
-    }
+    },
 
     async _fromRefreshToken(ims, token, config) {
         return this.getTokenIfValid(token)
             .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope));
-    }
+    },
 
     async _generateToken(ims, config, reason) {
         debug("generateToken(reason=%s)", reason);
@@ -93,6 +93,7 @@ class ImsTokenManager {
                 debug("  > Trying: %s", imsLoginPlugin);
                 try {
                     const { supports, imsLogin } = require(imsLoginPlugin);
+                    debug("  > supports(%o): %s", config, supports(config));
                     if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function' ) {
                         const result = imsLogin(ims, config);
                         debug("  > result: %o", result);
@@ -105,7 +106,7 @@ class ImsTokenManager {
         }
 
         return Promise.reject(new Error("Cannot generate token because no plugin supports configuration"));
-    }
+    },
 
     /**
      * If the result is an object containing an access and refresh token,
@@ -131,7 +132,7 @@ class ImsTokenManager {
                 () => true)
             .then(() => this._context.set(context, contextData))
             .then(() => result.access_token.token)
-    }
+    },
 
     /**
      * Validates the token is not expired yet and returns it if so.
@@ -160,22 +161,5 @@ class ImsTokenManager {
 }
 
 module.exports = {
-    getToken: (contextName) => new ImsTokenManager().getToken(contextName),
-
-    /**
-     * Invalidates the access and optionally refresh of an IMS context.
-     * The name of the IMS context is given as its first parameter and defaults
-     * to the current context if missing or empty. The force parameter indicates
-     * whether only the access token is invalidated (force=false) or the refresh
-     * token (if existing) is also invalidated (force=true). If the refresh token
-     * exists and is validated, all access tokens which have been created with
-     * this refresh token will automatically become invalid as well.
-     *
-     * @param {string} contextName The name of the IMS context for which to
-     *              invalidate the token(s). If this is empty, the token(s) of
-     *              the current IMS context are invalidated.
-     * @param {boolean} force Whether to invalidate just the access token or
-     *              to also invalidate the refresh token.
-     */
-    invalidateToken: (contextName, force) => new ImsTokenManager().invalidateToken(contextName, !!force)
+    IMS_TOKEN_MANAGER
 }
