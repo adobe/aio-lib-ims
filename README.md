@@ -1,5 +1,7 @@
 # Adobe I/O CNA IMS Library
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/adobe/aio-cna-core-ims.svg?token=b2cddca43fa697ddb206faaa410c01addcad20154ed371ddd7a4fbeeef2474bc&ts=1567277064673)](https://greenkeeper.io/)
+
 The Adobe I/O CNA IMS Library helps interacting with the IMS API as well as creating and invalidating tokes.
 To support multiple use cases and environments, there is not a single configuration managed by this library but multiple configurations called _IMS configuration contexts_.
 Each configuration context holds configuration data needed to create tokens.
