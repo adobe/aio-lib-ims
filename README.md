@@ -124,7 +124,7 @@ When a new access token needs to be created from credentials, the IMS Library im
 * Iterate over this collection and for each plugin do:
   * `require` the plugin
   * Call the plugin's `supports(config)` function with the configuration context
-  * If `supports()` returns `true` then call the plugin's `imsLogin(ims, config)` function with an instance of the [`Ims`](/adobe/aio-cna-core-ims/blob/master/src/ims.js) class and the configuration context.
+  * If `supports(config)` returns `true` then call the plugin's `imsLogin(ims, config, force)` function with an instance of the [`Ims`](/adobe/aio-cna-core-ims/blob/master/src/ims.js) class, the configuration context, and a boolean flag described below in [Forced `imsLogin`](#forced-imslogin).
 
 From this algorithm we can derive the following requirements for a plugin:
 
@@ -135,7 +135,21 @@ From this algorithm we can derive the following requirements for a plugin:
     | Property | Signature | Description |
     |---|---|---|
     | `supports` | `(config) => boolean` | Given the IMS configuration context, returns `true` if the configuration can be used for the plugins login mechanism. |
-    | `imsLogin` | `(ims, config) => Promise` | Given the [`Ims` instance](/adobe/aio-cna-core-ims/blob/master/src/ims.js) and the IMS configuration context implement the authentication with IMS and return a `Promise` resolving to a token object. |
+    | `imsLogin` | `(ims, config, force) => Promise` | Given the [`Ims` instance](/adobe/aio-cna-core-ims/blob/master/src/ims.js) and the IMS configuration context implement the authentication with IMS and return a `Promise` resolving to a token object. See [Forced `imsLogin`](#forced-imslogin) for details on the `force` parameter. |
+
+### Forced `imsLogin`
+
+Some plugins support an OAuth2 login mechanism where the actual account for which an access token is generated depends on the user input.
+For example the [OAuth2](/adobe/aio-cna-core-ims-oauth) plugin implements an ExpressJS application to implemented the three legeed OAuth2 flow.
+During this flow the user is entering their credentials for IMS to validate.
+
+Typically IMS will set some cookies to cache the login state in the browser to improve user experience in a standard OAUth2 web application.
+In CLI contexts it might not always be desired to always get a token for the same user, particularly in testing scenarios.
+
+To allow changing user identity in the OAuth2 plugin or to prevent reusing cached information, the `force` flag to the `imsLogin` function indicates whether to clean caches before logging in.
+`True` meaning to clean the cache, while `false` indicates that using cached information is just fine.
+
+### `imsLogin` Promise
 
 The promise returned form `imsLogin` must resolve to a _token object_ having the following general structure:
 
@@ -159,12 +173,15 @@ Any additional properties are currently ignored.
 
 The `Ims.exchangeJwtToken()` and `Ims.getAccessToken()` functions both return a `Promise` resolving to a _token object_ as expected to be returned from the `imsLogin` function.
 
-> **NOTE:** One package provides for exactly one IMS plugin extension. So to provide multiple plugins, multiple packages must be created and deployed.
+### Implementing Plugins
 
-The configuration support modules for [JWT](/adobe/aio-cna-core-ims-jwt) and [OAuth2](/adobe/aio-cna-core-ims-oauth) are implemented in this way.
+Since plugins are accessed using standard `require` , one `npm` package only provides exactly one IMS plugin extension.
+Multiple plugins must be implemented in separate plugins.
+The configuration support modules for [JWT](/adobe/aio-cna-core-ims-jwt) and [OAuth2](/adobe/aio-cna-core-ims-oauth) are two such packages.
 The IMS Library has a dependency on the _JWT_ and _OAuth2_ plugins and will always try to use those.
-To add more plugins they must be `npm install`-ed and listed in the `$ims/$plugins` property.
-This can easily be done in a `postinstall` script like this:
+
+Additional plugins must be `npm install`-ed and listed in the `$ims/$plugins` array property.
+This can easily be done in the package `postinstall` script like this:
 
 ```js
 const { context } = require('@adobe/aio-cna-core-ims');

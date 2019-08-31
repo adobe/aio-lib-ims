@@ -75,7 +75,7 @@ The `@adobe/aio-cna-core-ims` module offers three kinds of elements:
     * [.CLIENT_SECRET](#module_@adobe/aio-cna-core-ims.CLIENT_SECRET)
     * [.SCOPE](#module_@adobe/aio-cna-core-ims.SCOPE)
     * [.context](#module_@adobe/aio-cna-core-ims.context)
-    * [.getToken(contextName)](#module_@adobe/aio-cna-core-ims.getToken) ⇒ <code>Promise</code>
+    * [.getToken(contextName, force)](#module_@adobe/aio-cna-core-ims.getToken) ⇒ <code>Promise</code>
     * [.invalidateToken(contextName, force)](#module_@adobe/aio-cna-core-ims.invalidateToken)
 
 <a name="module_@adobe/aio-cna-core-ims.getTokenData"></a>
@@ -128,7 +128,7 @@ the Adobe I/O CNA Core IMS Library.
 **See**: The [`context`](#context) object  
 <a name="module_@adobe/aio-cna-core-ims.getToken"></a>
 
-### @adobe/aio-cna-core-ims.getToken(contextName) ⇒ <code>Promise</code>
+### @adobe/aio-cna-core-ims.getToken(contextName, force) ⇒ <code>Promise</code>
 Returns an access token for the given context name.
 
 **Kind**: static method of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
@@ -137,6 +137,7 @@ Returns an access token for the given context name.
 | Param | Type | Description |
 | --- | --- | --- |
 | contextName | <code>string</code> | The name of the IMS context for which to              return the access token. If this is empty, the token(s) of              the current IMS context are invalidated. |
+| force | <code>boolean</code> | Forces a login in the selected plugin's `imslogin`              function. See [Forced `imsLogin`](README.md#forced-imslogin)              for more information on this flag. The default value is `false`. |
 
 <a name="module_@adobe/aio-cna-core-ims.invalidateToken"></a>
 

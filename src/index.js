@@ -71,10 +71,13 @@ module.exports = {
      * @param {string} contextName The name of the IMS context for which to
      *              return the access token. If this is empty, the token(s) of
      *              the current IMS context are invalidated.
+     * @param {boolean} force Forces a login in the selected plugin's `imslogin`
+     *              function. See [Forced `imsLogin`](README.md#forced-imslogin)
+     *              for more information on this flag. The default value is `false`.
      *
      * @returns {Promise} Resolving to an access token (string)
      */
-    getToken: (contextName) => IMS_TOKEN_MANAGER.getToken(contextName),
+    getToken: (contextName, force=false) => IMS_TOKEN_MANAGER.getToken(contextName, force),
 
     /**
      * Invalidates the access and optionally refresh of an IMS context.

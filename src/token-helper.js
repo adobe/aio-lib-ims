@@ -22,11 +22,11 @@ const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-cna-core-ims-jwt', '@adobe/aio
 
 const IMS_TOKEN_MANAGER  = {
 
-    async getToken(contextName) {
-        debug("getToken(%s)", contextName);
+    async getToken(contextName, force) {
+        debug("getToken(%s, %s)", contextName, force);
 
         return this._resolveContext(contextName)
-            .then(context => { return { ...context, result: this._getOrCreateToken(context.data) } })
+            .then(context => { return { ...context, result: this._getOrCreateToken(context.data, force) } })
             .then(result => this._persistTokens(result.name, result.data, result.result));
     },
 
@@ -72,20 +72,22 @@ const IMS_TOKEN_MANAGER  = {
         }
     },
 
-    async _getOrCreateToken(config) {
+    async _getOrCreateToken(config, force) {
+        debug("_getOrCreateToken(config=%o, force=%s)", config, force);
         const ims = new Ims(config.env);
         return this.getTokenIfValid(config.access_token)
             .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
-            .catch(reason => this._generateToken(ims, config, reason));
+            .catch(reason => this._generateToken(ims, config, reason, force));
     },
 
     async _fromRefreshToken(ims, token, config) {
+        debug("_fromRefreshToken(token=%s, config=%o)", token, config);
         return this.getTokenIfValid(token)
             .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope));
     },
 
-    async _generateToken(ims, config, reason) {
-        debug("generateToken(reason=%s)", reason);
+    async _generateToken(ims, config, reason, force) {
+        debug("_generateToken(reason=%s, force=%s)", reason, force);
 
         const imsLoginPlugins =  DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins);
         if (imsLoginPlugins) {
@@ -95,7 +97,7 @@ const IMS_TOKEN_MANAGER  = {
                     const { supports, imsLogin } = require(imsLoginPlugin);
                     debug("  > supports(%o): %s", config, supports(config));
                     if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function' ) {
-                        const result = imsLogin(ims, config);
+                        const result = imsLogin(ims, config, force);
                         debug("  > result: %o", result);
                         return result;
                     }
@@ -149,7 +151,7 @@ const IMS_TOKEN_MANAGER  = {
      * @returns the token if existing and not expired, else a rejected Promise
      */
     async getTokenIfValid(token) {
-        debug("getTokenIfValid(%o)", token);
+        debug("getTokenIfValid(token=%o)", token);
         const minExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes from now
         if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
             debug("  => %o", token.token);
