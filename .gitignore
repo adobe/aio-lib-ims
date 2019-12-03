@@ -11,3 +11,4 @@ node_modules
 /test-results.xml
 coverage/
 junit.xml
+package-lock.json

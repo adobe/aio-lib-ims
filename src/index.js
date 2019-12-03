@@ -24,13 +24,13 @@ const {
 } = require('./ims');
 
 /**
- * The `@adobe/aio-cna-core-ims` module offers three kinds of elements:
+ * The `@adobe/aio-lib-core-ims` module offers three kinds of elements:
  *
  * 1. Managing configuration contexts for token creation and use
  * 2. Creating and invalidating tokens
  * 3. Providing low level access to IMS API
  *
- * @exports @adobe/aio-cna-core-ims
+ * @exports @adobe/aio-lib-core-ims
  */
 module.exports = {
     /** @see (#getTokenData) */
@@ -59,7 +59,7 @@ module.exports = {
 
     /**
      * The `context` object manages the IMS configuration contexts on behalf of
-     * the Adobe I/O CNA Core IMS Library.
+     * the Adobe I/O Lib Core IMS Library.
      *
      * @see The [`context`](#context) object
      */

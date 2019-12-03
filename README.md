@@ -1,24 +1,24 @@
-# Adobe I/O CNA IMS Library
+# Adobe I/O Lib Core IMS Library
 
-The Adobe I/O CNA IMS Library helps interacting with the IMS API as well as creating and invalidating tokes.
+The Adobe I/O Lib Core IMS Library helps interacting with the IMS API as well as creating and invalidating tokes.
 To support multiple use cases and environments, there is not a single configuration managed by this library but multiple configurations called _IMS configuration contexts_.
 Each configuration context holds configuration data needed to create tokens.
 See the _Configuration_ section below.
 
 # Installation
 
-To install the Adobe I/O CNA IMS Library, simple use `npm`:
+To install the Adobe I/O Lib Core IMS Library, simple use `npm`:
 
 ```sh
-$ npm install @adobe/aio-cna-core-ims --save
+$ npm install @adobe/aio-lib-core-ims --save
 ```
 
 # Quickstart
 
-Before using the CNA IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
+Before using the AIO Lib Core IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
 ```js
-const { context, getToken } = require('@adobe/aio-cna-core-ims');
+const { context, getToken } = require('@adobe/aio-lib-core-ims');
 
 const config = {
   callback_url: "https://callback.example.org",
@@ -37,7 +37,7 @@ See the [API Documentation](api.md) for full details.
 
 # Configuration
 
-The CNA IMS Library is leveraging the [Configuration module for use by aio-cli plugins](https://github.com/adobe/aio-cna-core-config) to maintain the login configuration and keep access and refresh tokens for reuse before they expire.
+The AIO Lib Core IMS Library is leveraging the [Configuration module for use by aio-cli plugins](https://github.com/adobe/aio-lib-core-config) to maintain the login configuration and keep access and refresh tokens for reuse before they expire.
 
 All configuration is stored in a single semi-hidden `$ims` root property.
 
@@ -71,7 +71,7 @@ Here is an example `$ims` configuration
     },
     $current: "sample_oauth2",
     $plugins: [
-      "sample-cna-ims-plugin"
+      "sample-aio-lib-ims-plugin"
     ]
   }
 }
@@ -114,33 +114,33 @@ OAuth2 configuration requires the following properties:
 
 ## Adding Configuration Support
 
-The CNA IMS Library handles common tasks around tokens by itself.
+The AIO Lib Core IMS Library handles common tasks around tokens by itself.
 This includes storing access and refresh tokens in the configuration context, checking those tokens for expiry, and refreshing as needed.
 Only when an access token (and a refresh token) needs to be created anew from the configuration context credentials, the plugins come into play.
 
 When a new access token needs to be created from credentials, the IMS Library implements the following algorithm:
 
-* Collect the CNA IMS Library plugins
+* Collect the AIO Lib Core IMS Library plugins
 * Iterate over this collection and for each plugin do:
   * `require` the plugin
   * Call the plugin's `supports(config)` function with the configuration context
-  * If `supports(config)` returns `true` then call the plugin's `imsLogin(ims, config, force)` function with an instance of the [`Ims`](/adobe/aio-cna-core-ims/blob/master/src/ims.js) class, the configuration context, and a boolean flag described below in [Forced `imsLogin`](#forced-imslogin).
+  * If `supports(config)` returns `true` then call the plugin's `imsLogin(ims, config, force)` function with an instance of the [`Ims`](/adobe/aio-lib-core-ims/blob/master/src/ims.js) class, the configuration context, and a boolean flag described below in [Forced `imsLogin`](#forced-imslogin).
 
 From this algorithm we can derive the following requirements for a plugin:
 
-* _MUST_ be installed and available to the `require` function of the CNA IMS Library.
+* _MUST_ be installed and available to the `require` function of the AIO Lib Core IMS Library.
 * _MUST_ set the script to be loaded by `requiring` the plugin's root folder in the `package.json#/main` property (this is actually how `require` loads the package's main script when using the folder containing the `package.json` file).
 * _MUST_ export an object from this script with the following two properties being functions:
 
     | Property | Signature | Description |
     |---|---|---|
     | `supports` | `(config) => boolean` | Given the IMS configuration context, returns `true` if the configuration can be used for the plugins login mechanism. |
-    | `imsLogin` | `(ims, config, force) => Promise` | Given the [`Ims` instance](/adobe/aio-cna-core-ims/blob/master/src/ims.js) and the IMS configuration context implement the authentication with IMS and return a `Promise` resolving to a token object. See [Forced `imsLogin`](#forced-imslogin) for details on the `force` parameter. |
+    | `imsLogin` | `(ims, config, force) => Promise` | Given the [`Ims` instance](/adobe/aio-lib-core-ims/blob/master/src/ims.js) and the IMS configuration context implement the authentication with IMS and return a `Promise` resolving to a token object. See [Forced `imsLogin`](#forced-imslogin) for details on the `force` parameter. |
 
 ### Forced `imsLogin`
 
 Some plugins support an OAuth2 login mechanism where the actual account for which an access token is generated depends on the user input.
-For example the [OAuth2](/adobe/aio-cna-core-ims-oauth) plugin implements an ExpressJS application to implemented the three legeed OAuth2 flow.
+For example the [OAuth2](/adobe/aio-lib-core-ims-oauth) plugin implements an ExpressJS application to implemented the three legeed OAuth2 flow.
 During this flow the user is entering their credentials for IMS to validate.
 
 Typically IMS will set some cookies to cache the login state in the browser to improve user experience in a standard OAUth2 web application.
@@ -177,14 +177,14 @@ The `Ims.exchangeJwtToken()` and `Ims.getAccessToken()` functions both return a 
 
 Since plugins are accessed using standard `require` , one `npm` package only provides exactly one IMS plugin extension.
 Multiple plugins must be implemented in separate plugins.
-The configuration support modules for [JWT](/adobe/aio-cna-core-ims-jwt) and [OAuth2](/adobe/aio-cna-core-ims-oauth) are two such packages.
+The configuration support modules for [JWT](/adobe/aio-lib-core-ims-jwt) and [OAuth2](/adobe/aio-lib-core-ims-oauth) are two such packages.
 The IMS Library has a dependency on the _JWT_ and _OAuth2_ plugins and will always try to use those.
 
 Additional plugins must be `npm install`-ed and listed in the `$ims/$plugins` array property.
 This can easily be done in the package `postinstall` script like this:
 
 ```js
-const { context } = require('@adobe/aio-cna-core-ims');
+const { context } = require('@adobe/aio-lib-core-ims');
 context.plugins = context.plugins.push(process.env.npm_package_name);
 ```
 

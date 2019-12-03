@@ -1,24 +1,24 @@
 {
-  "name": "@adobe/aio-cna-core-ims",
+  "name": "@adobe/aio-lib-core-ims",
   "description": "IMS Support Module providing low level IMS HTTP API access as well as higher level support for getting tokens.",
   "version": "1.0.0",
   "author": "Adobe",
-  "bugs": "https://github.com/adobe/aio-cna-core-ims/issues",
+  "bugs": "https://github.com/adobe/aio-lib-core-ims/issues",
   "dependencies": {
-    "@adobe/aio-cna-core-config": "1.x",
+    "@adobe/aio-lib-core-config": "1.x",
     "debug": "^4.1.1",
     "request-promise-native": "^1.0.5"
   },
   "peerDependencies": {
-    "@adobe/aio-cna-core-ims-jwt": "^1",
-    "@adobe/aio-cna-core-ims-oauth": "^1"
+    "@adobe/aio-lib-core-ims-jwt": "^1",
+    "@adobe/aio-lib-core-ims-oauth": "^1"
   },
   "devDependencies": {
     "eslint": "^4",
     "eslint-config-oclif": "^1",
     "jest": "^23.0.1",
     "jest-junit": "^5.0.0",
-    "jsdoc-to-markdown": "^5.0.0",
+    "jsdoc-to-markdown": "^5.0.3",
     "stdout-stderr": "^0.1.9"
   },
   "engines": {
@@ -27,14 +27,14 @@
   "files": [
     "/src"
   ],
-  "homepage": "https://github.com/adobe/aio-cna-core-ims",
+  "homepage": "https://github.com/adobe/aio-lib-core-ims",
   "keywords": [
-    "aio-cna",
+    "aio-lib",
     "ims"
   ],
   "license": "Apache-2.0",
   "main": "src/index.js",
-  "repository": "https://github.com/adobe/aio-cna-core-ims",
+  "repository": "https://github.com/adobe/aio-lib-core-ims",
   "scripts": {
     "posttest": "eslint src",
     "test": "npm run unit-tests",

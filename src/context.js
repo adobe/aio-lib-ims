@@ -10,7 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const debug = require('debug')('@adobe/aio-cna-core-ims/context');
+const debug = require('debug')('@adobe/aio-lib-core-ims/context');
 
 // Name of the IMS configuration context data structure
 const IMS = '$ims';
@@ -23,7 +23,7 @@ const IMS_PLUGINS = `${IMS}.$plugins`;
 
 /**
  * The `context` object manages the IMS configuration contexts on behalf of
- * the Adobe I/O CNA Core IMS Library.
+ * the Adobe I/O Lib Core IMS Library.
  */
 const context = {
 
@@ -33,7 +33,7 @@ const context = {
      */
     get _cliConfig() {
         if (!this._config) {
-            this._config = require('@adobe/aio-cna-core-config')
+            this._config = require('@adobe/aio-lib-core-config')
             this._config.reload()
         }
         return this._config
@@ -70,7 +70,7 @@ const context = {
 
     /**
      * The list of additional IMS login plugins to consider.
-     * The JWT and OAuth2 plugins are required by the CNA Core IMS
+     * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
      * library and are always installed and used.
      * This list of plugins is always stored in the global configuration.
      */

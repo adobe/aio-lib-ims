@@ -1,10 +1,10 @@
-# Adobe I/O CNA Core IMS Library API Documentation
+# Adobe I/O Lib Core IMS Library API Documentation
 
 ## Modules
 
 <dl>
-<dt><a href="#module_@adobe/aio-cna-core-ims">@adobe/aio-cna-core-ims</a></dt>
-<dd><p>The <code>@adobe/aio-cna-core-ims</code> module offers three kinds of elements:</p>
+<dt><a href="#module_@adobe/aio-lib-core-ims">@adobe/aio-lib-core-ims</a></dt>
+<dd><p>The <code>@adobe/aio-lib-core-ims</code> module offers three kinds of elements:</p>
 <ol>
 <li>Managing configuration contexts for token creation and use</li>
 <li>Creating and invalidating tokens</li>
@@ -25,7 +25,7 @@
 <dl>
 <dt><a href="#context">context</a></dt>
 <dd><p>The <code>context</code> object manages the IMS configuration contexts on behalf of
-the Adobe I/O CNA Core IMS Library.</p>
+the Adobe I/O Lib Core IMS Library.</p>
 </dd>
 <dt><a href="#ACCESS_TOKEN">ACCESS_TOKEN</a></dt>
 <dd><p>The constant string <code>access_token</code>.</p>
@@ -55,83 +55,83 @@ the Adobe I/O CNA Core IMS Library.</p>
 </dd>
 </dl>
 
-<a name="module_@adobe/aio-cna-core-ims"></a>
+<a name="module_@adobe/aio-lib-core-ims"></a>
 
-## @adobe/aio-cna-core-ims
-The `@adobe/aio-cna-core-ims` module offers three kinds of elements:
+## @adobe/aio-lib-core-ims
+The `@adobe/aio-lib-core-ims` module offers three kinds of elements:
 
 1. Managing configuration contexts for token creation and use
 2. Creating and invalidating tokens
 3. Providing low level access to IMS API
 
 
-* [@adobe/aio-cna-core-ims](#module_@adobe/aio-cna-core-ims)
-    * [.getTokenData](#module_@adobe/aio-cna-core-ims.getTokenData)
-    * [.Ims](#module_@adobe/aio-cna-core-ims.Ims)
-    * [.ACCESS_TOKEN](#module_@adobe/aio-cna-core-ims.ACCESS_TOKEN)
-    * [.REFRESH_TOKEN](#module_@adobe/aio-cna-core-ims.REFRESH_TOKEN)
-    * [.AUTHORIZATION_CODE](#module_@adobe/aio-cna-core-ims.AUTHORIZATION_CODE)
-    * [.CLIENT_ID](#module_@adobe/aio-cna-core-ims.CLIENT_ID)
-    * [.CLIENT_SECRET](#module_@adobe/aio-cna-core-ims.CLIENT_SECRET)
-    * [.SCOPE](#module_@adobe/aio-cna-core-ims.SCOPE)
-    * [.context](#module_@adobe/aio-cna-core-ims.context)
-    * [.getToken(contextName, force)](#module_@adobe/aio-cna-core-ims.getToken) ⇒ <code>Promise</code>
-    * [.invalidateToken(contextName, force)](#module_@adobe/aio-cna-core-ims.invalidateToken)
+* [@adobe/aio-lib-core-ims](#module_@adobe/aio-lib-core-ims)
+    * [.getTokenData](#module_@adobe/aio-lib-core-ims.getTokenData)
+    * [.Ims](#module_@adobe/aio-lib-core-ims.Ims)
+    * [.ACCESS_TOKEN](#module_@adobe/aio-lib-core-ims.ACCESS_TOKEN)
+    * [.REFRESH_TOKEN](#module_@adobe/aio-lib-core-ims.REFRESH_TOKEN)
+    * [.AUTHORIZATION_CODE](#module_@adobe/aio-lib-core-ims.AUTHORIZATION_CODE)
+    * [.CLIENT_ID](#module_@adobe/aio-lib-core-ims.CLIENT_ID)
+    * [.CLIENT_SECRET](#module_@adobe/aio-lib-core-ims.CLIENT_SECRET)
+    * [.SCOPE](#module_@adobe/aio-lib-core-ims.SCOPE)
+    * [.context](#module_@adobe/aio-lib-core-ims.context)
+    * [.getToken(contextName, force)](#module_@adobe/aio-lib-core-ims.getToken) ⇒ <code>Promise</code>
+    * [.invalidateToken(contextName, force)](#module_@adobe/aio-lib-core-ims.invalidateToken)
 
-<a name="module_@adobe/aio-cna-core-ims.getTokenData"></a>
+<a name="module_@adobe/aio-lib-core-ims.getTokenData"></a>
 
-### @adobe/aio-cna-core-ims.getTokenData
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.getTokenData
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#getTokenData)  
-<a name="module_@adobe/aio-cna-core-ims.Ims"></a>
+<a name="module_@adobe/aio-lib-core-ims.Ims"></a>
 
-### @adobe/aio-cna-core-ims.Ims
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.Ims
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#Ims)  
-<a name="module_@adobe/aio-cna-core-ims.ACCESS_TOKEN"></a>
+<a name="module_@adobe/aio-lib-core-ims.ACCESS_TOKEN"></a>
 
-### @adobe/aio-cna-core-ims.ACCESS\_TOKEN
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.ACCESS\_TOKEN
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#ACCESS_TOKEN)  
-<a name="module_@adobe/aio-cna-core-ims.REFRESH_TOKEN"></a>
+<a name="module_@adobe/aio-lib-core-ims.REFRESH_TOKEN"></a>
 
-### @adobe/aio-cna-core-ims.REFRESH\_TOKEN
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.REFRESH\_TOKEN
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#REFRESH_TOKEN)  
-<a name="module_@adobe/aio-cna-core-ims.AUTHORIZATION_CODE"></a>
+<a name="module_@adobe/aio-lib-core-ims.AUTHORIZATION_CODE"></a>
 
-### @adobe/aio-cna-core-ims.AUTHORIZATION\_CODE
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.AUTHORIZATION\_CODE
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#AUTHORIZATION_CODE)  
-<a name="module_@adobe/aio-cna-core-ims.CLIENT_ID"></a>
+<a name="module_@adobe/aio-lib-core-ims.CLIENT_ID"></a>
 
-### @adobe/aio-cna-core-ims.CLIENT\_ID
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.CLIENT\_ID
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#CLIENT_ID)  
-<a name="module_@adobe/aio-cna-core-ims.CLIENT_SECRET"></a>
+<a name="module_@adobe/aio-lib-core-ims.CLIENT_SECRET"></a>
 
-### @adobe/aio-cna-core-ims.CLIENT\_SECRET
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.CLIENT\_SECRET
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#CLIENT_SECRET)  
-<a name="module_@adobe/aio-cna-core-ims.SCOPE"></a>
+<a name="module_@adobe/aio-lib-core-ims.SCOPE"></a>
 
-### @adobe/aio-cna-core-ims.SCOPE
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+### @adobe/aio-lib-core-ims.SCOPE
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: (#SCOPE)  
-<a name="module_@adobe/aio-cna-core-ims.context"></a>
+<a name="module_@adobe/aio-lib-core-ims.context"></a>
 
-### @adobe/aio-cna-core-ims.context
+### @adobe/aio-lib-core-ims.context
 The `context` object manages the IMS configuration contexts on behalf of
-the Adobe I/O CNA Core IMS Library.
+the Adobe I/O Lib Core IMS Library.
 
-**Kind**: static property of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+**Kind**: static property of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **See**: The [`context`](#context) object  
-<a name="module_@adobe/aio-cna-core-ims.getToken"></a>
+<a name="module_@adobe/aio-lib-core-ims.getToken"></a>
 
-### @adobe/aio-cna-core-ims.getToken(contextName, force) ⇒ <code>Promise</code>
+### @adobe/aio-lib-core-ims.getToken(contextName, force) ⇒ <code>Promise</code>
 Returns an access token for the given context name.
 
-**Kind**: static method of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+**Kind**: static method of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 **Returns**: <code>Promise</code> - Resolving to an access token (string)  
 
 | Param | Type | Description |
@@ -139,9 +139,9 @@ Returns an access token for the given context name.
 | contextName | <code>string</code> | The name of the IMS context for which to              return the access token. If this is empty, the token(s) of              the current IMS context are invalidated. |
 | force | <code>boolean</code> | Forces a login in the selected plugin's `imslogin`              function. See [Forced `imsLogin`](README.md#forced-imslogin)              for more information on this flag. The default value is `false`. |
 
-<a name="module_@adobe/aio-cna-core-ims.invalidateToken"></a>
+<a name="module_@adobe/aio-lib-core-ims.invalidateToken"></a>
 
-### @adobe/aio-cna-core-ims.invalidateToken(contextName, force)
+### @adobe/aio-lib-core-ims.invalidateToken(contextName, force)
 Invalidates the access and optionally refresh of an IMS context.
 The name of the IMS context is given as its first parameter and defaults
 to the current context if missing or empty. The force parameter indicates
@@ -150,7 +150,7 @@ token (if existing) is also invalidated (force=true). If the refresh token
 exists and is validated, all access tokens which have been created with
 this refresh token will automatically become invalid as well.
 
-**Kind**: static method of [<code>@adobe/aio-cna-core-ims</code>](#module_@adobe/aio-cna-core-ims)  
+**Kind**: static method of [<code>@adobe/aio-lib-core-ims</code>](#module_@adobe/aio-lib-core-ims)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -368,7 +368,7 @@ environment from the `as` claim in the provided access token.
 
 ## context
 The `context` object manages the IMS configuration contexts on behalf of
-the Adobe I/O CNA Core IMS Library.
+the Adobe I/O Lib Core IMS Library.
 
 **Kind**: global constant  
 
@@ -393,7 +393,7 @@ To persist the new current context name in global configuration call the
 
 ### context.plugins
 The list of additional IMS login plugins to consider.
-The JWT and OAuth2 plugins are required by the CNA Core IMS
+The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
 library and are always installed and used.
 This list of plugins is always stored in the global configuration.
 
