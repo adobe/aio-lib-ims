@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 
 const rp = require('request-promise-native')
 const debug = require('debug')('@adobe/aio-cli-ims/ims');
+const url = require('url')
 
 // default IMS environment
 const DEFAULT_ENVIRONMENT = "stage";
@@ -191,7 +192,7 @@ class Ims {
     getSusiUrl(clientId, scopes, callbackUrl, state) {
         debug("getSusiUrl(%s, %s, %s, %s)", clientId, scopes, callbackUrl, state);
 
-        const app = new URL(this.getApiUrl("/ims/authorize/v1"));
+        const app = new url.URL(this.getApiUrl("/ims/authorize/v1"));
         app.searchParams.set("response_type", "code");
         app.searchParams.set(CLIENT_ID, clientId);
         app.searchParams.set(SCOPE, scopes);
