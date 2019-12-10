@@ -60,10 +60,10 @@ const context = {
      * persist in the local or global configuration.
      *
      * @param {string} contextName The name of the context to use as the current context
-     * @param {boolean} local Persist the current name in local (`true`) or
-     *      global (`false`, default) configuration
+     * @param {boolean} local Persist the current name in local (`true`, default) or
+     *      global (`false`) configuration
      */
-  setCurrent (contextName, local = false) {
+  setCurrent (contextName, local = true) {
     debug('setCurrent(%s, %s)', contextName, !!local)
     this._cliConfig.set(IMS_CURRENT, contextName, !!local)
   },
@@ -143,7 +143,7 @@ const context = {
       return this._cliConfig.set(`$ims.${contextName}`, contextData, !!local)
     }
 
-    Promise.reject(new Error('Missing IMS context label to set context data for'))
+    return Promise.reject(new Error('Missing IMS context label to set context data for'))
   }
 }
 
