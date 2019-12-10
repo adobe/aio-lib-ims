@@ -46,9 +46,8 @@
   "scripts": {
     "pretest": "eslint src",
     "test": "npm run unit-tests",
-    "unit-tests": "jest --config test/jest.config.js --ci",
+    "unit-tests": "jest --config test/jest.config.js ---ci -w=2",
     "docs": "jsdoc2md --template jsdoc2md/api.hbs src/*.js > api.md",
-    "postpack": "",
     "version": "git add README.md"
   }
 }

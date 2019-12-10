@@ -284,7 +284,7 @@ class Ims {
       postData.grant_type = REFRESH_TOKEN
       postData.refresh_token = authCode
     } else {
-      Promise.reject(new Error(`Unknown type of authCode: ${tokenType}`))
+      return Promise.reject(new Error(`Unknown type of authCode: ${tokenType}`))
     }
 
     return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
