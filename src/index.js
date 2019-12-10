@@ -77,7 +77,7 @@ module.exports = {
      *
      * @returns {Promise} Resolving to an access token (string)
      */
-  getToken: (contextName, force = false) => IMS_TOKEN_MANAGER.getToken(contextName, force),
+  getToken: async (contextName, force = false) => IMS_TOKEN_MANAGER.getToken(contextName, force),
 
   /**
      * Invalidates the access and optionally refresh of an IMS context.
@@ -94,5 +94,5 @@ module.exports = {
      * @param {boolean} force Whether to invalidate just the access token or
      *              to also invalidate the refresh token.
      */
-  invalidateToken: (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
+  invalidateToken: async (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
 }
