@@ -89,21 +89,23 @@ const IMS_TOKEN_MANAGER = {
   async _generateToken (ims, config, reason, force) {
     debug('_generateToken(reason=%s, force=%s)', reason, force)
 
-    const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins)
-    if (imsLoginPlugins) {
-      for (const imsLoginPlugin of imsLoginPlugins) {
-        debug('  > Trying: %s', imsLoginPlugin)
-        try {
-          const { supports, imsLogin } = require(imsLoginPlugin)
-          debug('  > supports(%o): %s', config, supports(config))
-          if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
-            const result = imsLogin(ims, config, force)
-            debug('  > result: %o', result)
-            return result
-          }
-        } catch (e) {
-          debug('  > Ignoring failure loading or calling plugin %s: %o', imsLoginPlugin, e)
+    let imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
+    if (this._context.plugins) {
+      imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins)
+    }
+
+    for (const imsLoginPlugin of imsLoginPlugins) {
+      debug('  > Trying: %s', imsLoginPlugin)
+      try {
+        const { supports, imsLogin } = require(imsLoginPlugin)
+        debug('  > supports(%o): %s', config, supports(config))
+        if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
+          const result = imsLogin(ims, config, force)
+          debug('  > result: %o', result)
+          return result
         }
+      } catch (e) {
+        debug('  > Ignoring failure loading or calling plugin %s: %o', imsLoginPlugin, e)
       }
     }
 
