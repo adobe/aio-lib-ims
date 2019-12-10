@@ -10,18 +10,18 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { IMS_TOKEN_MANAGER } = require('./token-helper');
-const { context } = require('./context');
+const { IMS_TOKEN_MANAGER } = require('./token-helper')
+const { context } = require('./context')
 const {
-    getTokenData,
-    Ims,
-    ACCESS_TOKEN,
-    REFRESH_TOKEN,
-    AUTHORIZATION_CODE,
-    CLIENT_ID,
-    CLIENT_SECRET,
-    SCOPE
-} = require('./ims');
+  getTokenData,
+  Ims,
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
+  AUTHORIZATION_CODE,
+  CLIENT_ID,
+  CLIENT_SECRET,
+  SCOPE
+} = require('./ims')
 
 /**
  * The `@adobe/aio-lib-core-ims` module offers three kinds of elements:
@@ -33,39 +33,39 @@ const {
  * @exports @adobe/aio-lib-core-ims
  */
 module.exports = {
-    /** @see (#getTokenData) */
-    getTokenData,
+  /** @see (#getTokenData) */
+  getTokenData,
 
-    /** @see (#Ims) */
-    Ims,
+  /** @see (#Ims) */
+  Ims,
 
-    /** @see (#ACCESS_TOKEN) */
-    ACCESS_TOKEN,
+  /** @see (#ACCESS_TOKEN) */
+  ACCESS_TOKEN,
 
-    /** @see (#REFRESH_TOKEN) */
-    REFRESH_TOKEN,
+  /** @see (#REFRESH_TOKEN) */
+  REFRESH_TOKEN,
 
-    /** @see (#AUTHORIZATION_CODE) */
-    AUTHORIZATION_CODE,
+  /** @see (#AUTHORIZATION_CODE) */
+  AUTHORIZATION_CODE,
 
-    /** @see (#CLIENT_ID) */
-    CLIENT_ID,
+  /** @see (#CLIENT_ID) */
+  CLIENT_ID,
 
-    /** @see (#CLIENT_SECRET) */
-    CLIENT_SECRET,
+  /** @see (#CLIENT_SECRET) */
+  CLIENT_SECRET,
 
-    /** @see (#SCOPE) */
-    SCOPE,
+  /** @see (#SCOPE) */
+  SCOPE,
 
-    /**
+  /**
      * The `context` object manages the IMS configuration contexts on behalf of
      * the Adobe I/O Lib Core IMS Library.
      *
      * @see The [`context`](#context) object
      */
-    context,
+  context,
 
-    /**
+  /**
      * Returns an access token for the given context name.
      *
      * @param {string} contextName The name of the IMS context for which to
@@ -77,9 +77,9 @@ module.exports = {
      *
      * @returns {Promise} Resolving to an access token (string)
      */
-    getToken: (contextName, force=false) => IMS_TOKEN_MANAGER.getToken(contextName, force),
+  getToken: (contextName, force = false) => IMS_TOKEN_MANAGER.getToken(contextName, force),
 
-    /**
+  /**
      * Invalidates the access and optionally refresh of an IMS context.
      * The name of the IMS context is given as its first parameter and defaults
      * to the current context if missing or empty. The force parameter indicates
@@ -94,5 +94,5 @@ module.exports = {
      * @param {boolean} force Whether to invalidate just the access token or
      *              to also invalidate the refresh token.
      */
-    invalidateToken: (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
-};
+  invalidateToken: (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
+}

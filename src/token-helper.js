@@ -10,107 +10,107 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims');
-const debug = require('debug')('@adobe/aio-lib-core-ims/token-helper');
+const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
+const debug = require('debug')('@adobe/aio-lib-core-ims/token-helper')
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
  * as part of the getToken(contextName) function.
  * @private
  */
-const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-core-ims-jwt', '@adobe/aio-lib-core-ims-oauth'];
+const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-core-ims-jwt', '@adobe/aio-lib-core-ims-oauth']
 
-const IMS_TOKEN_MANAGER  = {
+const IMS_TOKEN_MANAGER = {
 
-    async getToken(contextName, force) {
-        debug("getToken(%s, %s)", contextName, force);
+  async getToken (contextName, force) {
+    debug('getToken(%s, %s)', contextName, force)
 
-        return this._resolveContext(contextName)
-            .then(context => { return { ...context, result: this._getOrCreateToken(context.data, force) } })
-            .then(result => this._persistTokens(result.name, result.data, result.result));
-    },
+    return this._resolveContext(contextName)
+      .then(context => { return { ...context, result: this._getOrCreateToken(context.data, force) } })
+      .then(result => this._persistTokens(result.name, result.data, result.result))
+  },
 
-    async invalidateToken(contextName, force) {
-        debug("invalidateToken(%s, %s)", contextName, force);
+  async invalidateToken (contextName, force) {
+    debug('invalidateToken(%s, %s)', contextName, force)
 
-        const tokenLabel = force ? REFRESH_TOKEN : ACCESS_TOKEN;
-        const { name, data } = await this._resolveContext(contextName)
-        const ims = new Ims(data.env);
-        return this.getTokenIfValid(data[tokenLabel])
-            .catch(err => {
-                if (force) {
-                    return this.getTokenIfValid(data[ACCESS_TOKEN]);
-                } else {
-                    return Promise.reject(err);
-                }
-            })
-            .then(token => ims.invalidateToken(token, data.client_id, data.client_secret))
-            .then(() => {
-                delete data[tokenLabel];
-                if (force) {
-                    delete data[ACCESS_TOKEN];
-                }
-                this._context.set(name, data);
-            });
-    },
-
-    get _context() {
-        if (!this.__context) {
-            this.__context = require('./context').context;
-        }
-        return this.__context;
-    },
-
-    async _resolveContext(contextName) {
-        const context = this._context.get(contextName);
-        debug("LoginCommand:contextData - %O", context);
-
-        if (context.data) {
-            return Promise.resolve(context);
+    const tokenLabel = force ? REFRESH_TOKEN : ACCESS_TOKEN
+    const { name, data } = await this._resolveContext(contextName)
+    const ims = new Ims(data.env)
+    return this.getTokenIfValid(data[tokenLabel])
+      .catch(err => {
+        if (force) {
+          return this.getTokenIfValid(data[ACCESS_TOKEN])
         } else {
-            return Promise.reject(new Error(`IMS context '${context.name}' is not configured`));
+          return Promise.reject(err)
         }
-    },
-
-    async _getOrCreateToken(config, force) {
-        debug("_getOrCreateToken(config=%o, force=%s)", config, force);
-        const ims = new Ims(config.env);
-        return this.getTokenIfValid(config.access_token)
-            .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
-            .catch(reason => this._generateToken(ims, config, reason, force));
-    },
-
-    async _fromRefreshToken(ims, token, config) {
-        debug("_fromRefreshToken(token=%s, config=%o)", token, config);
-        return this.getTokenIfValid(token)
-            .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope));
-    },
-
-    async _generateToken(ims, config, reason, force) {
-        debug("_generateToken(reason=%s, force=%s)", reason, force);
-
-        const imsLoginPlugins =  DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins);
-        if (imsLoginPlugins) {
-            for (const imsLoginPlugin of imsLoginPlugins) {
-                debug("  > Trying: %s", imsLoginPlugin);
-                try {
-                    const { supports, imsLogin } = require(imsLoginPlugin);
-                    debug("  > supports(%o): %s", config, supports(config));
-                    if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function' ) {
-                        const result = imsLogin(ims, config, force);
-                        debug("  > result: %o", result);
-                        return result;
-                    }
-                } catch (e) {
-                    debug("  > Ignoring failure loading or calling plugin %s: %o", imsLoginPlugin, e);
-                }
-            }
+      })
+      .then(token => ims.invalidateToken(token, data.client_id, data.client_secret))
+      .then(() => {
+        delete data[tokenLabel]
+        if (force) {
+          delete data[ACCESS_TOKEN]
         }
+        this._context.set(name, data)
+      })
+  },
 
-        return Promise.reject(new Error("Cannot generate token because no plugin supports configuration"));
-    },
+  get _context () {
+    if (!this.__context) {
+      this.__context = require('./context').context
+    }
+    return this.__context
+  },
 
-    /**
+  async _resolveContext (contextName) {
+    const context = this._context.get(contextName)
+    debug('LoginCommand:contextData - %O', context)
+
+    if (context.data) {
+      return Promise.resolve(context)
+    } else {
+      return Promise.reject(new Error(`IMS context '${context.name}' is not configured`))
+    }
+  },
+
+  async _getOrCreateToken (config, force) {
+    debug('_getOrCreateToken(config=%o, force=%s)', config, force)
+    const ims = new Ims(config.env)
+    return this.getTokenIfValid(config.access_token)
+      .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
+      .catch(reason => this._generateToken(ims, config, reason, force))
+  },
+
+  async _fromRefreshToken (ims, token, config) {
+    debug('_fromRefreshToken(token=%s, config=%o)', token, config)
+    return this.getTokenIfValid(token)
+      .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope))
+  },
+
+  async _generateToken (ims, config, reason, force) {
+    debug('_generateToken(reason=%s, force=%s)', reason, force)
+
+    const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins)
+    if (imsLoginPlugins) {
+      for (const imsLoginPlugin of imsLoginPlugins) {
+        debug('  > Trying: %s', imsLoginPlugin)
+        try {
+          const { supports, imsLogin } = require(imsLoginPlugin)
+          debug('  > supports(%o): %s', config, supports(config))
+          if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
+            const result = imsLogin(ims, config, force)
+            debug('  > result: %o', result)
+            return result
+          }
+        } catch (e) {
+          debug('  > Ignoring failure loading or calling plugin %s: %o', imsLoginPlugin, e)
+        }
+      }
+    }
+
+    return Promise.reject(new Error('Cannot generate token because no plugin supports configuration'))
+  },
+
+  /**
      * If the result is an object containing an access and refresh token,
      * the tokens are persisted back into the IMS context and the promise
      * resolves to the access token. If the result is a string, it is
@@ -118,25 +118,25 @@ const IMS_TOKEN_MANAGER  = {
      *
      * @param {string | any} result
      */
-    async _persistTokens(context, contextData, resultPromise) {
-        debug("persistTokens(%s, %o, %o)", context, contextData, resultPromise);
+  async _persistTokens (context, contextData, resultPromise) {
+    debug('persistTokens(%s, %o, %o)', context, contextData, resultPromise)
 
-        const result = await resultPromise;
-        if (typeof (result) === 'string') {
-            return result;
-        }
+    const result = await resultPromise
+    if (typeof (result) === 'string') {
+      return result
+    }
 
-        return this.getTokenIfValid(result.access_token)
-            .then(() => contextData.access_token = result.access_token)
-            .then(() => this.getTokenIfValid(result.refresh_token))
-            .then(
-                () => contextData.refresh_token = result.refresh_token,
-                () => true)
-            .then(() => this._context.set(context, contextData))
-            .then(() => result.access_token.token)
-    },
+    return this.getTokenIfValid(result.access_token)
+      .then(() => { contextData.access_token = result.access_token })
+      .then(() => this.getTokenIfValid(result.refresh_token))
+      .then(
+        () => { contextData.refresh_token = result.refresh_token },
+        () => true)
+      .then(() => this._context.set(context, contextData))
+      .then(() => result.access_token.token)
+  },
 
-    /**
+  /**
      * Validates the token is not expired yet and returns it if so.
      * Otherwise a rejected Promise is returned indicating that fact.
      * The token parameter is expected to be an object with two
@@ -150,18 +150,18 @@ const IMS_TOKEN_MANAGER  = {
      *
      * @returns the token if existing and not expired, else a rejected Promise
      */
-    async getTokenIfValid(token) {
-        debug("getTokenIfValid(token=%o)", token);
-        const minExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes from now
-        if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
-            debug("  => %o", token.token);
-            return token.token;
-        }
-
-        return Promise.reject("Token missing or expired");
+  async getTokenIfValid (token) {
+    debug('getTokenIfValid(token=%o)', token)
+    const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
+    if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
+      debug('  => %o', token.token)
+      return token.token
     }
+
+    return Promise.reject(new Error('Token missing or expired'))
+  }
 }
 
 module.exports = {
-    IMS_TOKEN_MANAGER
+  IMS_TOKEN_MANAGER
 }

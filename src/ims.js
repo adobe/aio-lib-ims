@@ -11,77 +11,76 @@ governing permissions and limitations under the License.
 */
 
 const rp = require('request-promise-native')
-const debug = require('debug')('@adobe/aio-cli-ims/ims');
+const debug = require('debug')('@adobe/aio-cli-ims/ims')
 const url = require('url')
 
 // default IMS environment
-const DEFAULT_ENVIRONMENT = "stage";
+const DEFAULT_ENVIRONMENT = 'stage'
 
 const IMS_ENDPOINTS = {
-    stage: "https://ims-na1-stg1.adobelogin.com",
-    prod: "https://ims-na1.adobelogin.com"
-};
+  stage: 'https://ims-na1-stg1.adobelogin.com',
+  prod: 'https://ims-na1.adobelogin.com'
+}
 
 /** The constant string `access_token`.  */
-const ACCESS_TOKEN = "access_token";
+const ACCESS_TOKEN = 'access_token'
 
 /** The constant string `refresh_token`.  */
-const REFRESH_TOKEN = "refresh_token";
+const REFRESH_TOKEN = 'refresh_token'
 
 /** The constant string `authorization_code`.  */
-const AUTHORIZATION_CODE = "authorization_code";
+const AUTHORIZATION_CODE = 'authorization_code'
 
 /** The constant string `client_id`.  */
-const CLIENT_ID = "client_id";
+const CLIENT_ID = 'client_id'
 
 /** The constant string `client_secret`.  */
-const CLIENT_SECRET = "client_secret";
+const CLIENT_SECRET = 'client_secret'
 
 /** The constant string `scope`.  */
-const SCOPE = "scope";
+const SCOPE = 'scope'
 
-async function _sendRequest(method, url, token, data) {
+async function _sendRequest (method, url, token, data) {
+  const options = {
+    uri: url,
+    method: method,
+    headers: {
+      'User-Agent': 'aio-cli-ims'
+    },
+    json: true
+  }
 
-    const options = {
-        uri: url,
-        method: method,
-        headers: {
-            'User-Agent': 'aio-cli-ims'
-        },
-        json: true
+  if (data) {
+    if (method === 'GET') {
+      options.qs = data
+    } else {
+      options.form = data
     }
+  }
 
-    if (data) {
-        if (method === 'GET') {
-            options.qs = data;
-        } else {
-            options.form = data;
-        }
-    }
+  if (token) {
+    options.auth = { bearer: token }
+  }
 
-    if (token) {
-        options.auth = { bearer: token };
-    }
-
-    return rp(options);
+  return rp(options)
 }
 
-async function _sendGet(getUrl, token, getData) {
-    return _sendRequest('GET', getUrl, token, getData);
+async function _sendGet (getUrl, token, getData) {
+  return _sendRequest('GET', getUrl, token, getData)
 }
 
-async function _sendPost(postUrl, token, postData) {
-    return _sendRequest('POST', postUrl, token, postData);
+async function _sendPost (postUrl, token, postData) {
+  return _sendRequest('POST', postUrl, token, postData)
 }
 
-function _calculateExpiry(token) {
-    // Note: could use jwt library, but this is simpler and slicker
-    const data = getTokenData(token);
-    return parseInt(data.created_at) + parseInt(data.expires_in);
+function _calculateExpiry (token) {
+  // Note: could use jwt library, but this is simpler and slicker
+  const data = getTokenData(token)
+  return parseInt(data.created_at) + parseInt(data.expires_in)
 }
 
-function _getTokenType(token) {
-    return getTokenData(token).type;
+function _getTokenType (token) {
+  return getTokenData(token).type
 }
 
 /**
@@ -107,27 +106,27 @@ function _getTokenType(token) {
  *
  * @private
  */
-async function _toTokenResult(apiResponse) {
-    debug("toTokenResult(%o)", apiResponse);
-    const result = {
-        payload: apiResponse
-    }
+async function _toTokenResult (apiResponse) {
+  debug('toTokenResult(%o)', apiResponse)
+  const result = {
+    payload: apiResponse
+  }
 
-    for (const label of [ ACCESS_TOKEN, REFRESH_TOKEN ]) {
-        debug(" > %s", label);
-        const token = apiResponse[label];
-        debug(" > %o", token);
-        if (token) {
-            result[label] = {
-                token: token,
-                expiry: _calculateExpiry(token)
-            }
-            debug(" > %o", result[label]);
-        }
+  for (const label of [ACCESS_TOKEN, REFRESH_TOKEN]) {
+    debug(' > %s', label)
+    const token = apiResponse[label]
+    debug(' > %o', token)
+    if (token) {
+      result[label] = {
+        token: token,
+        expiry: _calculateExpiry(token)
+      }
+      debug(' > %o', result[label])
     }
+  }
 
-    debug("<< %o", result);
-    return result;
+  debug('<< %o', result)
+  return result
 }
 
 /**
@@ -137,32 +136,31 @@ async function _toTokenResult(apiResponse) {
  *
  * @returns {object} The decoded token payload data without header and signature
  */
-function getTokenData(token) {
-    const [header, payload, sig] = token.split(".", 3);
-    return JSON.parse(Buffer.from(payload, 'base64'));
+function getTokenData (token) {
+  const [, payload] = token.split('.', 3)
+  return JSON.parse(Buffer.from(payload, 'base64'))
 }
 
 /**
  * @class
  */
 class Ims {
-
-    /**
+  /**
      * Creats a new IMS connector instance for the stage or prod environment
      * @param {string} env The name of the environment. `prod` and `stage`
      *      are the only values supported. `prod` is default and any value
      *      other than `prod` or `stage` stage is assumed to be the default
      *      value of `prod`.
      */
-    constructor(env) {
-        if (!env || !IMS_ENDPOINTS[env]) {
-            env = DEFAULT_ENVIRONMENT;
-        }
-
-        this.endpoint = IMS_ENDPOINTS[env];
+  constructor (env) {
+    if (!env || !IMS_ENDPOINTS[env]) {
+      env = DEFAULT_ENVIRONMENT
     }
 
-    /**
+    this.endpoint = IMS_ENDPOINTS[env]
+  }
+
+  /**
      * Returns the absolute URL to call the indicated API.
      * The API is expected to be the API absolute path, such as `/ims/profile`.
      * To form the absolute URL, the scheme (`https`) and fully qualified
@@ -173,11 +171,11 @@ class Ims {
      *
      * @returns {string} The absolute URI for the IMS API
      */
-    getApiUrl(api) {
-        return this.endpoint + api;
-    }
+  getApiUrl (api) {
+    return this.endpoint + api
+  }
 
-    /**
+  /**
      * Returns the URL for the environment of this instance which allows
      * for OAuth2 based three-legged authentication with a browser for
      * an end user.
@@ -189,19 +187,19 @@ class Ims {
      *
      * @returns the OAuth2 login URL
      */
-    getSusiUrl(clientId, scopes, callbackUrl, state) {
-        debug("getSusiUrl(%s, %s, %s, %s)", clientId, scopes, callbackUrl, state);
+  getSusiUrl (clientId, scopes, callbackUrl, state) {
+    debug('getSusiUrl(%s, %s, %s, %s)', clientId, scopes, callbackUrl, state)
 
-        const app = new url.URL(this.getApiUrl("/ims/authorize/v1"));
-        app.searchParams.set("response_type", "code");
-        app.searchParams.set(CLIENT_ID, clientId);
-        app.searchParams.set(SCOPE, scopes);
-        app.searchParams.set("redirect_uri", callbackUrl);
-        app.searchParams.set("state", state);
-        return app.toString();
-    }
+    const app = new url.URL(this.getApiUrl('/ims/authorize/v1'))
+    app.searchParams.set('response_type', 'code')
+    app.searchParams.set(CLIENT_ID, clientId)
+    app.searchParams.set(SCOPE, scopes)
+    app.searchParams.set('redirect_uri', callbackUrl)
+    app.searchParams.set('state', state)
+    return app.toString()
+  }
 
-    /**
+  /**
      * Send a `GET` request to an IMS API with the access token sending
      * the `parameters` as request URL parameters.
      *
@@ -211,13 +209,13 @@ class Ims {
      *
      * @returns a promise resolving to the result of the request
      */
-    async get(api, token, parameters) {
-        debug("get(%s, %s, %o)", api, token, parameters);
+  async get (api, token, parameters) {
+    debug('get(%s, %s, %o)', api, token, parameters)
 
-        return _sendGet(this.getApiUrl(api), token, parameters);
-    }
+    return _sendGet(this.getApiUrl(api), token, parameters)
+  }
 
-    /**
+  /**
      * Send a `POST` request to an IMS API with the access token sending
      * the `parameters` as form data.
      *
@@ -227,13 +225,13 @@ class Ims {
      *
      * @returns a promise resolving to the result of the request
      */
-    async post(api, token, parameters) {
-        debug("post(%s, %s, %o)", api, token, parameters);
+  async post (api, token, parameters) {
+    debug('post(%s, %s, %o)', api, token, parameters)
 
-        return _sendPost(this.getApiUrl(api), token, parameters);
-    }
+    return _sendPost(this.getApiUrl(api), token, parameters)
+  }
 
-    /**
+  /**
      * Request the access token for the given client providing the access
      * grant in the `authCode`.
      * The promise resolve to the token result JavaScript object as follows:
@@ -264,36 +262,36 @@ class Ims {
      * @returns a promise resolving to a tokens object as described in the
      *      {@link toTokenResult} or rejects to an error message.
      */
-    async getAccessToken(authCode, clientId, clientSecret, scopes) {
-        debug("getAccessToken(%s, %s, %s, %o)", authCode, clientId, clientSecret, scopes);
+  async getAccessToken (authCode, clientId, clientSecret, scopes) {
+    debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
 
-        // prepare the data with common data
-        const postData = {
-            client_id: clientId,
-            client_secret: clientSecret,
-            scope: scopes
-        }
-
-        // complete data with authCode specific grant type and property
-        const tokenType = _getTokenType(authCode);
-        if (tokenType == AUTHORIZATION_CODE) {
-            // for service tokens this is the static authCode
-            // for OAuth Tokerns this is the code received from the redirect
-            postData.grant_type = AUTHORIZATION_CODE;
-            postData.code = authCode;
-        } else if (tokenType == REFRESH_TOKEN) {
-            // for refresh tokens
-            postData.grant_type = REFRESH_TOKEN;
-            postData.refresh_token = authCode;
-        } else {
-            Promise.reject(`Unknown type of authCode: ${tokenType}`);
-        }
-
-        return _sendPost(this.getApiUrl("/ims/token/v1"), undefined, postData)
-            .then(response => _toTokenResult(response));
+    // prepare the data with common data
+    const postData = {
+      client_id: clientId,
+      client_secret: clientSecret,
+      scope: scopes
     }
 
-    /**
+    // complete data with authCode specific grant type and property
+    const tokenType = _getTokenType(authCode)
+    if (tokenType === AUTHORIZATION_CODE) {
+      // for service tokens this is the static authCode
+      // for OAuth Tokerns this is the code received from the redirect
+      postData.grant_type = AUTHORIZATION_CODE
+      postData.code = authCode
+    } else if (tokenType === REFRESH_TOKEN) {
+      // for refresh tokens
+      postData.grant_type = REFRESH_TOKEN
+      postData.refresh_token = authCode
+    } else {
+      Promise.reject(new Error(`Unknown type of authCode: ${tokenType}`))
+    }
+
+    return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
+      .then(response => _toTokenResult(response))
+  }
+
+  /**
      * Asks for the signed JWT token to be exchanged for a valid access
      * token as well as a refresh token.
      * The promise resolve to the token result JavaScript object as follows:
@@ -316,20 +314,20 @@ class Ims {
      * @param {string} clientSecret The client's secret
      * @param {string} signedJwtToken The properly signed JWT token for the JWT token exchange
      */
-    async exchangeJwtToken(clientId, clientSecret, signedJwtToken) {
-        debug("exchangeJwtToken(%s, %s, %s)", clientId, clientSecret, signedJwtToken);
+  async exchangeJwtToken (clientId, clientSecret, signedJwtToken) {
+    debug('exchangeJwtToken(%s, %s, %s)', clientId, clientSecret, signedJwtToken)
 
-        const postData = {
-            client_id: clientId,
-            client_secret: clientSecret,
-            jwt_token: signedJwtToken
-        }
-
-        return _sendPost(this.getApiUrl("/ims/exchange/jwt"), undefined, postData)
-            .then(response => _toTokenResult(response));
+    const postData = {
+      client_id: clientId,
+      client_secret: clientSecret,
+      jwt_token: signedJwtToken
     }
 
-    /**
+    return _sendPost(this.getApiUrl('/ims/exchange/jwt'), undefined, postData)
+      .then(response => _toTokenResult(response))
+  }
+
+  /**
      * Invalidates the given token. If the token is a refresh token, all the
      * access tokens created with that refresh token will also be invalidated
      * at the same time.
@@ -338,26 +336,26 @@ class Ims {
      * @param {string} clientId
      * @param {string} clientSecret
      */
-    async invalidateToken(token, clientId, clientSecret) {
-        debug("invalidateToken(%s, %s, %s)", token, clientId, clientSecret);
+  async invalidateToken (token, clientId, clientSecret) {
+    debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
 
-        if (clientId && clientSecret) {
-            const postData = {
-                token_type: _getTokenType(token),
-                token,
-                cascading: "all",
-                client_id: clientId,
-                client_secret: clientSecret
-            };
+    if (clientId && clientSecret) {
+      const postData = {
+        token_type: _getTokenType(token),
+        token,
+        cascading: 'all',
+        client_id: clientId,
+        client_secret: clientSecret
+      }
 
-            return _sendPost(this.getApiUrl("/ims/invalidate_token/v2"), undefined, postData);
-        }
-
-        // no client ID or no client Secret: assume nothing to be done and just resolve
-        return Promise.resolve(true);
+      return _sendPost(this.getApiUrl('/ims/invalidate_token/v2'), undefined, postData)
     }
 
-    /**
+    // no client ID or no client Secret: assume nothing to be done and just resolve
+    return Promise.resolve(true)
+  }
+
+  /**
      * Converts the access token to a token result object as follows:
      *
      * ```js
@@ -376,9 +374,9 @@ class Ims {
      *
      * @returns a `Promise` resolving to an object as described.
      */
-    async toTokenResult(token) {
-        return _toTokenResult({ access_token: token });
-    }
+  async toTokenResult (token) {
+    return _toTokenResult({ access_token: token })
+  }
 }
 
 /**
@@ -391,27 +389,27 @@ class Ims {
  * @returns A `Promise` resolving to the `Ims` instance.
  */
 Ims.fromToken = async token => {
-    debug("Ims.fromToken(%s)", token);
-    const as = getTokenData(token).as;
-    if (as) {
-        const url = `https://${as}.adobelogin.com`;
-        for (const env in IMS_ENDPOINTS) {
-            if (url === IMS_ENDPOINTS[env]) {
-                debug("  > %s=%s", env, IMS_ENDPOINTS[env]);
-                return Promise.resolve({ token, ims: new Ims(env) });
-            }
-        }
+  debug('Ims.fromToken(%s)', token)
+  const as = getTokenData(token).as
+  if (as) {
+    const url = `https://${as}.adobelogin.com`
+    for (const env in IMS_ENDPOINTS) {
+      if (url === IMS_ENDPOINTS[env]) {
+        debug('  > %s=%s', env, IMS_ENDPOINTS[env])
+        return Promise.resolve({ token, ims: new Ims(env) })
+      }
     }
-    return Promise.reject(new Error("Cannot resolve to IMS environment from token"));
+  }
+  return Promise.reject(new Error('Cannot resolve to IMS environment from token'))
 }
 
 module.exports = {
-    getTokenData,
-    Ims,
-    ACCESS_TOKEN,
-    REFRESH_TOKEN,
-    AUTHORIZATION_CODE,
-    CLIENT_ID,
-    CLIENT_SECRET,
-    SCOPE
-};
+  getTokenData,
+  Ims,
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
+  AUTHORIZATION_CODE,
+  CLIENT_ID,
+  CLIENT_SECRET,
+  SCOPE
+}

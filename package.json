@@ -1,8 +1,8 @@
 {
   "name": "@adobe/aio-lib-core-ims",
   "description": "IMS Support Module providing low level IMS HTTP API access as well as higher level support for getting tokens.",
-  "version": "1.0.0",
-  "author": "Adobe",
+  "version": "0.0.0",
+  "author": "Adobe Inc.",
   "bugs": "https://github.com/adobe/aio-lib-core-ims/issues",
   "dependencies": {
     "@adobe/aio-lib-core-config": "1.x",
@@ -14,10 +14,18 @@
     "@adobe/aio-lib-core-ims-oauth": "^1"
   },
   "devDependencies": {
-    "eslint": "^4",
+    "@adobe/eslint-config-aio-lib-config": "^1.0.2",
+    "codecov": "^3.6.1",
+    "eslint": "^6.7.2",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-jest": "^23.1.1",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "eslint-config-oclif": "^1",
-    "jest": "^23.0.1",
-    "jest-junit": "^5.0.0",
+    "jest": "^24",
+    "jest-junit": "^9.0.0",
     "jsdoc-to-markdown": "^5.0.3",
     "stdout-stderr": "^0.1.9"
   },
@@ -36,26 +44,11 @@
   "main": "src/index.js",
   "repository": "https://github.com/adobe/aio-lib-core-ims",
   "scripts": {
-    "posttest": "eslint src",
+    "pretest": "eslint src",
     "test": "npm run unit-tests",
-    "unit-tests": "jest --ci",
+    "unit-tests": "jest --config test/jest.config.js --ci",
     "docs": "jsdoc2md --template jsdoc2md/api.hbs src/*.js > api.md",
     "postpack": "",
     "version": "git add README.md"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "testPathIgnorePatterns": [
-      "<rootDir>/tests/fixtures/"
-    ],
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/tests/fixtures/"
-    ],
-    "reporters": [
-      "default",
-      "jest-junit"
-    ],
-    "testEnvironment": "node",
-    "setupTestFrameworkScriptFile": "./jest.setup.js"
   }
 }
