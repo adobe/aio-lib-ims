@@ -184,3 +184,20 @@ test('getToken - bad plugin', async () => {
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
     .rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
 })
+
+test('getToken - incomplete plugin', async () => {
+  config.get.mockImplementation(key => {
+    if (key === '$ims.known-context') {
+      return {
+        somekey: 'xyz'
+      }
+    } else if (key === '$ims.$plugins') {
+      return ['../test/incompleteImsPlugin']
+    }
+  })
+
+  // coverage: incomplete plugin
+  const contextName = 'known-context'
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
+    .rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
+})
