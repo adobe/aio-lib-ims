@@ -2,7 +2,7 @@
 [![Downloads/week](https://img.shields.io/npm/dw/@adobe/aio-lib-core-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-core-ims)
 [![Build Status](https://travis-ci.com/adobe/aio-lib-core-ims.svg?branch=master)](https://travis-ci.com/adobe/aio-lib-core-ims)
 [![License](https://img.shields.io/npm/l/@adobe/aio-lib-core-ims.svg)](https://github.com/adobe/aio-lib-core-ims/blob/master/package.json)
-[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-core-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-core-ims/)
+[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-core-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-core-ims/) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/aio-lib-core-ims.svg)](https://greenkeeper.io/)
 
 
 # Adobe I/O Lib Core IMS Library
