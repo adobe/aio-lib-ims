@@ -42,7 +42,7 @@ test('getToken - string', async () => {
         expired: 'no'
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/imsPlugin']
+      return ['../test/ims-plugins/imsPlugin']
     }
   })
 
@@ -50,11 +50,11 @@ test('getToken - string', async () => {
   let contextName = 'unknown-context'
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).rejects.toEqual(new Error(`IMS context '${contextName}' is not configured`))
 
-  // known context, handled by ./test/imsPlugin
+  // known context, handled by ./test/ims-plugins/imsPlugin
   contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
 
-  // known context, handled by ./test/imsPlugin (force)
+  // known context, handled by ./test/ims-plugins/imsPlugin (force)
   contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
 })
@@ -72,11 +72,11 @@ test('getToken - object', async () => {
         }
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/imsPlugin']
+      return ['../test/ims-plugins/imsPlugin']
     }
   })
 
-  // known context, handled by ./test/imsPlugin (force)
+  // known context, handled by ./test/ims-plugins/imsPlugin (force)
   const contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
 })
@@ -90,11 +90,11 @@ test('getToken - object (refresh token expired)', async () => {
         expired: 'refresh_token'
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/imsPlugin']
+      return ['../test/ims-plugins/imsPlugin']
     }
   })
 
-  // known context, handled by ./test/imsPlugin (force)
+  // known context, handled by ./test/ims-plugins/imsPlugin (force)
   const contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
 })
@@ -112,7 +112,7 @@ test('invalidateToken', async () => {
         }
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/imsPlugin']
+      return ['../test/ims-plugins/imsPlugin']
     }
   })
 
@@ -120,11 +120,11 @@ test('invalidateToken', async () => {
   let contextName = 'unknown-context'
   await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error(`IMS context '${contextName}' is not configured`))
 
-  // known context, handled by ./test/imsPlugin
+  // known context, handled by ./test/ims-plugins/imsPlugin
   contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).resolves.not.toThrow()
 
-  // known context, handled by ./test/imsPlugin (force)
+  // known context, handled by ./test/ims-plugins/imsPlugin (force)
   contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, true)).resolves.not.toThrow()
 })
@@ -142,11 +142,11 @@ test('invalidateToken - expired', async () => {
         }
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/imsPlugin']
+      return ['../test/ims-plugins/imsPlugin']
     }
   })
 
-  // known context, handled by ./test/imsPlugin (no force)
+  // known context, handled by ./test/ims-plugins/imsPlugin (no force)
   const contextName = 'known-context'
   await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error('Token missing or expired'))
 })
@@ -175,7 +175,7 @@ test('getToken - bad plugin', async () => {
         bar: 'foo'
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/badImsPlugin']
+      return ['../test/ims-plugins/badImsPlugin']
     }
   })
 
@@ -192,7 +192,7 @@ test('getToken - incomplete plugin', async () => {
         somekey: 'xyz'
       }
     } else if (key === '$ims.$plugins') {
-      return ['../test/incompleteImsPlugin']
+      return ['../test/ims-plugins/incompleteImsPlugin']
     }
   })
 
