@@ -10,8 +10,8 @@
     "request-promise-native": "^1.0.5"
   },
   "peerDependencies": {
-    "@adobe/aio-lib-core-ims-jwt": "^0.0.2",
-    "@adobe/aio-lib-core-ims-oauth": "^0.0.2"
+    "@adobe/aio-lib-core-ims-jwt": "^0.0.3",
+    "@adobe/aio-lib-core-ims-oauth": "^0.0.3"
   },
   "devDependencies": {
     "@adobe/eslint-config-aio-lib-config": "^1.0.2",
