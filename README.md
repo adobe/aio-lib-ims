@@ -7,7 +7,7 @@
 
 # Adobe I/O Lib Core IMS Library
 
-The Adobe I/O Lib Core IMS Library helps interacting with the IMS API as well as creating and invalidating tokes.
+The Adobe I/O Lib Core IMS Library helps interacting with the IMS API as well as creating and invalidating tokens.
 To support multiple use cases and environments, there is not a single configuration managed by this library but multiple configurations called _IMS configuration contexts_.
 Each configuration context holds configuration data needed to create tokens.
 See the _Configuration_ section below.
@@ -91,7 +91,7 @@ This configuration lists two _configuration contexts_ `sample_jwt` and `sample_o
 The use of IMS environments is reserved to Adobe use.
 For information it is indicated by the `env` configuration context property and takes one of the values `prod` and `stage`.
 The default value is `prod`.
-This property does not in general to be dealt with.
+In general, you do not need to deal with this property.
 
 ## JWT Configuration
 
@@ -104,7 +104,7 @@ JWT (service to service integration) configuration requires the following proper
 | techacct | The _Technical Account ID_ from the integration overview screen in the I/O Console
 | meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the *meta_scopes* property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`. |
 | ims_org_id | The _Organization ID_ from the integration overview screen in the I/O Console. |
-| private_key | The private key matching any one of the _Public keys_ of the integration. |
+| private_key | The private key matching any one of the _Public Keys_ of the integration. |
 
 
 ## OAuth2 Configuration
@@ -123,7 +123,7 @@ OAuth2 configuration requires the following properties:
 
 The AIO Lib Core IMS Library handles common tasks around tokens by itself.
 This includes storing access and refresh tokens in the configuration context, checking those tokens for expiry, and refreshing as needed.
-Only when an access token (and a refresh token) needs to be created anew from the configuration context credentials, the plugins come into play.
+Only when an access token (and a refresh token) needs to be created anew from the configuration context credentials, do the plugins come into play.
 
 When a new access token needs to be created from credentials, the IMS Library implements the following algorithm:
 
@@ -136,7 +136,7 @@ When a new access token needs to be created from credentials, the IMS Library im
 From this algorithm we can derive the following requirements for a plugin:
 
 * _MUST_ be installed and available to the `require` function of the AIO Lib Core IMS Library.
-* _MUST_ set the script to be loaded by `requiring` the plugin's root folder in the `package.json#/main` property (this is actually how `require` loads the package's main script when using the folder containing the `package.json` file).
+* _MUST_ set the script to be loaded by `require`-ing the plugin's root folder in the `package.json#/main` property (this is actually how `require` loads the package's main script when using the folder containing the `package.json` file).
 * _MUST_ export an object from this script with the following two properties being functions:
 
     | Property | Signature | Description |
@@ -147,14 +147,14 @@ From this algorithm we can derive the following requirements for a plugin:
 ### Forced `imsLogin`
 
 Some plugins support an OAuth2 login mechanism where the actual account for which an access token is generated depends on the user input.
-For example the [OAuth2](/adobe/aio-lib-core-ims-oauth) plugin implements an ExpressJS application to implemented the three legeed OAuth2 flow.
-During this flow the user is entering their credentials for IMS to validate.
+For example the [OAuth2](/adobe/aio-lib-core-ims-oauth) plugin implements an ExpressJS application to implemented the three legged OAuth2 flow.
+During this flow the user enters their credentials for IMS to validate.
 
-Typically IMS will set some cookies to cache the login state in the browser to improve user experience in a standard OAUth2 web application.
+Typically IMS will set some cookies to cache the login state in the browser to improve the user experience in a standard OAUth2 web application.
 In CLI contexts it might not always be desired to always get a token for the same user, particularly in testing scenarios.
 
-To allow changing user identity in the OAuth2 plugin or to prevent reusing cached information, the `force` flag to the `imsLogin` function indicates whether to clean caches before logging in.
-`True` meaning to clean the cache, while `false` indicates that using cached information is just fine.
+To allow changing user identity in the OAuth2 plugin or to prevent reusing cached information, the `force` flag to the `imsLogin` function indicates whether to clean the caches before logging in.
+`true` meaning to clean the cache, while `false` indicates that using the cached information is just fine.
 
 ### `imsLogin` Promise
 
@@ -195,7 +195,7 @@ const { context } = require('@adobe/aio-lib-core-ims');
 context.plugins = context.plugins.push(process.env.npm_package_name);
 ```
 
-**NOTE:** You want to actually be a bit more intelligent and first check, whether the plugin is already listed and you might also want to provide a `preuninstall` script to remove the plugin from the list again when being uninstalled.
+**NOTE:** You want to actually first check whether the plugin is already listed, and you might also want to provide a `preuninstall` script to remove the plugin from the list again when being uninstalled.
 
 
 # Contributing
