@@ -409,7 +409,7 @@ persist in the local or global configuration.
 | Param | Type | Description |
 | --- | --- | --- |
 | contextName | <code>string</code> | The name of the context to use as the current context |
-| local | <code>boolean</code> | Persist the current name in local (`true`) or      global (`false`, default) configuration |
+| local | <code>boolean</code> | Persist the current name in local (`true`, default) or      global (`false`) configuration |
 
 <a name="context.keys"></a>
 
