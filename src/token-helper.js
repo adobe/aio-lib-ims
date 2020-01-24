@@ -50,7 +50,7 @@ const IMS_TOKEN_MANAGER = {
         if (force) {
           delete data[ACCESS_TOKEN]
         }
-        this._context.set(name, data)
+        return this._context.set(name, data)
       })
   },
 
@@ -62,7 +62,7 @@ const IMS_TOKEN_MANAGER = {
   },
 
   async _resolveContext (contextName) {
-    const context = this._context.get(contextName)
+    const context = await this._context.get(contextName)
     debug('LoginCommand:contextData - %O', context)
 
     if (context.data) {

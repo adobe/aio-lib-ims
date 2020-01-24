@@ -12,141 +12,103 @@ governing permissions and limitations under the License.
 
 const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 
-// Name of the IMS configuration context data structure
-const IMS = '$ims'
+const ActionConfig = require('./config-loaders/action')
+const CliConfig = require('./config-loaders/cli')
 
-// Property holding the current context name
-const IMS_CURRENT = `${IMS}.$current`
-
-// Property holding the list of additional login plugins
-const IMS_PLUGINS = `${IMS}.$plugins`
+const { KEYS } = require('./constants')
 
 /**
- * The `context` object manages the IMS configuration contexts on behalf of
- * the Adobe I/O Lib Core IMS Library.
+ * The `context` object manages the KEYS.IMS configuration contexts on behalf of
+ * the Adobe I/O Lib Core KEYS.IMS Library.
  */
-const context = {
+class Context {
 
-  /**
-     * Getter for the actual configuration
-     * @private
-     */
-  get _cliConfig () {
-    if (!this._config) {
-      this._config = require('@adobe/aio-lib-core-config')
-      this._config.reload()
+  //todo private
+  constructor(contextType, options) {
+
+    switch (contextType) {
+      case 'action':
+        this._config = new ActionConfig(options)
+        break
+      case 'cli':
+        this._config = new CliConfig(options)
+        break
+      default:
+        throw new Error(`contextType '${contextType}' is not supported`)
     }
-    return this._config
-  },
+  }
 
-  /**
-     * The current context name.
-     * When assigning a value, the name is persisted in the local configuration.
-     * To persist the new current context name in global configuration call the
-     * `setCurrent(contextName, local)` method with `local=false`.
-     */
-  get current () {
+  async getCurrent () {
     debug('get current')
-    return this._cliConfig.get(IMS_CURRENT)
-  },
+    return this._config.get(KEYS.CURRENT)
+  }
 
-  set current (contextName) {
+  async setCurrent (contextName) {
     debug('set current=%s', contextName)
-    this.setCurrent(contextName, true)
-  },
+    return this._config.set(KEYS.CURRENT, contextName)
+  }
 
-  /**
-     * Sets the current context name while explicitly stating whether to
-     * persist in the local or global configuration.
-     *
-     * @param {string} contextName The name of the context to use as the current context
-     * @param {boolean} local Persist the current name in local (`true`, default) or
-     *      global (`false`) configuration
-     */
-  setCurrent (contextName, local = true) {
-    debug('setCurrent(%s, %s)', contextName, !!local)
-    this._cliConfig.set(IMS_CURRENT, contextName, !!local)
-  },
-
-  /**
-     * The list of additional IMS login plugins to consider.
-     * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
-     * library and are always installed and used.
-     * This list of plugins is always stored in the global configuration.
-     */
-  get plugins () {
+  async getPlugins () {
     debug('get plugins')
-    return this._cliConfig.get(IMS_PLUGINS)
-  },
+    return this._config.get(KEYS.PLUGINS)
+  }
 
-  set plugins (plugins) {
+  async setPlugins (plugins) {
     debug('set plugins=%o', plugins)
-    this._cliConfig.set(IMS_PLUGINS, plugins, false)
-  },
+    this._config.set(KEYS.PLUGINS, plugins)
+  }
 
-  /**
-     * Returns the names of the configured IMS contexts as an array of strings.
-     *
-     * @returns {string[]} The names of the currently known configurations.
-     */
-  keys () {
-    debug('keys()')
-    return Object.keys(this._cliConfig.get(IMS)).filter(x => !x.startsWith('$'))
-  },
-
-  /**
-     * Returns an object representing the named context.
-     * If the contextName parameter is empty or missing, it defaults to the
-     * current context name. The result is an object with two properties:
-     *
-     *   - `name`: The actual context name used
-     *   - `data`: The IMS context data
-     *
-     * @param {string} contextName Name of the context information to return.
-     * @returns {object} The configuration object
-     */
-  get (contextName) {
+  async get (contextName) {
     debug('get(%s)', contextName)
 
     if (!contextName) {
-      contextName = this.current
+      contextName = await this.getCurrent()
     }
 
     if (contextName) {
       return {
         name: contextName,
-        data: this._cliConfig.get(`$ims.${contextName}`)
+        data: await this._config.get(contextName)
       }
     }
 
     // missing context and no current context
     return { name: contextName, data: undefined }
-  },
+  }
 
-  /**
-     * Updates the named configuration with new configuration data.
-     * If a configuration object for the named context already exists it
-     * is completely replaced with this new configuration.
-     *
-     * @param {string} contextName Name of the context to update
-     * @param {object} contextData The configuration data to store for the context
-     * @param {boolean} local Persist in local (`true`) or global (`false`,
-     *          default) configuration
-     */
-  async set (contextName, contextData, local = false) {
-    debug('set(%s, %o, %s)', contextName, contextData, !!local)
+  async set (contextName, contextData) {
+    debug('set(%s, %o)', contextName, contextData)
 
     if (!contextName) {
-      contextName = this.current
+      contextName = await this.getCurrent()
     }
     if (contextName) {
-      return this._cliConfig.set(`$ims.${contextName}`, contextData, !!local)
+      return this._config.set(contextName, contextData)
     }
 
-    return Promise.reject(new Error('Missing IMS context label to set context data for'))
+    throw new Error(`Missing context label to set context data for`)
+  }
+
+  /**
+   * Returns the names of the configured contexts as an array of strings.
+   *
+   * @returns {string[]} The names of the currently known configurations.
+   */
+  keys () {
+    debug('keys()')
+    return Object.keys(this._config.get()).filter(k => !KEYS.includes(k))
   }
 }
 
+Context.context = null
+Context.init = function (contextType, options) {
+  if (!Context.context) {
+    Context.context = new Context(contextType, options)
+  }
+  return Context.context
+}
+
 module.exports = {
-  context
+  context: Context.context,
+  init: Context.init
 }

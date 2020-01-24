@@ -1,0 +1,84 @@
+const State = require('@adobe/aio-lib-state')
+const { KEYS } = require('../constants')
+
+class ActionConfig {
+
+  constructor (options) {
+    // todo error if not in ow runtime
+    if (!options.inputConfig) {
+      throw new Error('required options.inputConfig for contextType=action')
+    }
+    this._data = options.inputConfig // content inside of $ims
+    this._tokenLoaded = false
+    this._state = null
+  }
+
+  static _getStateKey (contextName) {
+    return `${KEYS.IMS}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
+  }
+
+  async _initStateOnce () {
+    if (!this._state) {
+      // here init reads __OW_API_KEY and __OW_NAMESPACE from the action environment
+      this._state = await State.init()
+    }
+  }
+
+  async _loadTokensOnce () {
+    if (!this._tokenLoaded) {
+
+      await this._initStateOnce()
+
+      const contexts = Object.keys(this._data).filter(k => !KEYS.includes(k))
+
+      // try to retrieve a token for each context
+      const results = await Promise.all(
+        contexts.map(async contextName => {
+          const key = ActionConfig._getStateKey(contextName)
+          const stateData = await this._state.get(key)
+          return { contextName, stateData }
+      }))
+
+      results.forEach(ret => {
+        if (ret.stateData && ret.stateData.value) {
+          if (ret.stateData.value.access_token) {
+            this._data[ret.contextName].access_token = ret.stateData.value.access_token
+          }
+          if (ret.stateData.value.refreshToken) {
+            this._data[ret.contextName].refresh_token = ret.stateData.value.refresh_token
+          }
+        }
+      })
+    }
+  }
+
+  async get (contextName) {
+    await this._loadTokensOnce()
+    if (!contextName) {
+      return this._data
+    }
+    return this._data[contextName]
+  }
+
+  async set (contextName, contextData) {
+    await this._initStateOnce()
+
+    this._data[contextName] = contextData
+
+    // persist tokens if any
+    const tokens = {}
+    if (contextData.access_token) {
+      tokens.access_token = contextData.access_token
+    }
+    if (contextData.refresh_token) {
+      tokens.refresh_token = contextData.refresh_token
+    }
+    if (Object.keys(tokens).length > 0) {
+      const stateKey = ActionConfig._getStateKey(contextName)
+      // todo background?
+      await this._state.put(stateKey, tokens)
+    }
+  }
+}
+
+module.exports = ActionConfig
