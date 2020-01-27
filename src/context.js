@@ -94,7 +94,7 @@ class Context {
    */
   keys () {
     debug('keys()')
-    return Object.keys(this._config.get()).filter(k => !Object.keys(contextConfig).includes(k))
+    return Object.keys(this._config.get()).filter(k => !Object.values(contextConfig).includes(k))
   }
 }
 

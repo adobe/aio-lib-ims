@@ -27,7 +27,7 @@ class ActionConfig {
     if (!this._tokenLoaded) {
       await this._initStateOnce()
 
-      const contexts = Object.keys(this._data).filter(k => !Object.keys(contextConfig).includes(k))
+      const contexts = Object.keys(this._data).filter(k => !Object.values(contextConfig).includes(k))
 
       // try to retrieve a token for each context
       const results = await Promise.all(
@@ -60,7 +60,7 @@ class ActionConfig {
 
   async set (contextName, contextData) {
     function getNewTTL (currTTL, token) {
-      const expirySeconds = Math.floor(token.expiry / 1000)
+      const expirySeconds = Math.floor((token.expiry - Date.now()) / 1000)
       return expirySeconds > currTTL ? expirySeconds : currTTL
     }
 
