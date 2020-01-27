@@ -1,8 +1,7 @@
 const State = require('@adobe/aio-lib-state')
-const { KEYS } = require('../constants')
+const { contextConfig } = require('../constants')
 
 class ActionConfig {
-
   constructor (options) {
     // todo error if not in ow runtime
     if (!options.inputConfig) {
@@ -14,7 +13,7 @@ class ActionConfig {
   }
 
   static _getStateKey (contextName) {
-    return `${KEYS.IMS}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
+    return `${contextConfig.ims}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
   }
 
   async _initStateOnce () {
@@ -26,10 +25,9 @@ class ActionConfig {
 
   async _loadTokensOnce () {
     if (!this._tokenLoaded) {
-
       await this._initStateOnce()
 
-      const contexts = Object.keys(this._data).filter(k => !KEYS.includes(k))
+      const contexts = Object.keys(this._data).filter(k => !Object.keys(contextConfig).includes(k))
 
       // try to retrieve a token for each context
       const results = await Promise.all(
@@ -37,7 +35,7 @@ class ActionConfig {
           const key = ActionConfig._getStateKey(contextName)
           const stateData = await this._state.get(key)
           return { contextName, stateData }
-      }))
+        }))
 
       results.forEach(ret => {
         if (ret.stateData && ret.stateData.value) {
@@ -61,9 +59,9 @@ class ActionConfig {
   }
 
   async set (contextName, contextData) {
-    function getNewTTL(currTTL, token){
+    function getNewTTL (currTTL, token) {
       const expirySeconds = Math.floor(token.expiry / 1000)
-      return expirySeconds > currTTL ? expirySeconds: currTTL
+      return expirySeconds > currTTL ? expirySeconds : currTTL
     }
 
     await this._initStateOnce()

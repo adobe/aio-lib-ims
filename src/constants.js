@@ -1,10 +1,10 @@
 module.exports = {
-  KEYS: {
+  contextConfig: {
     // Name of the IMS configuration context data structure
-    IMS: '$ims',
+    ims: '$ims',
     // Property holding the current context name
-    CURRENT: '$current',
+    current: '$current',
     // Property holding the list of additional login plugins
-    PLUGINS: '$plugins'
+    plugins: '$plugins'
   }
 }

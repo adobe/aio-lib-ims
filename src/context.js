@@ -15,15 +15,14 @@ const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 const ActionConfig = require('./config-loaders/action')
 const CliConfig = require('./config-loaders/cli')
 
-const { KEYS } = require('./constants')
+const { contextConfig } = require('./constants')
 
 /**
  * The `context` object manages the KEYS.IMS configuration contexts on behalf of
  * the Adobe I/O Lib Core KEYS.IMS Library.
  */
 class Context {
-
-  constructor(contextType, options) {
+  constructor (contextType, options) {
     switch (contextType) {
       case 'action':
         this._config = new ActionConfig(options)
@@ -39,22 +38,22 @@ class Context {
 
   async getCurrent () {
     debug('get current')
-    return this._config.get(KEYS.CURRENT)
+    return this._config.get(contextConfig.current)
   }
 
   async setCurrent (contextName) {
     debug('set current=%s', contextName)
-    return this._config.set(KEYS.CURRENT, contextName)
+    return this._config.set(contextConfig.current, contextName)
   }
 
   async getPlugins () {
     debug('get plugins')
-    return this._config.get(KEYS.PLUGINS)
+    return this._config.get(contextConfig.plugins)
   }
 
   async setPlugins (plugins) {
     debug('set plugins=%o', plugins)
-    this._config.set(KEYS.PLUGINS, plugins)
+    this._config.set(contextConfig.plugins, plugins)
   }
 
   async get (contextName) {
@@ -85,7 +84,7 @@ class Context {
       return this._config.set(contextName, contextData)
     }
 
-    throw new Error(`Missing context label to set context data for`)
+    throw new Error('Missing context label to set context data for')
   }
 
   /**
@@ -95,7 +94,7 @@ class Context {
    */
   keys () {
     debug('keys()')
-    return Object.keys(this._config.get()).filter(k => !KEYS.includes(k))
+    return Object.keys(this._config.get()).filter(k => !Object.keys(contextConfig).includes(k))
   }
 }
 
