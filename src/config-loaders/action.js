@@ -61,22 +61,29 @@ class ActionConfig {
   }
 
   async set (contextName, contextData) {
+    function getNewTTL(currTTL, token){
+      const expirySeconds = Math.floor(token.expiry / 1000)
+      return expirySeconds > currTTL ? expirySeconds: currTTL
+    }
+
     await this._initStateOnce()
 
     this._data[contextName] = contextData
 
     // persist tokens if any
     const tokens = {}
+    let ttl = 0 // default
     if (contextData.access_token) {
       tokens.access_token = contextData.access_token
+      ttl = getNewTTL(ttl, tokens.access_token)
     }
     if (contextData.refresh_token) {
       tokens.refresh_token = contextData.refresh_token
+      ttl = getNewTTL(ttl, tokens.refresh_token)
     }
     if (Object.keys(tokens).length > 0) {
       const stateKey = ActionConfig._getStateKey(contextName)
-      // todo background?
-      await this._state.put(stateKey, tokens)
+      return this._state.put(stateKey, tokens, { ttl })
     }
   }
 }
