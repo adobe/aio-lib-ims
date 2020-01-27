@@ -23,14 +23,13 @@ const { KEYS } = require('./constants')
  */
 class Context {
 
-  //todo private
   constructor(contextType, options) {
-
     switch (contextType) {
       case 'action':
         this._config = new ActionConfig(options)
         break
       case 'cli':
+      case undefined: // default
         this._config = new CliConfig(options)
         break
       default:
