@@ -1,9 +1,23 @@
 const State = require('@adobe/aio-lib-state')
 const { contextConfig } = require('../constants')
 
+function checkOWEnv () {
+  const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
+  const missing = []
+  requiredEnv.forEach(e => {
+    if (!process.env[e]) {
+      missing.concat(e)
+    }
+  })
+  if (missing.length > 0) {
+    throw new Error(`missing environment variables '${missing}' to run in contextType=action, are you actually in an action's runtime?`)
+  }
+}
+
 class ActionConfig {
   constructor (options) {
-    // todo error if not in ow runtime
+    checkOWEnv()
+
     if (!options.inputConfig) {
       throw new Error('required options.inputConfig for contextType=action')
     }

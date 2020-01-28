@@ -57,7 +57,8 @@ const IMS_TOKEN_MANAGER = {
   },
 
   async _resolveContext (contextName, options) {
-    this._context = initContext(options.contextType, options)
+    const contextType = options.contextType || this._guessContextType()
+    this._context = initContext(contextType, options)
 
     const context = await this._context.get(contextName)
     debug('LoginCommand:contextData - %O', context)
@@ -67,6 +68,13 @@ const IMS_TOKEN_MANAGER = {
     } else {
       return Promise.reject(new Error(`IMS context '${context.name}' is not configured`))
     }
+  },
+
+  _guessContextType () {
+    if (process.env.__OW_ACTION_NAME) {
+      return 'action'
+    }
+    return 'cli'
   },
 
   async _getOrCreateToken (config, force) {
