@@ -1,3 +1,16 @@
+/*
+Copyright 2018 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+
+const debug = require('debug')('@adobe/aio-lib-core-ims/config/action')
 const State = require('@adobe/aio-lib-state')
 const Config = require('./config')
 const { contextConfig } = require('../constants')
@@ -37,6 +50,7 @@ class ActionConfig extends Config {
    * @override
    */
   async get (key) {
+    debug('get(%s)', key)
     if (super._keyIsContextName(key)) {
       await this._loadTokensOnce()
     }
@@ -48,11 +62,12 @@ class ActionConfig extends Config {
    * @memberof ActionConfig
    * @override
    */
-  async set (key, contextData) {
-    this._data[key] = contextData
+  async set (key, data) {
+    debug('set(%s, %o)', key, data)
+    this._data[key] = data
 
     if (super._keyIsContextName(key)) {
-      await this._persistTokensIfAny(key, contextData)
+      await this._setTokens(key, data)
     }
   }
 
@@ -105,29 +120,31 @@ class ActionConfig extends Config {
     }
   }
 
-  async _persistTokensIfAny (contextName, contextData) {
-    function getNewTTL (currTTL, token) {
-      const expirySeconds = Math.floor((token.expiry - Date.now()) / 1000)
-      return expirySeconds > currTTL ? expirySeconds : currTTL
+  async _setTokens (contextName, contextData) {
+    function getTTL (expiryTimes) {
+      const maxExpiry = Math.max(...expiryTimes)
+      return Math.floor((maxExpiry - Date.now()) / 1000)
     }
 
     await this._initStateOnce()
 
-    // persist tokens if any
+    const stateKey = ActionConfig._getStateKey(contextName)
+
     const tokens = {}
-    let ttl = 0 // default
     if (contextData.access_token) {
       tokens.access_token = contextData.access_token
-      ttl = getNewTTL(ttl, tokens.access_token)
     }
     if (contextData.refresh_token) {
       tokens.refresh_token = contextData.refresh_token
-      ttl = getNewTTL(ttl, tokens.refresh_token)
     }
+
+    // set/replace tokens if any
     if (Object.keys(tokens).length > 0) {
-      const stateKey = ActionConfig._getStateKey(contextName)
+      const ttl = getTTL(Object.values(tokens).map(t => t.expiry))
       return this._state.put(stateKey, tokens, { ttl })
     }
+    // delete tokens if none
+    return this._state.delete(stateKey)
   }
 }
 

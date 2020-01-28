@@ -71,7 +71,7 @@ module.exports = {
      * @param {string} contextName The name of the IMS context for which to return the
      *              access token. If this is empty, the token(s) of the current IMS
      *              context are invalidated.
-     * @param {Object} [options]
+     * @param {object} [options]
      * @param {boolean} [options.force] Forces a login in the selected plugin's `imslogin`
      *              function. See [Forced `imsLogin`](README.md#forced-imslogin) for more
      *              information on this flag. The default value is `false`.
@@ -105,8 +105,11 @@ module.exports = {
      * @param {string} contextName The name of the IMS context for which to
      *              invalidate the token(s). If this is empty, the token(s) of
      *              the current IMS context are invalidated.
-     * @param {boolean} force Whether to invalidate just the access token or
-     *              to also invalidate the refresh token.
+     * @param {object} [options]
+     * @param {boolean} [options.force] Whether to invalidate just the access token or
+     *              to also invalidate the refresh token. Defaults to `false`.
+     * @param {string} [options.contextType] see getToken() options for more information
+     * @param {object} [options.imsConfig] see getToken() options for more information
      */
-  invalidateToken: async (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
+  invalidateToken: async (contextName, options) => IMS_TOKEN_MANAGER.invalidateToken(contextName, options)
 }
