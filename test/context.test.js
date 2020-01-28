@@ -71,7 +71,7 @@ test('keys - success', async () => {
     }
   })
 
-  return expect(context.keys()).toEqual(Object.keys(contexts))
+  return expect(await context.keys()).toEqual(Object.keys(contexts))
 })
 
 test('plugins - set', async () => {

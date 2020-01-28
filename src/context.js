@@ -12,8 +12,8 @@ governing permissions and limitations under the License.
 
 const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 
-const ActionConfig = require('./config-loaders/action')
-const CliConfig = require('./config-loaders/cli')
+const ActionConfig = require('./config/action')
+const CliConfig = require('./config/cli')
 
 const { contextConfig, contextTypes } = require('./constants')
 
@@ -90,11 +90,11 @@ class Context {
   /**
    * Returns the names of the configured contexts as an array of strings.
    *
-   * @returns {string[]} The names of the currently known configurations.
+   * @returns {Promise<string[]>} The names of the currently known configurations.
    */
-  keys () {
+  async keys () {
     debug('keys()')
-    return Object.keys(this._config.get()).filter(k => !Object.values(contextConfig).includes(k))
+    return this._config.contexts()
   }
 }
 

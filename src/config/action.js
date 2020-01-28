@@ -1,21 +1,10 @@
 const State = require('@adobe/aio-lib-state')
+const Config = require('./config')
 const { contextConfig } = require('../constants')
 
-function _checkOWEnv () {
-  const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
-  const missing = []
-  requiredEnv.forEach(e => {
-    if (!process.env[e]) {
-      missing.concat(e)
-    }
-  })
-  if (missing.length > 0) {
-    throw new Error(`missing environment variables '${missing}' to run in contextType=action, are you actually in an action's runtime?`)
-  }
-}
-
-class ActionConfig {
+class ActionConfig extends Config {
   constructor (options) {
+    super()
     // constructor helpers
     function _checkOWEnv () {
       const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
@@ -42,6 +31,40 @@ class ActionConfig {
     this._tokensLoaded = false
     this._state = null
   }
+
+  /**
+   * @memberof ActionConfig
+   * @override
+   */
+  async get (key) {
+    if (super._keyIsContextName(key)) {
+      await this._loadTokensOnce()
+    }
+
+    return this._data[key]
+  }
+
+  /**
+   * @memberof ActionConfig
+   * @override
+   */
+  async set (key, contextData) {
+    this._data[key] = contextData
+
+    if (super._keyIsContextName(key)) {
+      await this._persistTokensIfAny(key, contextData)
+    }
+  }
+
+  /**
+   * @memberof ActionConfig
+   * @override
+   */
+  async contexts () {
+    return Object.keys(this._data).filter(super._keyIsContextName)
+  }
+
+  /* helpers */
 
   static _getStateKey (contextName) {
     return `${contextConfig.ims}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
@@ -82,24 +105,13 @@ class ActionConfig {
     }
   }
 
-  async get (contextName) {
-    await this._loadTokensOnce()
-
-    if (!contextName) {
-      return this._data
-    }
-    return this._data[contextName]
-  }
-
-  async set (contextName, contextData) {
+  async _persistTokensIfAny (contextName, contextData) {
     function getNewTTL (currTTL, token) {
       const expirySeconds = Math.floor((token.expiry - Date.now()) / 1000)
       return expirySeconds > currTTL ? expirySeconds : currTTL
     }
 
     await this._initStateOnce()
-
-    this._data[contextName] = contextData
 
     // persist tokens if any
     const tokens = {}
