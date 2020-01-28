@@ -1,7 +1,7 @@
 const State = require('@adobe/aio-lib-state')
 const { contextConfig } = require('../constants')
 
-function checkOWEnv () {
+function _checkOWEnv () {
   const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
   const missing = []
   requiredEnv.forEach(e => {
@@ -16,13 +16,30 @@ function checkOWEnv () {
 
 class ActionConfig {
   constructor (options) {
-    checkOWEnv()
-
-    if (!options.inputConfig) {
-      throw new Error('required options.inputConfig for contextType=action')
+    // constructor helpers
+    function _checkOWEnv () {
+      const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
+      const missing = []
+      requiredEnv.forEach(e => {
+        if (!process.env[e]) {
+          missing.concat(e)
+        }
+      })
+      if (missing.length > 0) {
+        throw new Error(`missing environment variables '${missing}' to run in contextType=action, are you actually in an action's runtime?`)
+      }
     }
-    this._data = options.inputConfig // content inside of $ims
-    this._tokenLoaded = false
+
+    // start constructor
+    _checkOWEnv()
+
+    const imsConfig = options.imsConfig
+
+    if (!imsConfig) {
+      throw new Error('required options.imsConfig for contextType=action')
+    }
+    this._data = options.imsConfig // content inside of $ims
+    this._tokensLoaded = false
     this._state = null
   }
 
@@ -38,7 +55,7 @@ class ActionConfig {
   }
 
   async _loadTokensOnce () {
-    if (!this._tokenLoaded) {
+    if (!this._tokensLoaded) {
       await this._initStateOnce()
 
       const contexts = Object.keys(this._data).filter(k => !Object.values(contextConfig).includes(k))
@@ -61,11 +78,13 @@ class ActionConfig {
           }
         }
       })
+      this._tokensLoaded = true
     }
   }
 
   async get (contextName) {
     await this._loadTokensOnce()
+
     if (!contextName) {
       return this._data
     }

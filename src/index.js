@@ -76,18 +76,22 @@ module.exports = {
      *              function. See [Forced `imsLogin`](README.md#forced-imslogin) for more
      *              information on this flag. The default value is `false`.
      * @param {string} [options.contextType] The type of context to use for loading the
-     *              auth configuration. Default is 'cli', which reads and writes the ims
-     *              configuration from local disk using `@adobe/aio-lib-core-config`.
-     *              Alternatively, `options.contextType='action'` can be used when calling
-     *              this function within an Adobe I/O Runtime function (OpenWhisk action),
-     *              in which case tokens are persisted using `@adobe/aio-lib-state`.
-     * @param {object} [options.inputConfig] An ims configuration object. This is required
+     *              auth configuration, possible values are **'cli' or 'action'**. If left
+     *              empty, this module will attempt to auto detect the current context
+     *              type from the runtime environment. When 'cli' is used, the ims
+     *              configuration is read from and written to local disk using
+     *              `@adobe/aio-lib-core-config`. Alternatively, the context type 'action'
+     *              should be used when running the module in an Adobe I/O Runtime
+     *              function (OpenWhisk action), in that case the ims configuration should
+     *              be passed to `options.imsConfig` and tokens will be persisted using
+     *              `@adobe/aio-lib-state`.
+     * @param {object} [options.imsConfig] An ims configuration object. This is required
      *              if `contextType==='action'. When `contextType==='cli'` the input
-     *              config is merged with the loaded config.
+     *              imsConfig is merged with the loaded config.
      *
      * @returns {Promise} Resolving to an access token (string)
      */
-  getToken: async (contextName, options) => IMS_TOKEN_MANAGER.getToken(contextName, options),
+  getToken: async (contextName, options = {}) => IMS_TOKEN_MANAGER.getToken(contextName, options),
 
   /**
      * Invalidates the access and optionally refresh of an IMS context.

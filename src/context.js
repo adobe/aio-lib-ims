@@ -15,7 +15,7 @@ const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 const ActionConfig = require('./config-loaders/action')
 const CliConfig = require('./config-loaders/cli')
 
-const { contextConfig } = require('./constants')
+const { contextConfig, contextTypes } = require('./constants')
 
 /**
  * The `context` object manages the KEYS.IMS configuration contexts on behalf of
@@ -24,10 +24,10 @@ const { contextConfig } = require('./constants')
 class Context {
   constructor (contextType, options) {
     switch (contextType) {
-      case 'action':
+      case contextTypes.action:
         this._config = new ActionConfig(options)
         break
-      case 'cli':
+      case contextTypes.cli:
       case undefined: // default
         this._config = new CliConfig(options)
         break

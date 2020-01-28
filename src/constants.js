@@ -6,5 +6,9 @@ module.exports = {
     current: '$current',
     // Property holding the list of additional login plugins
     plugins: '$plugins'
+  },
+  contextTypes: {
+    cli: 'cli',
+    action: 'action'
   }
 }
