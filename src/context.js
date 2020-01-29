@@ -15,7 +15,20 @@ const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 const ActionConfig = require('./config/action')
 const CliConfig = require('./config/cli')
 
-const { contextConfig, contextTypes } = require('./constants')
+/** Name of context type action */
+const TYPE_ACTION = 'action'
+
+/** Name of context type cli */
+const TYPE_CLI = 'cli'
+
+/** Name of the IMS configuration context data structure */
+const IMS = '$ims'
+
+/** Property holding the current context name */
+const CURRENT = '$current'
+
+/** Property holding the list of additional login plugins */
+const PLUGINS = '$plugins'
 
 /**
  * The `context` object manages the KEYS.IMS configuration contexts on behalf of
@@ -24,12 +37,12 @@ const { contextConfig, contextTypes } = require('./constants')
 class Context {
   constructor (contextType, options) {
     switch (contextType) {
-      case contextTypes.action:
-        this._config = new ActionConfig(options)
+      case TYPE_ACTION:
+        this._config = new ActionConfig(IMS, options)
         break
-      case contextTypes.cli:
+      case TYPE_CLI:
       case undefined: // default
-        this._config = new CliConfig(options)
+        this._config = new CliConfig(IMS, options)
         break
       default:
         throw new Error(`contextType '${contextType}' is not supported`)
@@ -38,22 +51,22 @@ class Context {
 
   async getCurrent () {
     debug('get current')
-    return this._config.get(contextConfig.current)
+    return this._config.get(CURRENT)
   }
 
   async setCurrent (contextName) {
     debug('set current=%s', contextName)
-    return this._config.set(contextConfig.current, contextName)
+    return this._config.set(CURRENT, contextName)
   }
 
   async getPlugins () {
     debug('get plugins')
-    return this._config.get(contextConfig.plugins)
+    return this._config.get(PLUGINS)
   }
 
   async setPlugins (plugins) {
     debug('set plugins=%o', plugins)
-    this._config.set(contextConfig.plugins, plugins)
+    this._config.set(PLUGINS, plugins)
   }
 
   async get (contextName) {
@@ -108,5 +121,10 @@ Context.init = function (contextType, options) {
 
 module.exports = {
   context: Context.context,
-  init: Context.init
+  init: Context.init,
+  TYPE_ACTION,
+  TYPE_CLI,
+  IMS,
+  CURRENT,
+  PLUGINS
 }

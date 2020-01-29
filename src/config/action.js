@@ -13,11 +13,10 @@ governing permissions and limitations under the License.
 const debug = require('debug')('@adobe/aio-lib-core-ims/config/action')
 const State = require('@adobe/aio-lib-state')
 const Config = require('./config')
-const { contextConfig } = require('../constants')
 
 class ActionConfig extends Config {
-  constructor (options) {
-    super()
+  constructor (configKey, options) {
+    super(configKey)
     // constructor helpers
     function _checkOWEnv () {
       const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
@@ -76,13 +75,13 @@ class ActionConfig extends Config {
    * @override
    */
   async contexts () {
-    return Object.keys(this._data).filter(super._keyIsContextName)
+    return Object.keys(this._data).filter(this._keyIsContextName)
   }
 
   /* helpers */
 
-  static _getStateKey (contextName) {
-    return `${contextConfig.ims}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
+  _getStateKey (contextName) {
+    return `${this.configKey}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
   }
 
   async _initStateOnce () {
@@ -96,12 +95,12 @@ class ActionConfig extends Config {
     if (!this._tokensLoaded) {
       await this._initStateOnce()
 
-      const contexts = Object.keys(this._data).filter(k => !Object.values(contextConfig).includes(k))
+      const contexts = await this.contexts()
 
       // try to retrieve a token for each context
       const results = await Promise.all(
         contexts.map(async contextName => {
-          const key = ActionConfig._getStateKey(contextName)
+          const key = this._getStateKey(contextName)
           const stateData = await this._state.get(key)
           return { contextName, stateData }
         }))
@@ -128,7 +127,7 @@ class ActionConfig extends Config {
 
     await this._initStateOnce()
 
-    const stateKey = ActionConfig._getStateKey(contextName)
+    const stateKey = this._getStateKey(contextName)
 
     const tokens = {}
     if (contextData.access_token) {

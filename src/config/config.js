@@ -15,6 +15,10 @@ function throwNotImplemented () {
 }
 
 class Config {
+  constructor (configKey) {
+    this.configKey = configKey
+  }
+
   /* Instance members to be implemented by subclasses */
 
   /**
@@ -57,7 +61,7 @@ class Config {
 
   /* Helpers */
 
-  async _keyIsContextName (key) {
+  _keyIsContextName (key) {
     return !key.startsWith('$')
   }
 }

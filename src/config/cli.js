@@ -12,32 +12,31 @@ governing permissions and limitations under the License.
 
 const debug = require('debug')('@adobe/aio-lib-core-ims/config/cli')
 
-const { contextConfig } = require('../constants')
 const Config = require('./config')
 
 class CliConfig extends Config {
-  constructor (options) {
-    super()
+  constructor (configKey, options) {
+    super(configKey)
 
     this._cliConfig = require('@adobe/aio-lib-core-config')
     this._cliConfig.reload()
     if (options.imsConfig) {
-      this._cliConfig.set(`${contextConfig.ims}`, { ...this._cliConfig.get(`${contextConfig.ims}`), ...options.imsConfig })
+      this._cliConfig.set(`${this.configKey}`, { ...this._cliConfig.get(`${this.configKey}`), ...options.imsConfig })
     }
   }
 
   async get (key) {
     debug('set(%s)', key)
-    return this._cliConfig.get(`${contextConfig.ims}.${key}`)
+    return this._cliConfig.get(`${this.configKey}.${key}`)
   }
 
   async set (key, data) {
     debug('set(%s, %o)', key, data)
-    this._cliConfig.set(`${contextConfig.ims}.${key}`, data)
+    this._cliConfig.set(`${this.configKey}.${key}`, data)
   }
 
-  async contexts (key) {
-    return Object.keys(this._cliConfig.get(`${contextConfig.ims}`)).filter(super._keyIsContextName)
+  async contexts () {
+    return Object.keys(this._cliConfig.get(`${this.configKey}`)).filter(super._keyIsContextName)
   }
 }
 
