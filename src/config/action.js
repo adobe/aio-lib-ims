@@ -15,7 +15,7 @@ const State = require('@adobe/aio-lib-state')
 const Config = require('./config')
 
 class ActionConfig extends Config {
-  constructor (configKey, options) {
+  constructor (configKey) {
     super(configKey)
     // constructor helpers
     function _checkOWEnv () {
@@ -34,12 +34,7 @@ class ActionConfig extends Config {
     // start constructor
     _checkOWEnv()
 
-    const imsConfig = options.imsConfig
-
-    if (!imsConfig) {
-      throw new Error('required options.imsConfig for contextType=action')
-    }
-    this._data = options.imsConfig // content inside of $ims
+    this._data = {} // initially empty, must be set first
     this._tokensLoaded = false
     this._state = null
   }

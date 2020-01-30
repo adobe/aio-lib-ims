@@ -31,8 +31,8 @@ const CURRENT = '$current'
 const PLUGINS = '$plugins'
 
 /**
- * The `context` object manages the KEYS.IMS configuration contexts on behalf of
- * the Adobe I/O Lib Core KEYS.IMS Library.
+ * The `context` object manages the IMS configuration contexts on behalf of
+ * the Adobe I/O Lib Core IMS Library.
  */
 class Context {
   constructor (contextType, options) {
@@ -93,11 +93,17 @@ class Context {
     if (!contextName) {
       contextName = await this.getCurrent()
     }
-    if (contextName) {
-      return this._config.set(contextName, contextData)
+    if (!contextName) {
+      throw new Error('Missing context label to set context data for')
     }
 
-    throw new Error('Missing context label to set context data for')
+    await this._config.set(contextName, contextData)
+
+    // if there are no current context set, set this one
+    if (!await this.getCurrent()) {
+      debug(`current is not set, setting current to '${contextName}'`, contextName)
+      await this.setCurrent(contextName)
+    }
   }
 
   /**
@@ -111,17 +117,23 @@ class Context {
   }
 }
 
+function _guessContextType () {
+  if (process.env.__OW_ACTION_NAME) {
+    return 'action'
+  }
+  return 'cli'
+}
+
 Context.context = null
-Context.init = function (contextType, options) {
+function getContext () {
   if (!Context.context) {
-    Context.context = new Context(contextType, options)
+    Context.context = new Context(_guessContextType())
   }
   return Context.context
 }
 
 module.exports = {
-  context: Context.context,
-  init: Context.init,
+  getContext,
   TYPE_ACTION,
   TYPE_CLI,
   IMS,

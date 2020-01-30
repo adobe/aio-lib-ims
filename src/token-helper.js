@@ -12,8 +12,7 @@ governing permissions and limitations under the License.
 
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const debug = require('debug')('@adobe/aio-lib-core-ims/token-helper')
-
-const initContext = require('./context').init
+const { getContext } = require('./context')
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
@@ -24,23 +23,23 @@ const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-core-ims-jwt', '@adobe/aio
 
 const IMS_TOKEN_MANAGER = {
 
-  async getToken (contextName, options) {
-    debug('getToken(%s, %o)', contextName, options)
+  async getToken (contextName, force) {
+    debug('getToken(%s, %s)', contextName, force)
 
-    return this._resolveContext(contextName, options)
-      .then(context => { return { ...context, result: this._getOrCreateToken(context.data, !!options.force) } })
+    return this._resolveContext(contextName)
+      .then(context => { return { ...context, result: this._getOrCreateToken(context.data, force) } })
       .then(result => this._persistTokens(result.name, result.data, result.result))
   },
 
-  async invalidateToken (contextName, options) {
-    debug('invalidateToken(%s, %o)', contextName, options)
+  async invalidateToken (contextName, force) {
+    debug('invalidateToken(%s, %s)', contextName, force)
 
-    const tokenLabel = options.force ? REFRESH_TOKEN : ACCESS_TOKEN
-    const { name, data } = await this._resolveContext(contextName, options)
+    const tokenLabel = force ? REFRESH_TOKEN : ACCESS_TOKEN
+    const { name, data } = await this._resolveContext(contextName)
     const ims = new Ims(data.env)
     return this.getTokenIfValid(data[tokenLabel])
       .catch(err => {
-        if (options.force) {
+        if (force) {
           return this.getTokenIfValid(data[ACCESS_TOKEN])
         } else {
           return Promise.reject(err)
@@ -49,17 +48,18 @@ const IMS_TOKEN_MANAGER = {
       .then(token => ims.invalidateToken(token, data.client_id, data.client_secret))
       .then(() => {
         delete data[tokenLabel]
-        if (options.force) {
+        if (force) {
           delete data[ACCESS_TOKEN]
         }
         return this._context.set(name, data)
       })
   },
 
-  async _resolveContext (contextName, options) {
-    const contextType = options.contextType || this._guessContextType()
-    this._context = initContext(contextType, options)
+  get _context () {
+    return getContext()
+  },
 
+  async _resolveContext (contextName) {
     const context = await this._context.get(contextName)
     debug('LoginCommand:contextData - %O', context)
 
@@ -68,13 +68,6 @@ const IMS_TOKEN_MANAGER = {
     } else {
       return Promise.reject(new Error(`IMS context '${context.name}' is not configured`))
     }
-  },
-
-  _guessContextType () {
-    if (process.env.__OW_ACTION_NAME) {
-      return 'action'
-    }
-    return 'cli'
   },
 
   async _getOrCreateToken (config, force) {

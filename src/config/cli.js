@@ -15,14 +15,11 @@ const debug = require('debug')('@adobe/aio-lib-core-ims/config/cli')
 const Config = require('./config')
 
 class CliConfig extends Config {
-  constructor (configKey, options) {
+  constructor (configKey) {
     super(configKey)
 
     this._cliConfig = require('@adobe/aio-lib-core-config')
     this._cliConfig.reload()
-    if (options.imsConfig) {
-      this._cliConfig.set(`${this.configKey}`, { ...this._cliConfig.get(`${this.configKey}`), ...options.imsConfig })
-    }
   }
 
   async get (key) {
