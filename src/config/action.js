@@ -23,11 +23,11 @@ class ActionConfig extends Config {
       const missing = []
       requiredEnv.forEach(e => {
         if (!process.env[e]) {
-          missing.concat(e)
+          missing.push(e)
         }
       })
       if (missing.length > 0) {
-        throw new Error(`missing environment variables '${missing}' to run in contextType=action, are you actually in an action's runtime?`)
+        throw new Error(`missing environment variable(s) '${missing}', are you actually in an action's runtime?`)
       }
     }
 
@@ -58,11 +58,19 @@ class ActionConfig extends Config {
    */
   async set (key, data) {
     debug('set(%s, %o)', key, data)
-    this._data[key] = data
 
     if (super._keyIsContextName(key)) {
-      await this._setTokens(key, data)
+      if (this._hasToken(data)) {
+        await this._setTokens(key, data)
+      } else if (this._hasToken(this._data[key]) && !this._hasToken(data)) {
+        // delete tokens only if some are cached and input data doesn't have some
+        // this extra condition avoids deleting any cached token on the initial set call
+        // but still ensures that invalidation works
+        await this._deleteTokens(key)
+      }
     }
+
+    this._data[key] = data
   }
 
   /**
@@ -74,9 +82,13 @@ class ActionConfig extends Config {
   }
 
   /* helpers */
+  _hasToken (data = {}) {
+    return data.access_token || data.refresh_token
+  }
 
   _getStateKey (contextName) {
-    return `${this.configKey}.${process.env.__OW_ACTION_NAME.split('/').slice(0, -1).join('.')}.${contextName}`
+    // token caching at action level, one state key per action
+    return `${this.configKey}.${process.env.__OW_ACTION_NAME.split('/').join('.')}.${contextName}`
   }
 
   async _initStateOnce () {
@@ -114,6 +126,13 @@ class ActionConfig extends Config {
     }
   }
 
+  async _deleteTokens (contextName) {
+    await this._initStateOnce()
+    const stateKey = this._getStateKey(contextName)
+
+    return this._state.delete(stateKey)
+  }
+
   async _setTokens (contextName, contextData) {
     function getTTL (expiryTimes) {
       const maxExpiry = Math.max(...expiryTimes)
@@ -121,24 +140,17 @@ class ActionConfig extends Config {
     }
 
     await this._initStateOnce()
-
     const stateKey = this._getStateKey(contextName)
 
-    const tokens = {}
-    if (contextData.access_token) {
-      tokens.access_token = contextData.access_token
+    const tokens = {
+      access_token: contextData.access_token,
+      refresh_token: contextData.refresh_token
     }
-    if (contextData.refresh_token) {
-      tokens.refresh_token = contextData.refresh_token
-    }
+    // remove undefined tokens
+    Object.keys(tokens).forEach(key => tokens[key] === undefined && delete tokens[key])
 
-    // set/replace tokens if any
-    if (Object.keys(tokens).length > 0) {
-      const ttl = getTTL(Object.values(tokens).map(t => t.expiry))
-      return this._state.put(stateKey, tokens, { ttl })
-    }
-    // delete tokens if none
-    return this._state.delete(stateKey)
+    const ttl = getTTL(Object.values(tokens).map(t => t.expiry))
+    return this._state.put(stateKey, tokens, { ttl })
   }
 }
 

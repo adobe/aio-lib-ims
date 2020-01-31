@@ -25,10 +25,10 @@ test('getToken', async () => {
   jest.mock('../src/token-helper')
   expect.assertions(7)
 
-  function _curry (contextName, force, retVal) {
+  function _curry (contextName, options, retVal) {
     return function (n, f) {
       expect(n).toEqual(contextName)
-      expect(f).toEqual(force)
+      expect(f).toEqual(options)
       return new Promise(resolve => resolve(retVal))
     }
   }
@@ -45,10 +45,10 @@ test('invalidateToken', async () => {
   jest.mock('../src/token-helper')
   expect.assertions(7)
 
-  function _curry (contextName, force) {
+  function _curry (contextName, options) {
     return function (n, f) {
       expect(n).toEqual(contextName)
-      expect(f).toEqual(force)
+      expect(f).toEqual(options)
     }
   }
 

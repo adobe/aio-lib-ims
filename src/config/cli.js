@@ -22,18 +22,30 @@ class CliConfig extends Config {
     this._cliConfig.reload()
   }
 
+  /**
+   * @memberof CliConfig
+   * @override
+   */
   async get (key) {
     debug('set(%s)', key)
     return this._cliConfig.get(`${this.configKey}.${key}`)
   }
 
+  /**
+   * @memberof CliConfig
+   * @override
+   */
   async set (key, data) {
     debug('set(%s, %o)', key, data)
     this._cliConfig.set(`${this.configKey}.${key}`, data)
   }
 
+  /**
+   * @memberof CliConfig
+   * @override
+   */
   async contexts () {
-    return Object.keys(this._cliConfig.get(`${this.configKey}`)).filter(super._keyIsContextName)
+    return Object.keys(this._cliConfig.get(`${this.configKey}`)).filter(this._keyIsContextName)
   }
 }
 

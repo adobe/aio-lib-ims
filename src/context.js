@@ -89,18 +89,19 @@ class Context {
 
   async set (contextName, contextData) {
     debug('set(%s, %o)', contextName, contextData)
-
+    let current
     if (!contextName) {
-      contextName = await this.getCurrent()
+      current = await this.getCurrent()
+      contextName = current
     }
     if (!contextName) {
-      throw new Error('Missing context label to set context data for')
+      throw new Error('Missing IMS context label to set context data for')
     }
 
     await this._config.set(contextName, contextData)
 
     // if there are no current context set, set this one
-    if (!await this.getCurrent()) {
+    if (!current && !await this.getCurrent()) {
       debug(`current is not set, setting current to '${contextName}'`, contextName)
       await this.setCurrent(contextName)
     }
@@ -132,7 +133,12 @@ function getContext () {
   return Context.context
 }
 
+function resetContext () {
+  Context.context = null
+}
+
 module.exports = {
+  resetContext,
   getContext,
   TYPE_ACTION,
   TYPE_CLI,
