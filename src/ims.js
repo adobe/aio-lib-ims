@@ -15,7 +15,7 @@ const debug = require('debug')('@adobe/aio-cli-ims/ims')
 const url = require('url')
 
 // default IMS environment
-const DEFAULT_ENVIRONMENT = 'stage'
+const DEFAULT_ENVIRONMENT = 'prod'
 
 const IMS_ENDPOINTS = {
   stage: 'https://ims-na1-stg1.adobelogin.com',
