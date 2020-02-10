@@ -28,9 +28,11 @@ const IMS_PLUGINS = `${IMS}.$plugins`
 const context = {
 
   /**
-     * Getter for the actual configuration
-     * @private
-     */
+   * Getter for the actual configuration
+   *
+   * @private
+   * @returns {object} the cli config data
+   */
   get _cliConfig () {
     if (!this._config) {
       this._config = require('@adobe/aio-lib-core-config')
@@ -40,11 +42,13 @@ const context = {
   },
 
   /**
-     * The current context name.
-     * When assigning a value, the name is persisted in the local configuration.
-     * To persist the new current context name in global configuration call the
-     * `setCurrent(contextName, local)` method with `local=false`.
-     */
+   * The current context name.
+   * When assigning a value, the name is persisted in the local configuration.
+   * To persist the new current context name in global configuration call the
+   * `setCurrent(contextName, local)` method with `local=false`.
+   *
+   * @returns {string} the current context name
+   */
   get current () {
     debug('get current')
     return this._cliConfig.get(IMS_CURRENT)
@@ -56,24 +60,26 @@ const context = {
   },
 
   /**
-     * Sets the current context name while explicitly stating whether to
-     * persist in the local or global configuration.
-     *
-     * @param {string} contextName The name of the context to use as the current context
-     * @param {boolean} local Persist the current name in local (`true`, default) or
-     *      global (`false`) configuration
-     */
+   * Sets the current context name while explicitly stating whether to
+   * persist in the local or global configuration.
+   *
+   * @param {string} contextName The name of the context to use as the current context
+   * @param {boolean} local Persist the current name in local (`true`, default) or
+   *      global (`false`) configuration
+   */
   setCurrent (contextName, local = true) {
     debug('setCurrent(%s, %s)', contextName, !!local)
     this._cliConfig.set(IMS_CURRENT, contextName, !!local)
   },
 
   /**
-     * The list of additional IMS login plugins to consider.
-     * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
-     * library and are always installed and used.
-     * This list of plugins is always stored in the global configuration.
-     */
+   * The list of additional IMS login plugins to consider.
+   * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
+   * library and are always installed and used.
+   * This list of plugins is always stored in the global configuration.
+   *
+   * @returns {Array} array of plugins
+   */
   get plugins () {
     debug('get plugins')
     return this._cliConfig.get(IMS_PLUGINS)
@@ -85,26 +91,26 @@ const context = {
   },
 
   /**
-     * Returns the names of the configured IMS contexts as an array of strings.
-     *
-     * @returns {string[]} The names of the currently known configurations.
-     */
+   * Returns the names of the configured IMS contexts as an array of strings.
+   *
+   * @returns {string[]} The names of the currently known configurations.
+   */
   keys () {
     debug('keys()')
     return Object.keys(this._cliConfig.get(IMS)).filter(x => !x.startsWith('$'))
   },
 
   /**
-     * Returns an object representing the named context.
-     * If the contextName parameter is empty or missing, it defaults to the
-     * current context name. The result is an object with two properties:
-     *
-     *   - `name`: The actual context name used
-     *   - `data`: The IMS context data
-     *
-     * @param {string} contextName Name of the context information to return.
-     * @returns {object} The configuration object
-     */
+   * Returns an object representing the named context.
+   * If the contextName parameter is empty or missing, it defaults to the
+   * current context name. The result is an object with two properties:
+   *
+   *   - `name`: The actual context name used
+   *   - `data`: The IMS context data
+   *
+   * @param {string} contextName Name of the context information to return.
+   * @returns {object} The configuration object
+   */
   get (contextName) {
     debug('get(%s)', contextName)
 
@@ -124,15 +130,15 @@ const context = {
   },
 
   /**
-     * Updates the named configuration with new configuration data.
-     * If a configuration object for the named context already exists it
-     * is completely replaced with this new configuration.
-     *
-     * @param {string} contextName Name of the context to update
-     * @param {object} contextData The configuration data to store for the context
-     * @param {boolean} local Persist in local (`true`) or global (`false`,
-     *          default) configuration
-     */
+   * Updates the named configuration with new configuration data.
+   * If a configuration object for the named context already exists it
+   * is completely replaced with this new configuration.
+   *
+   * @param {string} contextName Name of the context to update
+   * @param {object} contextData The configuration data to store for the context
+   * @param {boolean} local Persist in local (`true`) or global (`false`,
+   *          default) configuration
+   */
   async set (contextName, contextData, local = false) {
     debug('set(%s, %o, %s)', contextName, contextData, !!local)
 
