@@ -99,9 +99,8 @@ class ActionConfig extends Config {
   }
 
   async _loadTokensOnce () {
+    await this._initStateOnce()
     if (!this._tokensLoaded) {
-      await this._initStateOnce()
-
       const contexts = await this.contexts()
 
       // try to retrieve a token for each context
@@ -117,7 +116,7 @@ class ActionConfig extends Config {
           if (ret.stateData.value.access_token) {
             this._data[ret.contextName].access_token = ret.stateData.value.access_token
           }
-          if (ret.stateData.value.refreshToken) {
+          if (ret.stateData.value.refresh_token) {
             this._data[ret.contextName].refresh_token = ret.stateData.value.refresh_token
           }
         }

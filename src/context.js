@@ -35,15 +35,16 @@ const PLUGINS = '$plugins'
  * the Adobe I/O Lib Core IMS Library.
  */
 class Context {
-  constructor (contextType, options) {
+  constructor (contextType) {
     switch (contextType) {
       case TYPE_ACTION:
-        this._config = new ActionConfig(IMS, options)
+        this._config = new ActionConfig(IMS)
         break
       case TYPE_CLI:
       case undefined: // default
-        this._config = new CliConfig(IMS, options)
+        this._config = new CliConfig(IMS)
         break
+      /* istanbul ignore next */
       default:
         throw new Error(`contextType '${contextType}' is not supported`)
     }
