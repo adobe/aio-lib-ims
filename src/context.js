@@ -54,6 +54,16 @@ const context = {
     return this._cliConfig.get(IMS_CLI)
   },
 
+  set cli (contextData) {
+    debug(`set cli=${JSON.stringify(contextData)}`)
+    this._cliConfig.set(IMS_CLI, contextData, true)
+  },
+
+  setCli (contextData, local = true) {
+    debug(`set cli=${JSON.stringify(contextData)} local:${!!local}`)
+    this._cliConfig.set(IMS_CLI, contextData, true)
+  },
+
   /**
    * The current context name.
    * When assigning a value, the name is persisted in the local configuration.
