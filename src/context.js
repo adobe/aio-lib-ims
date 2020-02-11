@@ -50,16 +50,33 @@ class Context {
     }
   }
 
+  /**
+   * Gets the current context name.
+   *
+   * @returns {Promise<string>} the current context name
+   */
   async getCurrent () {
     debug('get current')
     return this._config.get(CURRENT)
   }
 
+  /**
+   * Sets the current context name
+   *
+   * @param {string} contextName The name of the context to use as the current context
+   */
   async setCurrent (contextName) {
     debug('set current=%s', contextName)
     return this._config.set(CURRENT, contextName)
   }
 
+  /**
+   * Gets the list of additional IMS login plugins to consider.
+   * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
+   * library and are always installed and used.
+   *
+   * @returns {Promise<Array>} array of plugins
+   */
   async getPlugins () {
     debug('get plugins')
     return this._config.get(PLUGINS)
@@ -70,6 +87,17 @@ class Context {
     this._config.set(PLUGINS, plugins)
   }
 
+  /**
+   * Returns an object representing the named context.
+   * If the contextName parameter is empty or missing, it defaults to the
+   * current context name. The result is an object with two properties:
+   *
+   *   - `name`: The actual context name used
+   *   - `data`: The IMS context data
+   *
+   * @param {string} contextName Name of the context information to return.
+   * @returns {Promise<object>} The configuration object
+   */
   async get (contextName) {
     debug('get(%s)', contextName)
 
@@ -88,6 +116,15 @@ class Context {
     return { name: contextName, data: undefined }
   }
 
+  /**
+   * Updates the named configuration with new configuration data. If a configuration
+   * object for the named context already exists it is completely replaced with this new
+   * configuration. If no current contexts are set, then contextName will be set as
+   * current context.
+   *
+   * @param {string} contextName Name of the context to update
+   * @param {object} contextData The configuration data to store for the context
+   */
   async set (contextName, contextData) {
     debug('set(%s, %o)', contextName, contextData)
     let current

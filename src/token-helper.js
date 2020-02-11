@@ -17,6 +17,7 @@ const { getContext } = require('./context')
 /**
  * This is the default list of NPM packages used as plugins to create tokens
  * as part of the getToken(contextName) function.
+ *
  * @private
  */
 const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-core-ims-jwt', '@adobe/aio-lib-core-ims-oauth']
@@ -113,13 +114,16 @@ const IMS_TOKEN_MANAGER = {
   },
 
   /**
-     * If the result is an object containing an access and refresh token,
-     * the tokens are persisted back into the IMS context and the promise
-     * resolves to the access token. If the result is a string, it is
-     * assumed to be a valid access token to which the promise resolves.
-     *
-     * @param {string | any} result
-     */
+   * If the result is an object containing an access and refresh token,
+   * the tokens are persisted back into the IMS context and the promise
+   * resolves to the access token. If the result is a string, it is
+   * assumed to be a valid access token to which the promise resolves.
+   *
+   * @param {string} context the ims context name
+   * @param {object} contextData the ims context data to persist
+   * @param {Promise} resultPromise the promise that contains the results (access token, or access token and refresh token)
+   * @returns {Promise<string>} resolves to the access token
+   */
   async _persistTokens (context, contextData, resultPromise) {
     debug('persistTokens(%s, %o, %o)', context, contextData, resultPromise)
 
@@ -139,19 +143,19 @@ const IMS_TOKEN_MANAGER = {
   },
 
   /**
-     * Validates the token is not expired yet and returns it if so.
-     * Otherwise a rejected Promise is returned indicating that fact.
-     * The token parameter is expected to be an object with two
-     * properties: "token" with the actual token value which is
-     * returned. The "expiry" property must be a number indicating
-     * the expiry time of the token in ms since the Epoch. This time
-     * must be at least 10 minutes in the future for the token to be
-     * returned.
-     *
-     * @param {*} token The token hash
-     *
-     * @returns the token if existing and not expired, else a rejected Promise
-     */
+   * Validates the token is not expired yet and returns it if so.
+   * Otherwise a rejected Promise is returned indicating that fact.
+   * The token parameter is expected to be an object with two
+   * properties: "token" with the actual token value which is
+   * returned. The "expiry" property must be a number indicating
+   * the expiry time of the token in ms since the Epoch. This time
+   * must be at least 10 minutes in the future for the token to be
+   * returned.
+   *
+   * @param {*} token The token hash
+   *
+   * @returns {string} the token if existing and not expired, else a rejected Promise
+   */
   async getTokenIfValid (token) {
     debug('getTokenIfValid(token=%o)', token)
     const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
