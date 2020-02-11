@@ -56,10 +56,10 @@ class ActionConfig extends Config {
    * @memberof ActionConfig
    * @override
    */
-  async set (key, data) {
+  async set (key, data, local = false) {
     debug('set(%s, %o)', key, data)
 
-    if (super._keyIsContextName(key)) {
+    if (!local && super._keyIsContextName(key)) {
       if (this._hasToken(data)) {
         await this._setTokens(key, data)
       } else if (this._hasToken(this._data[key]) && !this._hasToken(data)) {

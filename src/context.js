@@ -64,27 +64,40 @@ class Context {
    * Sets the current context name
    *
    * @param {string} contextName The name of the context to use as the current context
+   * @param {boolean} [local=true] Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime.
    */
-  async setCurrent (contextName) {
+  async setCurrent (contextName, local = true) {
     debug('set current=%s', contextName)
-    return this._config.set(CURRENT, contextName)
+    return this._config.set(CURRENT, contextName, local)
   }
 
   /**
-   * Gets the list of additional IMS login plugins to consider.
-   * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
-   * library and are always installed and used.
+   * Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
+   * are required by the AIO Lib Core IMS library and are always installed and used.
    *
-   * @returns {Promise<Array>} array of plugins
+   * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
+   * global configuration.
+   *
+   * @returns {Promise<Array<String>>} array of plugins
    */
-  async getPlugins () {
+  async getPlugins (options) {
     debug('get plugins')
     return this._config.get(PLUGINS)
   }
 
+  /**
+   * Sets the list of additional IMS login plugins to consider.
+   * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
+   * library and are always installed and used.
+   *
+   * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
+   * global configuration.
+   *
+   * @param {Promise<Array<String>>} plugins array of plugins
+   */
   async setPlugins (plugins) {
     debug('set plugins=%o', plugins)
-    this._config.set(PLUGINS, plugins)
+    this._config.set(PLUGINS, plugins, false)
   }
 
   /**
@@ -124,9 +137,12 @@ class Context {
    *
    * @param {string} contextName Name of the context to update
    * @param {object} contextData The configuration data to store for the context
+   * @param {boolean} local Persist in local or global configuration. When running in
+   * Adobe I/O Runtime, setting `local = true` disables persistence of generated tokens.
+   *
    */
-  async set (contextName, contextData) {
-    debug('set(%s, %o)', contextName, contextData)
+  async set (contextName, contextData, local = false) {
+    debug('set(%s, %o)', contextName, contextData, !!local)
     let current
     if (!contextName) {
       current = await this.getCurrent()
@@ -136,7 +152,7 @@ class Context {
       throw new Error('Missing IMS context label to set context data for')
     }
 
-    await this._config.set(contextName, contextData)
+    await this._config.set(contextName, contextData, !!local)
 
     // if there are no current context set, set this one
     if (!current && !await this.getCurrent()) {

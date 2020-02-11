@@ -35,9 +35,9 @@ class CliConfig extends Config {
    * @memberof CliConfig
    * @override
    */
-  async set (key, data) {
+  async set (key, data, local = false) {
     debug('set(%s, %o)', key, data)
-    this._cliConfig.set(`${this.configKey}.${key}`, data)
+    this._cliConfig.set(`${this.configKey}.${key}`, data, local)
   }
 
   /**

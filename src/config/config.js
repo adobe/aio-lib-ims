@@ -39,12 +39,13 @@ class Config {
    *
    * @param {string} key
    * @param {any} data
+   * @param {boolean} local
    *
    * @returns {Promise<>}
    *
    * @memberof Config
    */
-  async set (key, data) {
+  async set (key, data, local = false) {
     throwNotImplemented()
   }
 

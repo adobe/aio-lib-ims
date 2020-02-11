@@ -154,7 +154,7 @@ const IMS_TOKEN_MANAGER = {
    *
    * @param {*} token The token hash
    *
-   * @returns {string} the token if existing and not expired, else a rejected Promise
+   * @returns {Promise<string>} the token if existing and not expired, else a rejected Promise
    */
   async getTokenIfValid (token) {
     debug('getTokenIfValid(token=%o)', token)

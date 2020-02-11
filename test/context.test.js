@@ -91,7 +91,7 @@ describe('context operations (cli config)', () => {
     const contextData = 'myContextData'
     expect.assertions(3)
     await expect(context.set(null, contextData)).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith('myContext', contextData)
+    expect(_config.set).toHaveBeenCalledWith('myContext', contextData, false)
     // also make sure current has not been set
     expect(_config.set).not.toHaveBeenCalledWith(ctx.CURRENT, expect.any(String))
   })
@@ -102,9 +102,20 @@ describe('context operations (cli config)', () => {
 
     expect.assertions(3)
     await expect(context.set(contextName, contextData)).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(contextName, contextData)
+    expect(_config.set).toHaveBeenCalledWith(contextName, contextData, false)
     // also make sure current has been set
-    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'myContext')
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'myContext', true)
+  })
+
+  test('set(contextName, data, true) and no current - success', async () => {
+    const contextName = 'myContext'
+    const contextData = 'myContextData'
+
+    expect.assertions(3)
+    await expect(context.set(contextName, contextData, true)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(contextName, contextData, true)
+    // also make sure current has been set
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'myContext', true)
   })
 
   test('set(contextName, data) and current - success', async () => {
@@ -113,7 +124,7 @@ describe('context operations (cli config)', () => {
     const contextData = 'myContextData'
     expect.assertions(3)
     await expect(context.set(contextName, contextData)).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(contextName, contextData)
+    expect(_config.set).toHaveBeenCalledWith(contextName, contextData, false)
     // also make sure current has not been set
     expect(_config.set).not.toHaveBeenCalledWith(ctx.CURRENT, expect.any(String))
   })
@@ -169,7 +180,7 @@ describe('context operations (cli config)', () => {
 
   test('setCurrent()', async () => {
     await expect(context.setCurrent('yolo')).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'yolo')
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'yolo', true)
   })
 
   test('getPlugins()', async () => {
@@ -180,6 +191,6 @@ describe('context operations (cli config)', () => {
 
   test('setPlugins()', async () => {
     await expect(context.setPlugins('yolo')).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo')
+    expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo', false)
   })
 })

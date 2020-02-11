@@ -238,3 +238,11 @@ test('set(cow, { data:1, access_token: { token: hello2, expiry: +2000 } }) and p
   expect(mockState.put).toHaveBeenCalledWith('imsKey.fake.pkg.action.cow', { access_token: { token: 'hello2', expiry: DATE_NOW + 2000 } }, { ttl: 2 })
   expect(config._data).toEqual({ cow: { data: 1, access_token: { token: 'hello2', expiry: DATE_NOW + 2000 } } })
 })
+
+test('set(cow, { data:1, access_token: { token: hello, expiry: 1000 } }, true) [local=true=nocaching]', async () => {
+  const config = new ActionConfig('imsKey')
+  await expect(config.set('cow', { data: 1, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } }, true)).resolves.toBeUndefined()
+  expect(config._state).toBeNull()
+  expect(mockState.put).not.toHaveBeenCalled()
+  expect(config._data).toEqual({ cow: { data: 1, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } } })
+})

@@ -38,7 +38,21 @@ test('set(sheep, baa)', async () => {
   const config = new CliConfig('imsKey')
 
   await expect(config.set('sheep', 'baa')).resolves.toBeUndefined()
-  expect(aioConfig.set).toHaveBeenCalledWith('imsKey.sheep', 'baa')
+  expect(aioConfig.set).toHaveBeenCalledWith('imsKey.sheep', 'baa', false)
+})
+
+test('set(sheep, baa, true)', async () => {
+  const config = new CliConfig('imsKey')
+
+  await expect(config.set('sheep', 'baa', true)).resolves.toBeUndefined()
+  expect(aioConfig.set).toHaveBeenCalledWith('imsKey.sheep', 'baa', true)
+})
+
+test('set(sheep, baa, false)', async () => {
+  const config = new CliConfig('imsKey')
+
+  await expect(config.set('sheep', 'baa', false)).resolves.toBeUndefined()
+  expect(aioConfig.set).toHaveBeenCalledWith('imsKey.sheep', 'baa', false)
 })
 
 test('contexts()', async () => {
