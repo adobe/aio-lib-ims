@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "@adobe/aio-lib-core-ims-jwt": "^0.0.3",
-    "@adobe/aio-lib-core-ims-oauth": "^0.0.3"
+    "@adobe/aio-lib-core-ims-oauth": "^1.1.0"
   },
   "devDependencies": {
     "@adobe/eslint-config-aio-lib-config": "^1.0.2",

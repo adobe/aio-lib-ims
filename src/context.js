@@ -15,6 +15,9 @@ const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 // Name of the IMS configuration context data structure
 const IMS = '$ims'
 
+// Property holding the cli context name
+const IMS_CLI = `${IMS}.$cli`
+
 // Property holding the current context name
 const IMS_CURRENT = `${IMS}.$current`
 
@@ -39,6 +42,16 @@ const context = {
       this._config.reload()
     }
     return this._config
+  },
+
+  /**
+   * The cli context name.
+   *
+   * @returns {string} the cli context name
+   */
+  get cli () {
+    debug('get cli')
+    return this._cliConfig.get(IMS_CLI)
   },
 
   /**
