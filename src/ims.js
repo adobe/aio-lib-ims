@@ -397,6 +397,28 @@ class Ims {
   }
 
   /**
+   * Verifies a given token.
+   *
+   * @param {string} token the access token
+   * @param {string} clientId the client id
+   */
+  async validateToken (token, clientId) {
+    debug('validateToken(%s, %s)', token, clientId)
+
+    const postData = {
+      token_type: _getTokenType(token),
+      client_id: clientId
+    }
+
+    const res = await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
+    try {
+      return JSON.parse(res)
+    } catch (e) {
+      return res
+    }
+  }
+
+  /**
    * Converts the access token to a token result object as follows:
    *
    * ```js
