@@ -1,6 +1,3 @@
-/* eslint-disable jsdoc/require-returns-check */
-/* eslint-disable jsdoc/require-jsdoc */
-
 /*
 Copyright 2020 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -20,6 +17,7 @@ afterEach(() => {
   jest.restoreAllMocks()
 })
 
+/** @private */
 function createHandlerForContext (context = {}, imsPlugin) {
   const mappedContext = Object.keys(context)
     // prefix $ims. to all the keys

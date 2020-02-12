@@ -1,6 +1,3 @@
-/* eslint-disable jsdoc/require-returns-check */
-/* eslint-disable jsdoc/require-jsdoc */
-
 /*
 Copyright 2020 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -32,6 +29,7 @@ afterEach(() => {
   rp.mockRestore()
 })
 
+/** @private */
 function createTokenFromPayload (payload) {
   const payloadBase64 = Buffer.from(JSON.stringify(payload)).toString('base64')
   return `header.${payloadBase64}.signature`
