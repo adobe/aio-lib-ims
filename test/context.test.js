@@ -10,108 +10,187 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { context } = require('../src/context')
-const config = require('@adobe/aio-lib-core-config')
+const ctx = require('../src/context')
 
-afterEach(() => {
-  jest.restoreAllMocks()
+jest.mock('../src/config/action')
+jest.mock('../src/config/cli')
+const ActionConfig = require('../src/config/action')
+const CliConfig = require('../src/config/cli')
+
+beforeEach(() => {
+  ActionConfig.mockClear()
+  CliConfig.mockClear()
+  delete process.env.__OW_ACTION_NAME
 })
 
 test('exports', async () => {
-  expect(typeof context).toEqual('object')
+  expect(typeof ctx.getContext).toEqual('function')
+  expect(typeof ctx.resetContext).toEqual('function')
+  expect(ctx.PLUGINS).toEqual('$plugins')
+  expect(ctx.CURRENT).toEqual('$current')
+  expect(ctx.IMS).toEqual('$ims')
 })
 
-test('set - fail', async () => {
-  return expect(context.set()).rejects.toEqual(new Error('Missing IMS context label to set context data for'))
-})
-
-test('set - success', async () => {
-  const contextName = 'myContext'
-  const contextData = 'myContextData'
-  expect.assertions(4)
-
-  config.set.mockImplementation((key, value, local) => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    expect(value).toEqual(contextData)
-    expect(local).toEqual(false)
+describe('getContext', () => {
+  beforeEach(async () => {
+    // clean any previous instance
+    ctx.resetContext()
   })
-  return expect(context.set(contextName, contextData)).resolves.toBeUndefined()
-})
+  test('with cli config', async () => {
+    const context = ctx.getContext()
+    expect(CliConfig).toHaveBeenCalledTimes(1)
+    expect(ActionConfig).toHaveBeenCalledTimes(0)
+    expect(context._config).toBe(CliConfig.mock.instances[0])
 
-test('get - fail', () => {
-  expect(context.get()).toEqual({ data: undefined, name: undefined })
-})
-
-test('get - success', async () => {
-  const contextName = 'myContext'
-  const contextData = 'myContextData'
-  expect.assertions(2)
-
-  config.get.mockImplementation((key) => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    return contextData
+    // always return same context after init
+    expect(ctx.getContext()).toBe(context)
   })
 
-  return expect(context.get(contextName)).toEqual({ data: contextData, name: contextName })
+  test('with action config', async () => {
+    process.env.__OW_ACTION_NAME = 'yolo'
+    const context = await ctx.getContext()
+    expect(CliConfig).toHaveBeenCalledTimes(0)
+    expect(ActionConfig).toHaveBeenCalledTimes(1)
+    expect(context._config).toBe(ActionConfig.mock.instances[0])
+
+    // always return same context after init
+    expect(ctx.getContext()).toBe(context)
+  })
 })
 
-test('keys - success', async () => {
-  const contexts = {
-    context1: {},
-    context2: {},
-    context3: {}
-  }
-
-  config.get.mockImplementation((key) => {
-    if (key === '$ims') {
-      return {
-        ...contexts,
-        $dollarPrefixedContextVariable: {}
-      }
-    }
+describe('init context with action config', () => {
+  beforeEach(async () => {
+    // clean any previous instance
+    ctx.resetContext()
   })
-
-  return expect(context.keys()).toEqual(Object.keys(contexts))
+  test('ctx.getContext', async () => {
+    process.env.__OW_ACTION_NAME = 'yolo'
+    const context = await ctx.getContext()
+    expect(CliConfig).toHaveBeenCalledTimes(0)
+    expect(ActionConfig).toHaveBeenCalledTimes(1)
+    expect(context._config).toBe(ActionConfig.mock.instances[0])
+  })
 })
 
-test('plugins - set', async () => {
-  const contextName = '$plugins'
-  const contextData = ['plugin1', 'plugin2']
-  expect.assertions(3)
-
-  config.set.mockImplementation((key, value, local) => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    expect(value).toEqual(contextData)
-    expect(local).toEqual(false)
+describe('context operations (cli config)', () => {
+  let context
+  let _config
+  beforeEach(async () => {
+    // clean any previous instance
+    ctx.resetContext()
+    context = await ctx.getContext()
+    _config = CliConfig.mock.instances[0]
   })
 
-  context.plugins = contextData
-})
-
-test('plugins - get', () => {
-  const contextName = '$plugins'
-  const contextData = ['plugin1', 'plugin2']
-  expect.assertions(2)
-
-  config.get.mockImplementation(key => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    return contextData
+  test('set(null) and no current - fail', async () => {
+    return expect(context.set(null)).rejects.toEqual(new Error('Missing IMS context label to set context data for'))
   })
 
-  expect(context.plugins).toEqual(contextData)
-})
-
-test('setCurrent, .current', () => {
-  const contextName = '$current'
-  const contextData = 'myContext'
-  expect.assertions(6)
-
-  config.set.mockImplementation((key, value, local) => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    expect(value).toEqual(contextData)
-    expect(local).toEqual(true)
+  test('set(null, data) and current - success', async () => {
+    _config.get.mockResolvedValue('myContext')
+    const contextData = 'myContextData'
+    expect.assertions(3)
+    await expect(context.set(null, contextData)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith('myContext', contextData, false)
+    // also make sure current has not been set
+    expect(_config.set).not.toHaveBeenCalledWith(ctx.CURRENT, expect.any(String))
   })
 
-  context.setCurrent(contextData)
-  context.current = contextData
+  test('set(contextName, data) and no current - success', async () => {
+    const contextName = 'myContext'
+    const contextData = 'myContextData'
+
+    expect.assertions(3)
+    await expect(context.set(contextName, contextData)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(contextName, contextData, false)
+    // also make sure current has been set
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'myContext', true)
+  })
+
+  test('set(contextName, data, true) and no current - success', async () => {
+    const contextName = 'myContext'
+    const contextData = 'myContextData'
+
+    expect.assertions(3)
+    await expect(context.set(contextName, contextData, true)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(contextName, contextData, true)
+    // also make sure current has been set
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'myContext', true)
+  })
+
+  test('set(contextName, data) and current - success', async () => {
+    _config.get.mockResolvedValue('myContext2')
+    const contextName = 'myContext'
+    const contextData = 'myContextData'
+    expect.assertions(3)
+    await expect(context.set(contextName, contextData)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(contextName, contextData, false)
+    // also make sure current has not been set
+    expect(_config.set).not.toHaveBeenCalledWith(ctx.CURRENT, expect.any(String))
+  })
+
+  test('get() no current, no data', async () => {
+    await expect(context.get()).resolves.toEqual({ data: undefined, name: undefined })
+    expect(_config.get).toHaveBeenCalledTimes(1)
+    expect(_config.get).toHaveBeenCalledWith(ctx.CURRENT)
+  })
+
+  test('get(contextName) with no current, no data', async () => {
+    const contextName = 'myContext'
+    await expect(context.get(contextName)).resolves.toEqual({ data: undefined, name: contextName })
+    expect(_config.get).toHaveBeenCalledTimes(1)
+    expect(_config.get).toHaveBeenCalledWith(contextName)
+  })
+
+  test('get(contextName) with no current, and data', async () => {
+    const contextName = 'myContext'
+    _config.get.mockImplementation(() => 'contextData')
+    await expect(context.get(contextName)).resolves.toEqual({ data: 'contextData', name: contextName })
+    expect(_config.get).toHaveBeenCalledTimes(1)
+    expect(_config.get).toHaveBeenCalledWith(contextName)
+  })
+
+  test('get() with current, no data', async () => {
+    _config.get.mockImplementation(k => k === ctx.CURRENT ? 'myContext' : undefined)
+    await expect(context.get()).resolves.toEqual({ data: undefined, name: 'myContext' })
+    expect(_config.get).toHaveBeenCalledTimes(2)
+    expect(_config.get).toHaveBeenCalledWith(ctx.CURRENT)
+    expect(_config.get).toHaveBeenCalledWith('myContext')
+  })
+
+  test('get() with current, and data', async () => {
+    _config.get.mockImplementation(k => k === ctx.CURRENT ? 'myContext' : 'contextData')
+    await expect(context.get()).resolves.toEqual({ data: 'contextData', name: 'myContext' })
+    expect(_config.get).toHaveBeenCalledTimes(2)
+    expect(_config.get).toHaveBeenCalledWith(ctx.CURRENT)
+    expect(_config.get).toHaveBeenCalledWith('myContext')
+  })
+
+  test('keys()', async () => {
+    _config.contexts.mockResolvedValue(['yo', 'lo'])
+    await expect(context.keys()).resolves.toEqual(['yo', 'lo'])
+    expect(_config.contexts).toHaveBeenCalledTimes(1)
+  })
+
+  test('getCurrent()', async () => {
+    _config.get.mockResolvedValue('yolo')
+    await expect(context.getCurrent()).resolves.toEqual('yolo')
+    expect(_config.get).toHaveBeenCalledWith(ctx.CURRENT)
+  })
+
+  test('setCurrent()', async () => {
+    await expect(context.setCurrent('yolo')).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'yolo', true)
+  })
+
+  test('getPlugins()', async () => {
+    _config.get.mockResolvedValue('yolo')
+    await expect(context.getPlugins()).resolves.toEqual('yolo')
+    expect(_config.get).toHaveBeenCalledWith(ctx.PLUGINS)
+  })
+
+  test('setPlugins()', async () => {
+    await expect(context.setPlugins('yolo')).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo', false)
+  })
 })
