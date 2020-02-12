@@ -12,37 +12,46 @@ governing permissions and limitations under the License.
 
 const debug = require('debug')('@adobe/aio-lib-core-ims/context')
 
-// Name of the IMS configuration context data structure
+const ActionConfig = require('./config/action')
+const CliConfig = require('./config/cli')
+
+/** Name of context type action */
+const TYPE_ACTION = 'action'
+
+/** Name of context type cli */
+const TYPE_CLI = 'cli'
+
+/** Name of the IMS configuration context data structure */
 const IMS = '$ims'
 
-// Property holding the cli context name
-const IMS_CLI = `${IMS}.$cli`
+/** Property holding the cli context name */
+const CLI = `$cli`
+      
+/** Property holding the current context name */
+const CURRENT = '$current'
 
-// Property holding the current context name
-const IMS_CURRENT = `${IMS}.$current`
-
-// Property holding the list of additional login plugins
-const IMS_PLUGINS = `${IMS}.$plugins`
+/** Property holding the list of additional login plugins */
+const PLUGINS = '$plugins'
 
 /**
  * The `context` object manages the IMS configuration contexts on behalf of
  * the Adobe I/O Lib Core IMS Library.
  */
-const context = {
-
-  /**
-   * Getter for the actual configuration
-   *
-   * @private
-   * @returns {object} the cli config data
-   */
-  get _cliConfig () {
-    if (!this._config) {
-      this._config = require('@adobe/aio-lib-core-config')
-      this._config.reload()
+class Context {
+  constructor (contextType) {
+    switch (contextType) {
+      case TYPE_ACTION:
+        this._config = new ActionConfig(IMS)
+        break
+      case TYPE_CLI:
+      case undefined: // default
+        this._config = new CliConfig(IMS)
+        break
+      /* istanbul ignore next */
+      default:
+        throw new Error(`contextType '${contextType}' is not supported`)
     }
-    return this._config
-  },
+  }
 
   /**
    * The cli context name.
@@ -51,77 +60,68 @@ const context = {
    */
   get cli () {
     debug('get cli')
-    return this._cliConfig.get(IMS_CLI)
+    return this._config.get(CLI)
   },
 
   set cli (contextData) {
     debug(`set cli=${JSON.stringify(contextData)}`)
-    this._cliConfig.set(IMS_CLI, contextData, true)
+    this._config.set(CLI, contextData, true)
   },
 
   setCli (contextData, local = true) {
     debug(`set cli=${JSON.stringify(contextData)} local:${!!local}`)
-    this._cliConfig.set(IMS_CLI, contextData, true)
+    this._config.set(CLI, contextData, true)
   },
 
   /**
-   * The current context name.
-   * When assigning a value, the name is persisted in the local configuration.
-   * To persist the new current context name in global configuration call the
-   * `setCurrent(contextName, local)` method with `local=false`.
+   * Gets the current context name.
    *
-   * @returns {string} the current context name
+   * @returns {Promise<string>} the current context name
    */
-  get current () {
+  async getCurrent () {
     debug('get current')
-    return this._cliConfig.get(IMS_CURRENT)
-  },
-
-  set current (contextName) {
-    debug('set current=%s', contextName)
-    this.setCurrent(contextName, true)
-  },
+    return this._config.get(CURRENT)
+  }
 
   /**
-   * Sets the current context name while explicitly stating whether to
-   * persist in the local or global configuration.
+   * Sets the current context name
    *
    * @param {string} contextName The name of the context to use as the current context
-   * @param {boolean} local Persist the current name in local (`true`, default) or
-   *      global (`false`) configuration
+   * @param {boolean} [local=true] Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime.
    */
-  setCurrent (contextName, local = true) {
-    debug('setCurrent(%s, %s)', contextName, !!local)
-    this._cliConfig.set(IMS_CURRENT, contextName, !!local)
-  },
+  async setCurrent (contextName, local = true) {
+    debug('set current=%s', contextName)
+    return this._config.set(CURRENT, contextName, local)
+  }
 
   /**
-   * The list of additional IMS login plugins to consider.
+   * Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
+   * are required by the AIO Lib Core IMS library and are always installed and used.
+   *
+   * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
+   * global configuration.
+   *
+   * @returns {Promise<Array<String>>} array of plugins
+   */
+  async getPlugins (options) {
+    debug('get plugins')
+    return this._config.get(PLUGINS)
+  }
+
+  /**
+   * Sets the list of additional IMS login plugins to consider.
    * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
    * library and are always installed and used.
-   * This list of plugins is always stored in the global configuration.
    *
-   * @returns {Array} array of plugins
+   * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
+   * global configuration.
+   *
+   * @param {Promise<Array<String>>} plugins array of plugins
    */
-  get plugins () {
-    debug('get plugins')
-    return this._cliConfig.get(IMS_PLUGINS)
-  },
-
-  set plugins (plugins) {
+  async setPlugins (plugins) {
     debug('set plugins=%o', plugins)
-    this._cliConfig.set(IMS_PLUGINS, plugins, false)
-  },
-
-  /**
-   * Returns the names of the configured IMS contexts as an array of strings.
-   *
-   * @returns {string[]} The names of the currently known configurations.
-   */
-  keys () {
-    debug('keys()')
-    return Object.keys(this._cliConfig.get(IMS)).filter(x => !x.startsWith('$'))
-  },
+    this._config.set(PLUGINS, plugins, false)
+  }
 
   /**
    * Returns an object representing the named context.
@@ -132,50 +132,94 @@ const context = {
    *   - `data`: The IMS context data
    *
    * @param {string} contextName Name of the context information to return.
-   * @returns {object} The configuration object
+   * @returns {Promise<object>} The configuration object
    */
-  get (contextName) {
+  async get (contextName) {
     debug('get(%s)', contextName)
 
     if (!contextName) {
-      contextName = this.current
+      contextName = await this.getCurrent()
     }
 
     if (contextName) {
       return {
         name: contextName,
-        data: this._cliConfig.get(`$ims.${contextName}`)
+        data: await this._config.get(contextName)
       }
     }
 
     // missing context and no current context
     return { name: contextName, data: undefined }
-  },
+  }
 
   /**
-   * Updates the named configuration with new configuration data.
-   * If a configuration object for the named context already exists it
-   * is completely replaced with this new configuration.
+   * Updates the named configuration with new configuration data. If a configuration
+   * object for the named context already exists it is completely replaced with this new
+   * configuration. If no current contexts are set, then contextName will be set as
+   * current context.
    *
    * @param {string} contextName Name of the context to update
    * @param {object} contextData The configuration data to store for the context
-   * @param {boolean} local Persist in local (`true`) or global (`false`,
-   *          default) configuration
+   * @param {boolean} local Persist in local or global configuration. When running in
+   * Adobe I/O Runtime, setting `local = true` disables persistence of generated tokens.
+   *
    */
   async set (contextName, contextData, local = false) {
-    debug('set(%s, %o, %s)', contextName, contextData, !!local)
-
+    debug('set(%s, %o)', contextName, contextData, !!local)
+    let current
     if (!contextName) {
-      contextName = this.current
+      current = await this.getCurrent()
+      contextName = current
     }
-    if (contextName) {
-      return this._cliConfig.set(`$ims.${contextName}`, contextData, !!local)
+    if (!contextName) {
+      throw new Error('Missing IMS context label to set context data for')
     }
 
-    return Promise.reject(new Error('Missing IMS context label to set context data for'))
+    await this._config.set(contextName, contextData, !!local)
+
+    // if there are no current context set, set this one
+    if (!current && !await this.getCurrent()) {
+      debug(`current is not set, setting current to '${contextName}'`, contextName)
+      await this.setCurrent(contextName)
+    }
+  }
+
+  /**
+   * Returns the names of the configured contexts as an array of strings.
+   *
+   * @returns {Promise<string[]>} The names of the currently known configurations.
+   */
+  async keys () {
+    debug('keys()')
+    return this._config.contexts()
   }
 }
 
+function _guessContextType () {
+  if (process.env.__OW_ACTION_NAME) {
+    return 'action'
+  }
+  return 'cli'
+}
+
+Context.context = null
+function getContext () {
+  if (!Context.context) {
+    Context.context = new Context(_guessContextType())
+  }
+  return Context.context
+}
+
+function resetContext () {
+  Context.context = null
+}
+
 module.exports = {
-  context
+  resetContext,
+  getContext,
+  TYPE_ACTION,
+  TYPE_CLI,
+  IMS,
+  CURRENT,
+  PLUGINS
 }

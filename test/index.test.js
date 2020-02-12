@@ -29,7 +29,7 @@ test('getToken', async () => {
   function _curry (contextName, force, retVal) {
     return function (n, f) {
       expect(n).toEqual(contextName)
-      expect(f).toEqual(force)
+      expect(f).toEqual(options)
       return new Promise(resolve => resolve(retVal))
     }
   }
@@ -47,10 +47,10 @@ test('invalidateToken', async () => {
   expect.assertions(7)
 
   /** @private */
-  function _curry (contextName, force) {
+  function _curry (contextName, options) {
     return function (n, f) {
       expect(n).toEqual(contextName)
-      expect(f).toEqual(force)
+      expect(f).toEqual(options)
     }
   }
 

@@ -11,7 +11,9 @@ governing permissions and limitations under the License.
 */
 
 const { IMS_TOKEN_MANAGER } = require('./token-helper')
-const { context } = require('./context')
+
+const { getContext } = require('./context')
+
 const {
   getTokenData,
   Ims,
@@ -58,41 +60,41 @@ module.exports = {
   SCOPE,
 
   /**
-   * The `context` object manages the IMS configuration contexts on behalf of
-   * the Adobe I/O Lib Core IMS Library.
-   *
-   * @see The [`context`](#context) object
-   */
-  context,
+     * The `context` object manages the IMS configuration contexts on behalf of
+     * the Adobe I/O Lib Core IMS Library.
+     *
+     * @see The context [`context`](#context) object
+     */
+  context: getContext(),
 
   /**
-   * Returns an access token for the given context name.
-   *
-   * @param {string} contextName The name of the IMS context for which to
-   *              return the access token. If this is empty, the token(s) of
-   *              the current IMS context are invalidated.
-   * @param {boolean} force Forces a login in the selected plugin's `imslogin`
-   *              function. See [Forced `imsLogin`](README.md#forced-imslogin)
-   *              for more information on this flag. The default value is `false`.
-   *
-   * @returns {Promise} Resolving to an access token (string)
-   */
-  getToken: async (contextName, force = false) => IMS_TOKEN_MANAGER.getToken(contextName, force),
+     * Returns an access token for the given context name.
+     *
+     * @param {string} contextName The name of the IMS context for which to return the
+     *              access token. If this is empty, the token(s) of the current IMS
+     *              context are invalidated.
+     * @param {boolean} [force] Forces a login in the selected plugin's `imslogin`
+     *              function. See [Forced `imsLogin`](README.md#forced-imslogin) for more
+     *              information on this flag. The default value is `false`.
+     *
+     * @returns {Promise} Resolving to an access token (string)
+     */
+  getToken: async (contextName, force) => IMS_TOKEN_MANAGER.getToken(contextName, !!force),
 
   /**
-   * Invalidates the access and optionally refresh of an IMS context.
-   * The name of the IMS context is given as its first parameter and defaults
-   * to the current context if missing or empty. The force parameter indicates
-   * whether only the access token is invalidated (force=false) or the refresh
-   * token (if existing) is also invalidated (force=true). If the refresh token
-   * exists and is validated, all access tokens which have been created with
-   * this refresh token will automatically become invalid as well.
-   *
-   * @param {string} contextName The name of the IMS context for which to
-   *              invalidate the token(s). If this is empty, the token(s) of
-   *              the current IMS context are invalidated.
-   * @param {boolean} force Whether to invalidate just the access token or
-   *              to also invalidate the refresh token.
-   */
+     * Invalidates the access and optionally refresh of an IMS context.
+     * The name of the IMS context is given as its first parameter and defaults
+     * to the current context if missing or empty. The force parameter indicates
+     * whether only the access token is invalidated (force=false) or the refresh
+     * token (if existing) is also invalidated (force=true). If the refresh token
+     * exists and is validated, all access tokens which have been created with
+     * this refresh token will automatically become invalid as well.
+     *
+     * @param {string} contextName The name of the IMS context for which to
+     *              invalidate the token(s). If this is empty, the token(s) of
+     *              the current IMS context are invalidated.
+     * @param {boolean} [force] Whether to invalidate just the access token or
+     *              to also invalidate the refresh token. Defaults to `false`.
+     */
   invalidateToken: async (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
 }

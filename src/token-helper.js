@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const debug = require('debug')('@adobe/aio-lib-core-ims/token-helper')
+const { getContext } = require('./context')
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
@@ -51,19 +52,16 @@ const IMS_TOKEN_MANAGER = {
         if (force) {
           delete data[ACCESS_TOKEN]
         }
-        this._context.set(name, data)
+        return this._context.set(name, data)
       })
   },
 
   get _context () {
-    if (!this.__context) {
-      this.__context = require('./context').context
-    }
-    return this.__context
+    return getContext()
   },
 
   async _resolveContext (contextName) {
-    const context = this._context.get(contextName)
+    const context = await this._context.get(contextName)
     debug('LoginCommand:contextData - %O', context)
 
     if (context.data) {
@@ -91,8 +89,10 @@ const IMS_TOKEN_MANAGER = {
     debug('_generateToken(reason=%s, force=%s)', reason, force)
 
     let imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
-    if (this._context.plugins) {
-      imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS.concat(this._context.plugins)
+
+    const contextPlugins = await this._context.getPlugins()
+    if (contextPlugins) {
+      imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS.concat(contextPlugins)
     }
 
     for (const imsLoginPlugin of imsLoginPlugins) {
@@ -154,7 +154,7 @@ const IMS_TOKEN_MANAGER = {
    *
    * @param {*} token The token hash
    *
-   * @returns {string} the token if existing and not expired, else a rejected Promise
+   * @returns {Promise<string>} the token if existing and not expired, else a rejected Promise
    */
   async getTokenIfValid (token) {
     debug('getTokenIfValid(token=%o)', token)
