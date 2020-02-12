@@ -26,7 +26,7 @@ test('getToken', async () => {
   expect.assertions(7)
 
   /** @private */
-  function _curry (contextName, force, retVal) {
+  function _curry (contextName, options, retVal) {
     return function (n, f) {
       expect(n).toEqual(contextName)
       expect(f).toEqual(options)

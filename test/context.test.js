@@ -193,25 +193,15 @@ describe('context operations (cli config)', () => {
     await expect(context.setPlugins('yolo')).resolves.toBeUndefined()
     expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo', false)
   })
-})
 
-test('setCli, .cli', () => {
-  const contextName = '$cli'
-  const contextData = { foo: 'bar' }
-  expect.assertions(8)
-
-  config.set.mockImplementation((key, value, local) => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    expect(value).toEqual(contextData)
-    expect(local).toEqual(true)
+  test('setCli', async () => {
+    await expect(context.setCli('yolo')).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, 'yolo', true)
   })
 
-  config.get.mockImplementation(key => {
-    expect(key).toEqual(`$ims.${contextName}`)
-    return contextData
+  test('getCli', async () => {
+    _config.get.mockResolvedValue('yolo')
+    await expect(context.getCli()).resolves.toEqual('yolo')
+    expect(_config.get).toHaveBeenCalledWith(ctx.CLI)
   })
-
-  context.setCli(contextData)
-  context.cli = contextData
-  expect(context.cli).toEqual(contextData)
 })

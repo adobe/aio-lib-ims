@@ -25,8 +25,8 @@ const TYPE_CLI = 'cli'
 const IMS = '$ims'
 
 /** Property holding the cli context name */
-const CLI = `$cli`
-      
+const CLI = '$cli'
+
 /** Property holding the current context name */
 const CURRENT = '$current'
 
@@ -58,20 +58,15 @@ class Context {
    *
    * @returns {string} the cli context name
    */
-  get cli () {
+  async getCli () {
     debug('get cli')
     return this._config.get(CLI)
-  },
+  }
 
-  set cli (contextData) {
-    debug(`set cli=${JSON.stringify(contextData)}`)
-    this._config.set(CLI, contextData, true)
-  },
-
-  setCli (contextData, local = true) {
+  async setCli (contextData, local = true) {
     debug(`set cli=${JSON.stringify(contextData)} local:${!!local}`)
     this._config.set(CLI, contextData, true)
-  },
+  }
 
   /**
    * Gets the current context name.
@@ -101,9 +96,9 @@ class Context {
    * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
    * global configuration.
    *
-   * @returns {Promise<Array<String>>} array of plugins
+   * @returns {Promise<Array<string>>} array of plugins
    */
-  async getPlugins (options) {
+  async getPlugins () {
     debug('get plugins')
     return this._config.get(PLUGINS)
   }
@@ -116,7 +111,7 @@ class Context {
    * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
    * global configuration.
    *
-   * @param {Promise<Array<String>>} plugins array of plugins
+   * @param {Promise<Array<string>>} plugins array of plugins
    */
   async setPlugins (plugins) {
     debug('set plugins=%o', plugins)
@@ -195,6 +190,7 @@ class Context {
   }
 }
 
+/** @private */
 function _guessContextType () {
   if (process.env.__OW_ACTION_NAME) {
     return 'action'
@@ -203,6 +199,7 @@ function _guessContextType () {
 }
 
 Context.context = null
+/** @private */
 function getContext () {
   if (!Context.context) {
     Context.context = new Context(_guessContextType())
@@ -210,6 +207,7 @@ function getContext () {
   return Context.context
 }
 
+/** @private */
 function resetContext () {
   Context.context = null
 }
@@ -221,5 +219,6 @@ module.exports = {
   TYPE_CLI,
   IMS,
   CURRENT,
+  CLI,
   PLUGINS
 }
