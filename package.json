@@ -7,7 +7,7 @@
   "dependencies": {
     "@adobe/aio-lib-core-config": ">=1.2.3",
     "@adobe/aio-lib-core-ims-jwt": "^0.0.3",
-    "@adobe/aio-lib-core-ims-oauth": "^1.1.0"
+    "@adobe/aio-lib-core-ims-oauth": "^1.1.0",
     "@adobe/aio-lib-state": "^1.0.4",
     "debug": "^4.1.1",
     "request": "^2",
