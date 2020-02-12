@@ -13,3 +13,4 @@ coverage/
 junit.xml
 package-lock.json
 playground/
+.vscode/

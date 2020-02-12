@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
 const debug = require('debug')('@adobe/aio-lib-core-ims/config/action')
 const State = require('@adobe/aio-lib-state')
 const Config = require('./config')
+const cloneDeep = require('lodash.clonedeep')
 
 class ActionConfig extends Config {
   constructor (configKey) {
@@ -49,7 +50,7 @@ class ActionConfig extends Config {
       await this._loadTokensOnce()
     }
 
-    return this._data[key]
+    return cloneDeep(this._data[key])
   }
 
   /**
@@ -70,7 +71,7 @@ class ActionConfig extends Config {
       }
     }
 
-    this._data[key] = data
+    this._data[key] = cloneDeep(data)
   }
 
   /**
@@ -78,12 +79,13 @@ class ActionConfig extends Config {
    * @override
    */
   async contexts () {
+    debug('contexts()')
     return Object.keys(this._data).filter(this._keyIsContextName)
   }
 
   /* helpers */
   _hasToken (data = {}) {
-    return data.access_token || data.refresh_token
+    return data.access_token || !!data.refresh_token
   }
 
   _getStateKey (contextName) {

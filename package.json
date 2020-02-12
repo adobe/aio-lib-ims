@@ -10,6 +10,7 @@
     "@adobe/aio-lib-core-ims-oauth": "^1.1.0",
     "@adobe/aio-lib-state": "^1.0.4",
     "debug": "^4.1.1",
+    "lodash.clonedeep": "^4.5.0",
     "request": "^2",
     "request-promise-native": "^1.0.5"
   },
