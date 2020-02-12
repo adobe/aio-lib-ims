@@ -25,7 +25,7 @@ $ npm install @adobe/aio-lib-core-ims --save
 Before using the AIO Lib Core IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
 ```js
-const { context, getToken } = require('@adobe/aio-lib-core-ims');
+const { context, getToken, getTokenData } = require('@adobe/aio-lib-core-ims');
 
 const config = {
   callback_url: "https://callback.example.org",
@@ -33,10 +33,10 @@ const config = {
   client_secret: "12345678-cafe-babe-cafe-9999",
   scope: "openid"
 };
-context.set('example', config, true);
-context.current = 'example';
+await context.set('example', config, true);
+await context.setCurrent('example');
 
-const token = getToken();
+const token = await getToken();
 const tokenDecoded = getTokenData(token);
 ```
 
@@ -44,11 +44,12 @@ See the [API Documentation](api.md) for full details.
 
 # Configuration
 
-The AIO Lib Core IMS Library is leveraging the [Configuration module for use by aio-cli plugins](https://github.com/adobe/aio-lib-core-config) to maintain the login configuration and keep access and refresh tokens for reuse before they expire.
+The AIO Lib Core IMS Library transparently maintains the login configuration and keep
+access and refresh tokens for reuse before they expire.
 
-All configuration is stored in a single semi-hidden `$ims` root property.
+All configuration is stored in a single `$ims` root property.
 
-The plugin supports maintaining multiple configurations for different use cases.
+The library supports maintaining multiple configurations for different use cases.
 Each such configuration is stored in its own named object with the `$ims` configuration.
 Such a configuration is called an _IMS (configuration) context_ and has a label which allows to refer to the configuration by name.
 
@@ -84,7 +85,40 @@ Here is an example `$ims` configuration
 }
 ```
 
-This configuration lists two _configuration contexts_ `sample_jwt` and `sample_oauth2` designating the `sample_oauth2` configuration to be the current context.
+## Running on a Desktop
+
+When running on your local machine the AIO Lib Core IMS is leveraging the [Configuration module for use by aio-cli plugins](https://github.com/adobe/aio-lib-core-config) to load and update the configuration stored in `.aio` and `.env` files. The library supports both local and global aio configurations.
+
+Here is an example that relies on the AIO Lib Core IMS to generate a token from an existing configuration:
+
+```js
+const { context, getToken } = require('@adobe/aio-lib-core-ims');
+
+await context.setCurrent('my-config');
+const token = await getToken();
+```
+
+## Running in an Adobe I/O Runtime action
+
+The AIO Lib Core IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
+
+Here is an Adobe I/O Runtime action example that leverages the AIO Lib Core IMS:
+
+```js
+const { context, getToken } = require('@adobe/aio-lib-core-ims');
+
+function main ({ imsContextConfig, ...params }) {
+  // the IMS context configuration is passed as action parameter
+  // imsContextConfig = { client_id, client_secret, techacct, meta_scopes, ims_org_id, private_key }
+  await context.set('my_ctx', imsContextConfig)
+
+  const token = await getToken('my_ctx')
+}
+```
+
+Note that for now cached tokens will only be accessible from the action that created them. In
+the above example, the token persisted under `'my_ctx'` will not be retrievable from a
+different action even if it uses the same context key.
 
 ## IMS Environment
 
