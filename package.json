@@ -46,7 +46,7 @@
   "main": "src/index.js",
   "repository": "https://github.com/adobe/aio-lib-core-ims",
   "scripts": {
-    "pretest": "eslint src",
+    "pretest": "eslint src test",
     "test": "npm run unit-tests",
     "unit-tests": "jest --config test/jest.config.js ---ci -w=2",
     "docs": "jsdoc2md --template jsdoc2md/api.hbs src/*.js > api.md",

@@ -15,6 +15,7 @@ const config = require('@adobe/aio-lib-core-config')
 
 afterEach(() => {
   jest.restoreAllMocks()
+  jest.resetAllMocks()
 })
 
 test('exports', async () => {
@@ -114,4 +115,25 @@ test('setCurrent, .current', () => {
 
   context.setCurrent(contextData)
   context.current = contextData
+})
+
+test('setCli, .cli', () => {
+  const contextName = '$cli'
+  const contextData = { foo: 'bar' }
+  expect.assertions(8)
+
+  config.set.mockImplementation((key, value, local) => {
+    expect(key).toEqual(`$ims.${contextName}`)
+    expect(value).toEqual(contextData)
+    expect(local).toEqual(true)
+  })
+
+  config.get.mockImplementation(key => {
+    expect(key).toEqual(`$ims.${contextName}`)
+    return contextData
+  })
+
+  context.setCli(contextData)
+  context.cli = contextData
+  expect(context.cli).toEqual(contextData)
 })
