@@ -7,7 +7,7 @@
   "dependencies": {
     "@adobe/aio-lib-core-config": ">=1.2.3",
     "@adobe/aio-lib-core-ims-jwt": "^0.0.3",
-    "@adobe/aio-lib-core-ims-oauth": "^0.0.3",
+    "@adobe/aio-lib-core-ims-oauth": "^1.1.0",
     "@adobe/aio-lib-state": "^1.0.4",
     "debug": "^4.1.1",
     "request": "^2",
@@ -46,7 +46,7 @@
   "main": "src/index.js",
   "repository": "https://github.com/adobe/aio-lib-core-ims",
   "scripts": {
-    "pretest": "eslint src",
+    "pretest": "eslint src test",
     "test": "npm run unit-tests",
     "unit-tests": "jest --config test/jest.config.js ---ci -w=2",
     "docs": "jsdoc2md --template jsdoc2md/api.hbs src/*.js > api.md",

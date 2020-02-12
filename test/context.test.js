@@ -193,4 +193,15 @@ describe('context operations (cli config)', () => {
     await expect(context.setPlugins('yolo')).resolves.toBeUndefined()
     expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo', false)
   })
+
+  test('setCli', async () => {
+    await expect(context.setCli('yolo')).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, 'yolo', true)
+  })
+
+  test('getCli', async () => {
+    _config.get.mockResolvedValue('yolo')
+    await expect(context.getCli()).resolves.toEqual('yolo')
+    expect(_config.get).toHaveBeenCalledWith(ctx.CLI)
+  })
 })

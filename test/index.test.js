@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Adobe. All rights reserved.
+Copyright 2020 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -25,6 +25,7 @@ test('getToken', async () => {
   jest.mock('../src/token-helper')
   expect.assertions(7)
 
+  /** @private */
   function _curry (contextName, options, retVal) {
     return function (n, f) {
       expect(n).toEqual(contextName)
@@ -45,6 +46,7 @@ test('invalidateToken', async () => {
   jest.mock('../src/token-helper')
   expect.assertions(7)
 
+  /** @private */
   function _curry (contextName, options) {
     return function (n, f) {
       expect(n).toEqual(contextName)

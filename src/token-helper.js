@@ -20,7 +20,7 @@ const { getContext } = require('./context')
  *
  * @private
  */
-const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-core-ims-jwt', '@adobe/aio-lib-core-ims-oauth']
+const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-core-ims-oauth/src/ims-cli', '@adobe/aio-lib-core-ims-jwt', '@adobe/aio-lib-core-ims-oauth']
 
 const IMS_TOKEN_MANAGER = {
 
