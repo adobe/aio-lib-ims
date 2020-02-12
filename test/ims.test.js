@@ -167,13 +167,13 @@ test('Ims.validateToken response is non parseable', async () => {
   }
 
   // have some return value from request module
-  rp.mockImplementation(() => JSON.stringify('hello'))
+  rp.mockImplementation(() => 'hello hello')
 
   const clientId = 'some-client-id'
   const token = createTokenFromPayload(payload)
 
   await expect(ims.validateToken(token, clientId))
-    .resolves.toEqual('hello')
+    .resolves.toEqual('hello hello')
 
   expect(rp).toHaveBeenCalledWith(expect.objectContaining({ uri: expect.stringContaining('/ims/validate_token/v1') }))
 })
