@@ -127,6 +127,57 @@ test('Ims.invalidateToken', async () => {
   return expect(ims.invalidateToken(token, clientId, clientSecret)).resolves.toEqual(retVal)
 })
 
+test('Ims.validateToken', async () => {
+  const ims = new Ims()
+
+  const serverResponsePayload = {
+    valid: false,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token'
+    }
+  }
+
+  // have some return value from request module
+  rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
+
+  const clientId = 'some-client-id'
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims.validateToken(token, clientId))
+    .resolves.toEqual(serverResponsePayload)
+
+  expect(rp).toHaveBeenCalledWith(expect.objectContaining({ uri: expect.stringContaining('/ims/validate_token/v1') }))
+})
+
+test('Ims.validateToken response is non parseable', async () => {
+  const ims = new Ims()
+
+  const payload = {
+    as: 'ims-na1',
+    created_at: 100,
+    expires_in: 300,
+    access_token: 'my-access-token',
+    refresh_token: 'my-refresh-token',
+    type: 'access token'
+  }
+
+  // have some return value from request module
+  rp.mockImplementation(() => 'hello hello')
+
+  const clientId = 'some-client-id'
+  const token = createTokenFromPayload(payload)
+
+  await expect(ims.validateToken(token, clientId))
+    .resolves.toEqual('hello hello')
+
+  expect(rp).toHaveBeenCalledWith(expect.objectContaining({ uri: expect.stringContaining('/ims/validate_token/v1') }))
+})
+
 test('Ims.exchangeJwtToken', async () => {
   const ims = new Ims()
 
