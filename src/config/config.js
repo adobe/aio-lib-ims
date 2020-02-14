@@ -10,6 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+/** @private */
 function throwNotImplemented () {
   throw new Error('abstract method is not implemented')
 }
@@ -24,9 +25,9 @@ class Config {
   /**
    * Returns a configuration value.
    *
-   * @param {string} key
+   * @param {string} key the config key
    *
-   * @returns {Promise<any>}
+   * @returns {Promise<any>} resolves to the config value
    *
    * @memberof Config
    */
@@ -35,13 +36,13 @@ class Config {
   }
 
   /**
-   * Returns all context names attached with the configuration.
+   * Sets the data for a config key.
    *
-   * @param {string} key
-   * @param {any} data
-   * @param {boolean} local
+   * @param {string} key the config key to write to
+   * @param {any} data the data to write
+   * @param {boolean} local set to true to write to the local config
    *
-   * @returns {Promise<>}
+   * @returns {void}
    *
    * @memberof Config
    */
@@ -52,7 +53,7 @@ class Config {
   /**
    * Returns all context names attached with the configuration.
    *
-   * @returns {Promise<Array<String>>}
+   * @returns {Promise<Array<string>>} resolves to all context names for the configuration
    *
    * @memberof Config
    */

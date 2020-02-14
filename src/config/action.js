@@ -19,6 +19,7 @@ class ActionConfig extends Config {
   constructor (configKey) {
     super(configKey)
     // constructor helpers
+    /** @private */
     function _checkOWEnv () {
       const requiredEnv = ['__OW_ACTION_NAME', '__OW_NAMESPACE', '__OW_API_KEY']
       const missing = []
@@ -135,6 +136,10 @@ class ActionConfig extends Config {
   }
 
   async _setTokens (contextName, contextData) {
+    /**
+     * @param {Array} expiryTimes array of expiry times
+     * @returns {number} the time to live (TTL)
+     */
     function getTTL (expiryTimes) {
       const maxExpiry = Math.max(...expiryTimes)
       return Math.floor((maxExpiry - Date.now()) / 1000)
