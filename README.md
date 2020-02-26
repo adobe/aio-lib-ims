@@ -5,16 +5,16 @@
 [![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/aio-lib-ims.svg)](https://greenkeeper.io/)
 
 
-# Adobe I/O Lib IMS Library
+# Adobe I/O IMS Library
 
-The Adobe I/O Lib Core IMS Library helps interacting with the IMS API as well as creating and invalidating tokens.
+The Adobe I/O IMS Library helps interacting with the IMS API as well as creating and invalidating tokens.
 To support multiple use cases and environments, there is not a single configuration managed by this library but multiple configurations called _IMS configuration contexts_.
 Each configuration context holds configuration data needed to create tokens.
 See the _Configuration_ section below.
 
 # Installation
 
-To install the Adobe I/O Lib Core IMS Library, simple use `npm`:
+To install the Adobe I/O IMS Library, simple use `npm`:
 
 ```sh
 $ npm install @adobe/aio-lib-ims --save
@@ -22,7 +22,7 @@ $ npm install @adobe/aio-lib-ims --save
 
 # Quickstart
 
-Before using the AIO Lib Core IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
+Before using the AIO IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
 ```js
 const { context, getToken, getTokenData } = require('@adobe/aio-lib-ims');
@@ -44,7 +44,7 @@ See the [API Documentation](api.md) for full details.
 
 # Configuration
 
-The AIO Lib Core IMS Library transparently maintains the login configuration and keep
+The AIO IMS Library transparently maintains the login configuration and keep
 access and refresh tokens for reuse before they expire.
 
 All configuration is stored in a single `$ims` root property.
@@ -87,9 +87,9 @@ Here is an example `$ims` configuration
 
 ## Running on a Desktop
 
-When running on your local machine the AIO Lib Core IMS is leveraging the [Configuration module for use by aio-cli plugins](https://github.com/adobe/aio-lib-core-config) to load and update the configuration stored in `.aio` and `.env` files. The library supports both local and global aio configurations.
+When running on your local machine the AIO IMS is leveraging the [Configuration module for use by aio-cli plugins](https://github.com/adobe/aio-lib-core-config) to load and update the configuration stored in `.aio` and `.env` files. The library supports both local and global aio configurations.
 
-Here is an example that relies on the AIO Lib Core IMS to generate a token from an existing configuration:
+Here is an example that relies on the AIO IMS to generate a token from an existing configuration:
 
 ```js
 const { context, getToken } = require('@adobe/aio-lib-ims');
@@ -100,9 +100,9 @@ const token = await getToken();
 
 ## Running in an Adobe I/O Runtime action
 
-The AIO Lib Core IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
+The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
 
-Here is an Adobe I/O Runtime action example that leverages the AIO Lib Core IMS:
+Here is an Adobe I/O Runtime action example that leverages the AIO IMS:
 
 ```js
 const { context, getToken } = require('@adobe/aio-lib-ims');
@@ -155,13 +155,13 @@ OAuth2 configuration requires the following properties:
 
 ## Adding Configuration Support
 
-The AIO Lib Core IMS Library handles common tasks around tokens by itself.
+The AIO IMS Library handles common tasks around tokens by itself.
 This includes storing access and refresh tokens in the configuration context, checking those tokens for expiry, and refreshing as needed.
 Only when an access token (and a refresh token) needs to be created anew from the configuration context credentials, do the plugins come into play.
 
 When a new access token needs to be created from credentials, the IMS Library implements the following algorithm:
 
-* Collect the AIO Lib Core IMS Library plugins
+* Collect the AIO IMS Library plugins
 * Iterate over this collection and for each plugin do:
   * `require` the plugin
   * Call the plugin's `supports(config)` function with the configuration context
@@ -169,7 +169,7 @@ When a new access token needs to be created from credentials, the IMS Library im
 
 From this algorithm we can derive the following requirements for a plugin:
 
-* _MUST_ be installed and available to the `require` function of the AIO Lib Core IMS Library.
+* _MUST_ be installed and available to the `require` function of the AIO IMS Library.
 * _MUST_ set the script to be loaded by `require`-ing the plugin's root folder in the `package.json#/main` property (this is actually how `require` loads the package's main script when using the folder containing the `package.json` file).
 * _MUST_ export an object from this script with the following two properties being functions:
 
