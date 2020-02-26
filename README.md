@@ -5,7 +5,7 @@
 [![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/aio-lib-ims.svg)](https://greenkeeper.io/)
 
 
-# Adobe I/O Lib Core IMS Library
+# Adobe I/O Lib IMS Library
 
 The Adobe I/O Lib Core IMS Library helps interacting with the IMS API as well as creating and invalidating tokens.
 To support multiple use cases and environments, there is not a single configuration managed by this library but multiple configurations called _IMS configuration contexts_.
