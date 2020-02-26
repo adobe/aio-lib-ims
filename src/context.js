@@ -10,7 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const debug = require('debug')('@adobe/aio-lib-core-ims/context')
+const debug = require('debug')('@adobe/aio-lib-ims/context')
 
 const ActionConfig = require('./config/action')
 const CliConfig = require('./config/cli')

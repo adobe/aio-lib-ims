@@ -1,13 +1,13 @@
 {
-  "name": "@adobe/aio-lib-core-ims",
+  "name": "@adobe/aio-lib-ims",
   "description": "IMS Support Module providing low level IMS HTTP API access as well as higher level support for getting tokens.",
   "version": "1.0.0",
   "author": "Adobe Inc.",
-  "bugs": "https://github.com/adobe/aio-lib-core-ims/issues",
+  "bugs": "https://github.com/adobe/aio-lib-ims/issues",
   "dependencies": {
     "@adobe/aio-lib-core-config": ">=1.2.3",
-    "@adobe/aio-lib-core-ims-jwt": "^0.0.3",
-    "@adobe/aio-lib-core-ims-oauth": "^1.1.0",
+    "@adobe/aio-lib-ims-jwt": "^1.0.0",
+    "@adobe/aio-lib-ims-oauth": "^1.2.1",
     "@adobe/aio-lib-state": "^1.0.4",
     "debug": "^4.1.1",
     "lodash.clonedeep": "^4.5.0",
@@ -38,14 +38,14 @@
   "files": [
     "/src"
   ],
-  "homepage": "https://github.com/adobe/aio-lib-core-ims",
+  "homepage": "https://github.com/adobe/aio-lib-ims",
   "keywords": [
     "aio-lib",
     "ims"
   ],
   "license": "Apache-2.0",
   "main": "src/index.js",
-  "repository": "https://github.com/adobe/aio-lib-core-ims",
+  "repository": "https://github.com/adobe/aio-lib-ims",
   "scripts": {
     "pretest": "eslint src test",
     "test": "npm run unit-tests",

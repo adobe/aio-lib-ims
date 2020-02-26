@@ -1,8 +1,8 @@
-[![Version](https://img.shields.io/npm/v/@adobe/aio-lib-core-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-core-ims)
-[![Downloads/week](https://img.shields.io/npm/dw/@adobe/aio-lib-core-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-core-ims)
-[![Build Status](https://travis-ci.com/adobe/aio-lib-core-ims.svg?branch=master)](https://travis-ci.com/adobe/aio-lib-core-ims)
-[![License](https://img.shields.io/npm/l/@adobe/aio-lib-core-ims.svg)](https://github.com/adobe/aio-lib-core-ims/blob/master/package.json)
-[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-core-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-core-ims/) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/aio-lib-core-ims.svg)](https://greenkeeper.io/)
+[![Version](https://img.shields.io/npm/v/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
+[![Downloads/week](https://img.shields.io/npm/dw/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
+[![Build Status](https://travis-ci.com/adobe/aio-lib-ims.svg?branch=master)](https://travis-ci.com/adobe/aio-lib-ims)
+[![License](https://img.shields.io/npm/l/@adobe/aio-lib-ims.svg)](https://github.com/adobe/aio-lib-ims/blob/master/package.json)
+[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/aio-lib-ims.svg)](https://greenkeeper.io/)
 
 
 # Adobe I/O Lib Core IMS Library
@@ -17,7 +17,7 @@ See the _Configuration_ section below.
 To install the Adobe I/O Lib Core IMS Library, simple use `npm`:
 
 ```sh
-$ npm install @adobe/aio-lib-core-ims --save
+$ npm install @adobe/aio-lib-ims --save
 ```
 
 # Quickstart
@@ -25,7 +25,7 @@ $ npm install @adobe/aio-lib-core-ims --save
 Before using the AIO Lib Core IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
 ```js
-const { context, getToken, getTokenData } = require('@adobe/aio-lib-core-ims');
+const { context, getToken, getTokenData } = require('@adobe/aio-lib-ims');
 
 const config = {
   callback_url: "https://callback.example.org",
@@ -92,7 +92,7 @@ When running on your local machine the AIO Lib Core IMS is leveraging the [Confi
 Here is an example that relies on the AIO Lib Core IMS to generate a token from an existing configuration:
 
 ```js
-const { context, getToken } = require('@adobe/aio-lib-core-ims');
+const { context, getToken } = require('@adobe/aio-lib-ims');
 
 await context.setCurrent('my-config');
 const token = await getToken();
@@ -105,7 +105,7 @@ The AIO Lib Core IMS Library can also be used in an Adobe I/O Runtime action. In
 Here is an Adobe I/O Runtime action example that leverages the AIO Lib Core IMS:
 
 ```js
-const { context, getToken } = require('@adobe/aio-lib-core-ims');
+const { context, getToken } = require('@adobe/aio-lib-ims');
 
 function main ({ imsContextConfig, ...params }) {
   // the IMS context configuration is passed as action parameter
@@ -165,7 +165,7 @@ When a new access token needs to be created from credentials, the IMS Library im
 * Iterate over this collection and for each plugin do:
   * `require` the plugin
   * Call the plugin's `supports(config)` function with the configuration context
-  * If `supports(config)` returns `true` then call the plugin's `imsLogin(ims, config, force)` function with an instance of the [`Ims`](/adobe/aio-lib-core-ims/blob/master/src/ims.js) class, the configuration context, and a boolean flag described below in [Forced `imsLogin`](#forced-imslogin).
+  * If `supports(config)` returns `true` then call the plugin's `imsLogin(ims, config, force)` function with an instance of the [`Ims`](/adobe/aio-lib-ims/blob/master/src/ims.js) class, the configuration context, and a boolean flag described below in [Forced `imsLogin`](#forced-imslogin).
 
 From this algorithm we can derive the following requirements for a plugin:
 
@@ -176,12 +176,12 @@ From this algorithm we can derive the following requirements for a plugin:
     | Property | Signature | Description |
     |---|---|---|
     | `supports` | `(config) => boolean` | Given the IMS configuration context, returns `true` if the configuration can be used for the plugins login mechanism. |
-    | `imsLogin` | `(ims, config, force) => Promise` | Given the [`Ims` instance](/adobe/aio-lib-core-ims/blob/master/src/ims.js) and the IMS configuration context implement the authentication with IMS and return a `Promise` resolving to a token object. See [Forced `imsLogin`](#forced-imslogin) for details on the `force` parameter. |
+    | `imsLogin` | `(ims, config, force) => Promise` | Given the [`Ims` instance](/adobe/aio-lib-ims/blob/master/src/ims.js) and the IMS configuration context implement the authentication with IMS and return a `Promise` resolving to a token object. See [Forced `imsLogin`](#forced-imslogin) for details on the `force` parameter. |
 
 ### Forced `imsLogin`
 
 Some plugins support an OAuth2 login mechanism where the actual account for which an access token is generated depends on the user input.
-For example the [OAuth2](/adobe/aio-lib-core-ims-oauth) plugin implements an ExpressJS application to implemented the three legged OAuth2 flow.
+For example the [OAuth2](/adobe/aio-lib-ims-oauth) plugin implements an ExpressJS application to implemented the three legged OAuth2 flow.
 During this flow the user enters their credentials for IMS to validate.
 
 Typically IMS will set some cookies to cache the login state in the browser to improve the user experience in a standard OAUth2 web application.
@@ -218,14 +218,14 @@ The `Ims.exchangeJwtToken()` and `Ims.getAccessToken()` functions both return a 
 
 Since plugins are accessed using standard `require` , one `npm` package only provides exactly one IMS plugin extension.
 Multiple plugins must be implemented in separate plugins.
-The configuration support modules for [JWT](/adobe/aio-lib-core-ims-jwt) and [OAuth2](/adobe/aio-lib-core-ims-oauth) are two such packages.
+The configuration support modules for [JWT](/adobe/aio-lib-ims-jwt) and [OAuth2](/adobe/aio-lib-ims-oauth) are two such packages.
 The IMS Library has a dependency on the _JWT_ and _OAuth2_ plugins and will always try to use those.
 
 Additional plugins must be `npm install`-ed and listed in the `$ims/$plugins` array property.
 This can easily be done in the package `postinstall` script like this:
 
 ```js
-const { context } = require('@adobe/aio-lib-core-ims');
+const { context } = require('@adobe/aio-lib-ims');
 context.plugins = context.plugins.push(process.env.npm_package_name);
 ```
 

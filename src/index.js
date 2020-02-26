@@ -26,13 +26,13 @@ const {
 } = require('./ims')
 
 /**
- * The `@adobe/aio-lib-core-ims` module offers three kinds of elements:
+ * The `@adobe/aio-lib-ims` module offers three kinds of elements:
  *
  * 1. Managing configuration contexts for token creation and use
  * 2. Creating and invalidating tokens
  * 3. Providing low level access to IMS API
  *
- * @exports @adobe/aio-lib-core-ims
+ * @exports @adobe/aio-lib-ims
  */
 module.exports = {
   /** @see (#getTokenData) */
