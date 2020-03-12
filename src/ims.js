@@ -400,10 +400,15 @@ class Ims {
    * Verifies a given token.
    *
    * @param {string} token the access token
-   * @param {string} clientId the client id
+   * @param {string} [clientId] the client id, optional
    */
   async validateToken (token, clientId) {
     debug('validateToken(%s, %s)', token, clientId)
+
+    if (clientId === undefined) {
+      clientId = getTokenData(token).client_id
+      debug('extracted clientId from token: %s', clientId)
+    }
 
     const postData = {
       token_type: _getTokenType(token),

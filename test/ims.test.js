@@ -127,7 +127,7 @@ test('Ims.invalidateToken', async () => {
   return expect(ims.invalidateToken(token, clientId, clientSecret)).resolves.toEqual(retVal)
 })
 
-test('Ims.validateToken', async () => {
+test('Ims.validateToken(token, clientId)', async () => {
   const ims = new Ims()
 
   const serverResponsePayload = {
@@ -138,20 +138,62 @@ test('Ims.validateToken', async () => {
       expires_in: 300,
       access_token: 'my-access-token',
       refresh_token: 'my-refresh-token',
-      type: 'access token'
+      type: 'access token',
+      client_id: 'some-client-id-1'
     }
   }
 
   // have some return value from request module
   rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
 
-  const clientId = 'some-client-id'
+  const clientId = 'some-client-id-2'
   const token = createTokenFromPayload(serverResponsePayload.token)
 
   await expect(ims.validateToken(token, clientId))
     .resolves.toEqual(serverResponsePayload)
 
-  expect(rp).toHaveBeenCalledWith(expect.objectContaining({ uri: expect.stringContaining('/ims/validate_token/v1') }))
+  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
+    uri: expect.stringContaining('/ims/validate_token/v1'),
+    form: {
+      client_id: 'some-client-id-2',
+      token_type: 'access token'
+    },
+    auth: { bearer: token }
+  }))
+})
+
+test('Ims.validateToken(token), extracts client id from token', async () => {
+  const ims = new Ims()
+
+  const serverResponsePayload = {
+    valid: false,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token',
+      client_id: 'some-client-id'
+    }
+  }
+
+  // have some return value from request module
+  rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
+
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims.validateToken(token))
+    .resolves.toEqual(serverResponsePayload)
+
+  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
+    uri: expect.stringContaining('/ims/validate_token/v1'),
+    form: {
+      client_id: 'some-client-id',
+      token_type: 'access token'
+    },
+    auth: { bearer: token }
+  }))
 })
 
 test('Ims.validateToken response is non parseable', async () => {
