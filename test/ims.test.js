@@ -220,6 +220,18 @@ test('Ims.validateToken response is non parseable', async () => {
   expect(rp).toHaveBeenCalledWith(expect.objectContaining({ uri: expect.stringContaining('/ims/validate_token/v1') }))
 })
 
+test('Ims.validateToken bad token', async () => {
+  const ims = new Ims()
+
+  const clientId = 'some-client-id'
+
+  await expect(ims.validateToken('BADTOKEN', clientId))
+    .resolves.toEqual({
+      valid: false,
+      reason: 'bad payload'
+    })
+})
+
 test('Ims.exchangeJwtToken', async () => {
   const ims = new Ims()
 
