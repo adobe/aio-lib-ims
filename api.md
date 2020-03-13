@@ -304,7 +304,7 @@ Returns the names of the configured contexts as an array of strings.
         * [.getAccessToken(authCode, clientId, clientSecret, scopes)](#Ims+getAccessToken) ⇒ <code>Promise</code>
         * [.exchangeJwtToken(clientId, clientSecret, signedJwtToken)](#Ims+exchangeJwtToken)
         * [.invalidateToken(token, clientId, clientSecret)](#Ims+invalidateToken)
-        * [.validateToken(token, clientId)](#Ims+validateToken)
+        * [.validateToken(token, [clientId])](#Ims+validateToken)
         * [.toTokenResult(token)](#Ims+toTokenResult) ⇒ <code>Promise</code>
     * _static_
         * [.fromToken(token)](#Ims.fromToken) ⇒ <code>Promise</code>
@@ -462,7 +462,7 @@ at the same time.
 
 <a name="Ims+validateToken"></a>
 
-### ims.validateToken(token, clientId)
+### ims.validateToken(token, [clientId])
 Verifies a given token.
 
 **Kind**: instance method of [<code>Ims</code>](#Ims)  
@@ -470,7 +470,7 @@ Verifies a given token.
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | the access token |
-| clientId | <code>string</code> | the client id |
+| [clientId] | <code>string</code> | the client id, optional |
 
 <a name="Ims+toTokenResult"></a>
 
