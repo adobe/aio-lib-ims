@@ -405,13 +405,23 @@ class Ims {
   async validateToken (token, clientId) {
     debug('validateToken(%s, %s)', token, clientId)
 
+    let tokenData
+    try {
+      tokenData = getTokenData(token)
+    } catch (e) {
+      return {
+        valid: false,
+        reason: 'bad payload'
+      }
+    }
+
     if (clientId === undefined) {
-      clientId = getTokenData(token).client_id
+      clientId = tokenData.client_id
       debug('extracted clientId from token: %s', clientId)
     }
 
     const postData = {
-      token_type: _getTokenType(token),
+      token_type: tokenData.type,
       client_id: clientId
     }
 
