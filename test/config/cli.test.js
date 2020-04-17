@@ -63,3 +63,12 @@ test('contexts()', async () => {
   await expect(config.contexts()).resolves.toEqual(['sheep', 'cow'])
   expect(aioConfig.get).toHaveBeenCalledWith('imsKey')
 })
+
+test('contexts() (empty)', async () => {
+  const config = new CliConfig('imsKey')
+
+  aioConfig.get.mockReturnValue()
+
+  await expect(config.contexts()).resolves.toEqual([])
+  expect(aioConfig.get).toHaveBeenCalledWith('imsKey')
+})
