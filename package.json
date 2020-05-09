@@ -1,7 +1,7 @@
 {
   "name": "@adobe/aio-lib-ims",
   "description": "IMS Support Module providing low level IMS HTTP API access as well as higher level support for getting tokens.",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "author": "Adobe Inc.",
   "bugs": "https://github.com/adobe/aio-lib-ims/issues",
   "dependencies": {
