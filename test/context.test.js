@@ -199,6 +199,11 @@ describe('context operations (cli config)', () => {
     expect(_config.set).toHaveBeenCalledWith(ctx.CLI, 'yolo', true)
   })
 
+  test('setCli local=false', async () => {
+    await expect(context.setCli('yolo', false)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, 'yolo', false)
+  })
+
   test('getCli', async () => {
     _config.get.mockResolvedValue('yolo')
     await expect(context.getCli()).resolves.toEqual('yolo')
