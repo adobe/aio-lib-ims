@@ -65,7 +65,7 @@ class Context {
 
   async setCli (contextData, local = true) {
     debug(`set cli=${JSON.stringify(contextData)} local:${!!local}`)
-    this._config.set(CLI, contextData, true)
+    this._config.set(CLI, contextData, local)
   }
 
   /**
