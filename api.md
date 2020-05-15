@@ -187,7 +187,8 @@ the Adobe I/O Lib Core IMS Library.
 **Kind**: global class  
 
 * [Context](#Context)
-    * [.getCli()](#Context+getCli) ⇒ <code>string</code>
+    * [.getCli()](#Context+getCli) ⇒ <code>object</code>
+    * [.setCli(contextData, [local], [merge])](#Context+setCli)
     * [.getCurrent()](#Context+getCurrent) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.setCurrent(contextName, [local])](#Context+setCurrent)
     * [.getPlugins()](#Context+getPlugins) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
@@ -198,11 +199,24 @@ the Adobe I/O Lib Core IMS Library.
 
 <a name="Context+getCli"></a>
 
-### context.getCli() ⇒ <code>string</code>
-The cli context name.
+### context.getCli() ⇒ <code>object</code>
+Gets the cli context data
 
 **Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>string</code> - the cli context name  
+**Returns**: <code>object</code> - the cli context data  
+<a name="Context+setCli"></a>
+
+### context.setCli(contextData, [local], [merge])
+Sets the cli context data
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| contextData | <code>object</code> |  | the data to save |
+| [local] | <code>boolean</code> | <code>true</code> | set to true to save to local config, false for global config |
+| [merge] | <code>boolean</code> | <code>true</code> | set to true to merge existing data with the new data |
+
 <a name="Context+getCurrent"></a>
 
 ### context.getCurrent() ⇒ <code>Promise.&lt;string&gt;</code>

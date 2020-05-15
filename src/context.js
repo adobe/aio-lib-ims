@@ -54,18 +54,32 @@ class Context {
   }
 
   /**
-   * The cli context name.
+   * Gets the cli context data
    *
-   * @returns {string} the cli context name
+   * @returns {object} the cli context data
    */
   async getCli () {
     debug('get cli')
     return this._config.get(CLI)
   }
 
-  async setCli (contextData, local = true) {
-    debug(`set cli=${JSON.stringify(contextData)} local:${!!local}`)
-    this._config.set(CLI, contextData, local)
+  /**
+   * Sets the cli context data
+   *
+   * @param {object} contextData the data to save
+   * @param {boolean} [local=true] set to true to save to local config, false for global config
+   * @param {boolean} [merge=true] set to true to merge existing data with the new data
+   */
+  async setCli (contextData, local = true, merge = true) {
+    debug(`set cli=${JSON.stringify(contextData)} local:${!!local} merge:${!!merge}`)
+
+    const dataIsObject = (typeof contextData === 'object' && contextData !== null)
+    if (!dataIsObject) {
+      throw new Error('contextData must be an object')
+    }
+
+    const existingData = await this.getCli()
+    this._config.set(CLI, { ...existingData, ...contextData }, local)
   }
 
   /**
