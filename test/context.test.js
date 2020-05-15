@@ -194,19 +194,36 @@ describe('context operations (cli config)', () => {
     expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo', false)
   })
 
-  test('setCli', async () => {
-    await expect(context.setCli('yolo')).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, 'yolo', true)
+  test('setCli with string (error)', async () => {
+    const contextData = 'foo'
+    await expect(context.setCli(contextData)).rejects.toThrowError(new Error('contextData must be an object'))
+  })
+
+  test('setCli with object (ok)', async () => {
+    const contextData = { foo: 'bar' }
+    await expect(context.setCli(contextData)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, contextData, true)
   })
 
   test('setCli local=false', async () => {
-    await expect(context.setCli('yolo', false)).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, 'yolo', false)
+    const contextData = { foo: 'bar' }
+    await expect(context.setCli(contextData, false)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, contextData, false)
+  })
+
+  test('setCli local=false, merge=true', async () => {
+    const existingContextData = { baz: 'faz' }
+    _config.get.mockResolvedValue(existingContextData)
+
+    const contextData = { foo: 'bar' }
+    await expect(context.setCli(contextData, false)).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CLI, { ...existingContextData, ...contextData }, false)
   })
 
   test('getCli', async () => {
-    _config.get.mockResolvedValue('yolo')
-    await expect(context.getCli()).resolves.toEqual('yolo')
+    const contextData = { foo: 'bar' }
+    _config.get.mockResolvedValue(contextData)
+    await expect(context.getCli()).resolves.toEqual(contextData)
     expect(_config.get).toHaveBeenCalledWith(ctx.CLI)
   })
 })
