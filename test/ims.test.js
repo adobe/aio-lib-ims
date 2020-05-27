@@ -156,7 +156,7 @@ test('Ims.validateToken(token, clientId)', async () => {
     uri: expect.stringContaining('/ims/validate_token/v1'),
     form: {
       client_id: 'some-client-id-2',
-      token_type: 'access token'
+      type: 'access token'
     },
     auth: { bearer: token }
   }))
@@ -190,7 +190,7 @@ test('Ims.validateToken(token), extracts client id from token', async () => {
     uri: expect.stringContaining('/ims/validate_token/v1'),
     form: {
       client_id: 'some-client-id',
-      token_type: 'access token'
+      type: 'access token'
     },
     auth: { bearer: token }
   }))

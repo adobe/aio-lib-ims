@@ -421,7 +421,7 @@ class Ims {
     }
 
     const postData = {
-      token_type: tokenData.type,
+      type: tokenData.type,
       client_id: clientId
     }
 
