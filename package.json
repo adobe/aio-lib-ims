@@ -17,7 +17,6 @@
   "devDependencies": {
     "@adobe/eslint-config-aio-lib-config": "^1.0.2",
     "@types/jest": "^25.1.0",
-    "codecov": "^3.6.1",
     "eslint": "^6.7.2",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-standard": "^14.1.0",
