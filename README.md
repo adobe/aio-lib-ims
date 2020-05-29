@@ -64,7 +64,8 @@ Here is an example `$ims` configuration
     sample_jwt: {
       client_id: "<jwt-clientid>",
       client_secret: "XXX",
-      techacct: "<guid>@techacct.adobe.com",
+      technical_account_id: "<guid>@techacct.adobe.com",
+      technical_account_email: "<another_guid>@techacct.adobe.com",
       meta_scopes: [
         "ent_dataservices_sdk"
       ],
@@ -109,7 +110,7 @@ const { context, getToken } = require('@adobe/aio-lib-ims');
 
 function main ({ imsContextConfig, ...params }) {
   // the IMS context configuration is passed as action parameter
-  // imsContextConfig = { client_id, client_secret, techacct, meta_scopes, ims_org_id, private_key }
+  // imsContextConfig = { client_id, client_secret, technical_account_id, technical_account_email, meta_scopes, ims_org_id, private_key }
   await context.set('my_ctx', imsContextConfig)
 
   const token = await getToken('my_ctx')
@@ -135,7 +136,8 @@ JWT (service to service integration) configuration requires the following proper
 |--|--|
 | client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe I/O Console. |
 | client_secret | The IMS (OAUth2) Client Secret |
-| techacct | The _Technical Account ID_ from the integration overview screen in the I/O Console
+| technical_account_id | The _Technical Account ID_ from the integration overview screen in the I/O Console
+| technical_account_email | The _Technical Account Email_ from the integration overview screen in the I/O Console
 | meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the *meta_scopes* property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`. |
 | ims_org_id | The _Organization ID_ from the integration overview screen in the I/O Console. |
 | private_key | The private key matching any one of the _Public Keys_ of the integration. |
