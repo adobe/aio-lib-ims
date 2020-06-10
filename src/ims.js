@@ -434,6 +434,22 @@ class Ims {
   }
 
   /**
+   * Gets the IMS organizations attached to the given token.
+   *
+   * @param {string} token the access token
+   */
+  async getOrganizations (token) {
+    debug('getOrganizations(%s)', token)
+
+    const res = await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
+    try {
+      return JSON.parse(res)
+    } catch (e) {
+      return res
+    }
+  }
+
+  /**
    * Converts the access token to a token result object as follows:
    *
    * ```js

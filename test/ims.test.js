@@ -232,6 +232,64 @@ test('Ims.validateToken bad token', async () => {
     })
 })
 
+test('Ims.getOrganizations(token)', async () => {
+  const ims = new Ims()
+
+  const serverResponse = {
+    fake: 'response'
+  }
+
+  const payload = {
+    as: 'ims-na1',
+    created_at: 100,
+    expires_in: 300,
+    access_token: 'my-access-token',
+    refresh_token: 'my-refresh-token',
+    type: 'access token'
+  }
+
+  // have some return value from request module
+  rp.mockImplementation(() => JSON.stringify(serverResponse))
+
+  const token = createTokenFromPayload(payload)
+
+  await expect(ims.getOrganizations(token))
+    .resolves.toEqual(serverResponse)
+
+  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
+    uri: expect.stringContaining('/ims/organizations/v6'),
+    auth: { bearer: token }
+  }))
+})
+
+test('Ims.getOrganizations(token) returns not JSON', async () => {
+  const ims = new Ims()
+
+  const serverResponse = 'noteverythingisJSON'
+
+  const payload = {
+    as: 'ims-na1',
+    created_at: 100,
+    expires_in: 300,
+    access_token: 'my-access-token',
+    refresh_token: 'my-refresh-token',
+    type: 'access token'
+  }
+
+  // have some return value from request module
+  rp.mockImplementation(() => serverResponse)
+
+  const token = createTokenFromPayload(payload)
+
+  await expect(ims.getOrganizations(token))
+    .resolves.toEqual(serverResponse)
+
+  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
+    uri: expect.stringContaining('/ims/organizations/v6'),
+    auth: { bearer: token }
+  }))
+})
+
 test('Ims.exchangeJwtToken', async () => {
   const ims = new Ims()
 
