@@ -48,6 +48,7 @@ const SCOPE = 'scope'
  * @param {string} url the url endppoint
  * @param {string} token the access token authorization
  * @param {object} data the data to send
+ * @returns {Promise} Promise that resolves with the request data
  */
 async function _sendRequest (method, url, token, data) {
   const options = {
@@ -81,6 +82,7 @@ async function _sendRequest (method, url, token, data) {
  * @param {string} getUrl the url endpoint
  * @param {string} token the authorization token
  * @param {object} getData the data to send
+ * @returns {Promise} Promise that resolves with the request data
  */
 async function _sendGet (getUrl, token, getData) {
   return _sendRequest('GET', getUrl, token, getData)
@@ -92,6 +94,7 @@ async function _sendGet (getUrl, token, getData) {
  * @param {string} postUrl the url endpoint
  * @param {string} token the authorization token
  * @param {object} postData the data to send
+ * @returns {Promise} Promise that resolves with the request data
  */
 async function _sendPost (postUrl, token, postData) {
   return _sendRequest('POST', postUrl, token, postData)
@@ -354,6 +357,7 @@ class Ims {
    * @param {string} clientId The client ID of the owning application
    * @param {string} clientSecret The client's secret
    * @param {string} signedJwtToken The properly signed JWT token for the JWT token exchange
+   * @returns {Promise} returns a Promise that resolves to the token result object
    */
   async exchangeJwtToken (clientId, clientSecret, signedJwtToken) {
     debug('exchangeJwtToken(%s, %s, %s)', clientId, clientSecret, signedJwtToken)
@@ -376,6 +380,7 @@ class Ims {
    * @param {string} token the access token
    * @param {string} clientId the client id
    * @param {string} clientSecret the client secret
+   * @returns {Promise} Promise that resolves with the request data
    */
   async invalidateToken (token, clientId, clientSecret) {
     debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
@@ -401,6 +406,7 @@ class Ims {
    *
    * @param {string} token the access token
    * @param {string} [clientId] the client id, optional
+   * @returns {object} the server response
    */
   async validateToken (token, clientId) {
     debug('validateToken(%s, %s)', token, clientId)
@@ -437,6 +443,7 @@ class Ims {
    * Gets the IMS organizations attached to the given token.
    *
    * @param {string} token the access token
+   * @returns {object} the server response
    */
   async getOrganizations (token) {
     debug('getOrganizations(%s)', token)

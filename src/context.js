@@ -97,6 +97,7 @@ class Context {
    *
    * @param {string} contextName The name of the context to use as the current context
    * @param {boolean} [local=true] Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime.
+   * @returns {object} returns an instance of the Config object
    */
   async setCurrent (contextName, local = true) {
     debug('set current=%s', contextName)

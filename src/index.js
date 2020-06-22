@@ -95,6 +95,7 @@ module.exports = {
    *              the current IMS context are invalidated.
    * @param {boolean} [force] Whether to invalidate just the access token or
    *              to also invalidate the refresh token. Defaults to `false`.
+   * @returns {Promise} Promise that resolves with the request data
    */
   invalidateToken: async (contextName, force) => IMS_TOKEN_MANAGER.invalidateToken(contextName, !!force)
 }
