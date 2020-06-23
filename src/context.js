@@ -22,7 +22,7 @@ const TYPE_ACTION = 'action'
 const TYPE_CLI = 'cli'
 
 /** Name of the IMS configuration context data structure */
-const IMS = '$ims'
+const IMS = 'ims'
 
 /** Property holding the cli context name */
 const CLI = '$cli'

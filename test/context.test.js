@@ -28,7 +28,7 @@ test('exports', async () => {
   expect(typeof ctx.resetContext).toEqual('function')
   expect(ctx.PLUGINS).toEqual('$plugins')
   expect(ctx.CURRENT).toEqual('$current')
-  expect(ctx.IMS).toEqual('$ims')
+  expect(ctx.IMS).toEqual('ims')
 })
 
 describe('getContext', () => {

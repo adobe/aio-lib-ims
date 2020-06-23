@@ -20,10 +20,10 @@ afterEach(() => {
 /** @private */
 function createHandlerForContext (context = {}, imsPlugin) {
   const mappedContext = Object.keys(context)
-    // prefix $ims. to all the keys
+    // prefix ims. to all the keys
     .map(key => {
       return {
-        [`$ims.${key}`]: context[key]
+        [`ims.${key}`]: context[key]
       }
     })
     // merge the objects
@@ -33,7 +33,7 @@ function createHandlerForContext (context = {}, imsPlugin) {
 
   const store = {
     ...mappedContext,
-    '$ims.$plugins': imsPlugin ? [imsPlugin] : null
+    'ims.$plugins': imsPlugin ? [imsPlugin] : null
   }
 
   return function (key) {

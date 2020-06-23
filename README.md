@@ -47,20 +47,20 @@ See the [API Documentation](api.md) for full details.
 The AIO IMS Library transparently maintains the login configuration and keep
 access and refresh tokens for reuse before they expire.
 
-All configuration is stored in a single `$ims` root property.
+All configuration is stored in a single `ims` root property.
 
 The library supports maintaining multiple configurations for different use cases.
-Each such configuration is stored in its own named object with the `$ims` configuration.
+Each such configuration is stored in its own named object with the `ims` configuration.
 Such a configuration is called an _IMS (configuration) context_ and has a label which allows to refer to the configuration by name.
 
 To simplify usage, there may be a designated _current context_ which is always used if explicit context is not given to the command.
-Inside the `$ims` configuration object, the name of the _current context_ is stored in the `$current` property.
+Inside the `ims` configuration object, the name of the _current context_ is stored in the `$current` property.
 
-Here is an example `$ims` configuration
+Here is an example `ims` configuration
 
 ```js
 {
-  $ims: {
+  ims: {
     sample_jwt: {
       client_id: "<jwt-clientid>",
       client_secret: "XXX",
@@ -223,7 +223,7 @@ Multiple plugins must be implemented in separate plugins.
 The configuration support modules for [JWT](/adobe/aio-lib-ims-jwt) and [OAuth2](/adobe/aio-lib-ims-oauth) are two such packages.
 The IMS Library has a dependency on the _JWT_ and _OAuth2_ plugins and will always try to use those.
 
-Additional plugins must be `npm install`-ed and listed in the `$ims/$plugins` array property.
+Additional plugins must be `npm install`-ed and listed in the `ims/$plugins` array property.
 This can easily be done in the package `postinstall` script like this:
 
 ```js
