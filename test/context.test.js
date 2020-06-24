@@ -27,7 +27,7 @@ test('exports', async () => {
   expect(typeof ctx.getContext).toEqual('function')
   expect(typeof ctx.resetContext).toEqual('function')
   expect(ctx.PLUGINS).toEqual('$plugins')
-  expect(ctx.CURRENT).toEqual('$current')
+  expect(ctx.CURRENT).toEqual('current')
   expect(ctx.IMS).toEqual('ims')
 })
 

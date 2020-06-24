@@ -25,10 +25,10 @@ const TYPE_CLI = 'cli'
 const IMS = 'ims'
 
 /** Property holding the cli context name */
-const CLI = '$cli'
+const CLI = 'cli'
 
 /** Property holding the current context name */
-const CURRENT = '$current'
+const CURRENT = 'current'
 
 /** Property holding the list of additional login plugins */
 const PLUGINS = '$plugins'

@@ -54,7 +54,7 @@ Each such configuration is stored in its own named object with the `ims` configu
 Such a configuration is called an _IMS (configuration) context_ and has a label which allows to refer to the configuration by name.
 
 To simplify usage, there may be a designated _current context_ which is always used if explicit context is not given to the command.
-Inside the `ims` configuration object, the name of the _current context_ is stored in the `$current` property.
+Inside the `ims` configuration object, the name of the _current context_ is stored in the `current` property.
 
 Here is an example `ims` configuration
 
@@ -78,7 +78,7 @@ Here is an example `ims` configuration
       client_secret: "XXX",
       scope: "openid AdobeID"
     },
-    $current: "sample_oauth2",
+    current: "sample_oauth2",
     $plugins: [
       "sample-aio-lib-ims-plugin"
     ]
