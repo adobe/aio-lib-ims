@@ -55,20 +55,20 @@ test('set(sheep, baa, false)', async () => {
   expect(aioConfig.set).toHaveBeenCalledWith('imsKey.sheep', 'baa', false)
 })
 
-test('contexts()', async () => {
+test('keys()', async () => {
   const config = new CliConfig('imsKey')
 
-  aioConfig.get.mockReturnValue({ $not: 'acontext', sheep: 'baah', cow: 'mooh' })
+  aioConfig.get.mockReturnValue({ sheep: 'baah', cow: 'mooh' })
 
-  await expect(config.contexts()).resolves.toEqual(['sheep', 'cow'])
+  await expect(config.keys()).resolves.toEqual(['sheep', 'cow'])
   expect(aioConfig.get).toHaveBeenCalledWith('imsKey')
 })
 
-test('contexts() (empty)', async () => {
+test('keys() (empty)', async () => {
   const config = new CliConfig('imsKey')
 
   aioConfig.get.mockReturnValue()
 
-  await expect(config.contexts()).resolves.toEqual([])
+  await expect(config.keys()).resolves.toEqual([])
   expect(aioConfig.get).toHaveBeenCalledWith('imsKey')
 })

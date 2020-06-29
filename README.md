@@ -79,7 +79,7 @@ Here is an example `ims` configuration
       scope: "openid AdobeID"
     },
     current: "sample_oauth2",
-    $plugins: [
+    plugins: [
       "sample-aio-lib-ims-plugin"
     ]
   }
@@ -223,7 +223,7 @@ Multiple plugins must be implemented in separate plugins.
 The configuration support modules for [JWT](/adobe/aio-lib-ims-jwt) and [OAuth2](/adobe/aio-lib-ims-oauth) are two such packages.
 The IMS Library has a dependency on the _JWT_ and _OAuth2_ plugins and will always try to use those.
 
-Additional plugins must be `npm install`-ed and listed in the `ims/$plugins` array property.
+Additional plugins must be `npm install`-ed and listed in the `ims/plugins` array property.
 This can easily be done in the package `postinstall` script like this:
 
 ```js

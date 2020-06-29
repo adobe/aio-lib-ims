@@ -57,14 +57,8 @@ class Config {
    *
    * @memberof Config
    */
-  async contexts () {
+  async keys () {
     throwNotImplemented()
-  }
-
-  /* Helpers */
-
-  _keyIsContextName (key) {
-    return !key.startsWith('$')
   }
 }
 

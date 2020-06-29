@@ -33,11 +33,5 @@ test('set(sheep, baa)', async () => {
 
 test('contexts()', async () => {
   const config = new Config('imsKey')
-  await expect(config.contexts()).rejects.toThrow('abstract method is not implemented')
-})
-
-test('_keyIsContextName', async () => {
-  const config = new Config('imsKey')
-  expect(config._keyIsContextName('$cow')).toBe(false)
-  expect(config._keyIsContextName('cow')).toBe(true)
+  await expect(config.keys()).rejects.toThrow('abstract method is not implemented')
 })

@@ -31,7 +31,18 @@ const CLI = 'cli'
 const CURRENT = 'current'
 
 /** Property holding the list of additional login plugins */
-const PLUGINS = '$plugins'
+const PLUGINS = 'plugins'
+
+/**
+ * Ensures key is a valid context name and not a reserved key
+ *
+ * @param {string} key the context key to set
+ * @returns {boolean} valid or not
+ * @protected
+ */
+function isValidCtx (key) {
+  return ![CLI, CURRENT, PLUGINS].includes(key)
+}
 
 /**
  * The `context` object manages the IMS configuration contexts on behalf of
@@ -41,7 +52,7 @@ class Context {
   constructor (contextType) {
     switch (contextType) {
       case TYPE_ACTION:
-        this._config = new ActionConfig(IMS)
+        this._config = new ActionConfig(IMS, isValidCtx)
         break
       case TYPE_CLI:
       case undefined: // default
@@ -176,6 +187,10 @@ class Context {
    */
   async set (contextName, contextData, local = false) {
     debug('set(%s, %o)', contextName, contextData, !!local)
+    if (contextName && !isValidCtx(contextName)) {
+      throw new Error(`${contextName} is a reserved key`)
+    }
+
     let current
     if (!contextName) {
       current = await this.getCurrent()
@@ -201,7 +216,7 @@ class Context {
    */
   async keys () {
     debug('keys()')
-    return this._config.contexts()
+    return (await this._config.keys()).filter(isValidCtx)
   }
 }
 

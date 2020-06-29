@@ -26,7 +26,7 @@ beforeEach(() => {
 test('exports', async () => {
   expect(typeof ctx.getContext).toEqual('function')
   expect(typeof ctx.resetContext).toEqual('function')
-  expect(ctx.PLUGINS).toEqual('$plugins')
+  expect(ctx.PLUGINS).toEqual('plugins')
   expect(ctx.CURRENT).toEqual('current')
   expect(ctx.IMS).toEqual('ims')
 })
@@ -47,7 +47,7 @@ describe('getContext', () => {
   })
 
   test('with action config', async () => {
-    process.env.__OW_ACTION_NAME = 'yolo'
+    process.env.__OW_ACTION_NAME = 'fake'
     const context = await ctx.getContext()
     expect(CliConfig).toHaveBeenCalledTimes(0)
     expect(ActionConfig).toHaveBeenCalledTimes(1)
@@ -64,7 +64,7 @@ describe('init context with action config', () => {
     ctx.resetContext()
   })
   test('ctx.getContext', async () => {
-    process.env.__OW_ACTION_NAME = 'yolo'
+    process.env.__OW_ACTION_NAME = 'fake'
     const context = await ctx.getContext()
     expect(CliConfig).toHaveBeenCalledTimes(0)
     expect(ActionConfig).toHaveBeenCalledTimes(1)
@@ -166,32 +166,39 @@ describe('context operations (cli config)', () => {
     expect(_config.get).toHaveBeenCalledWith('myContext')
   })
 
+  test('expect error on set(reservedKey)', async () => {
+    await expect(context.set(ctx.CURRENT)).rejects.toThrow('is a reserved key')
+    await expect(context.set(ctx.PLUGINS)).rejects.toThrow('is a reserved key')
+    await expect(context.set(ctx.CLI)).rejects.toThrow('is a reserved key')
+  })
+
   test('keys()', async () => {
-    _config.contexts.mockResolvedValue(['yo', 'lo'])
+    // make sure reserved keys are not returned
+    _config.keys.mockResolvedValue(['yo', 'lo', ctx.CURRENT, ctx.PLUGINS, ctx.CLI])
     await expect(context.keys()).resolves.toEqual(['yo', 'lo'])
-    expect(_config.contexts).toHaveBeenCalledTimes(1)
+    expect(_config.keys).toHaveBeenCalledTimes(1)
   })
 
   test('getCurrent()', async () => {
-    _config.get.mockResolvedValue('yolo')
-    await expect(context.getCurrent()).resolves.toEqual('yolo')
+    _config.get.mockResolvedValue('fake')
+    await expect(context.getCurrent()).resolves.toEqual('fake')
     expect(_config.get).toHaveBeenCalledWith(ctx.CURRENT)
   })
 
   test('setCurrent()', async () => {
-    await expect(context.setCurrent('yolo')).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'yolo', true)
+    await expect(context.setCurrent('fake')).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.CURRENT, 'fake', true)
   })
 
   test('getPlugins()', async () => {
-    _config.get.mockResolvedValue('yolo')
-    await expect(context.getPlugins()).resolves.toEqual('yolo')
+    _config.get.mockResolvedValue('fake')
+    await expect(context.getPlugins()).resolves.toEqual('fake')
     expect(_config.get).toHaveBeenCalledWith(ctx.PLUGINS)
   })
 
   test('setPlugins()', async () => {
-    await expect(context.setPlugins('yolo')).resolves.toBeUndefined()
-    expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'yolo', false)
+    await expect(context.setPlugins('fake')).resolves.toBeUndefined()
+    expect(_config.set).toHaveBeenCalledWith(ctx.PLUGINS, 'fake', false)
   })
 
   test('setCli with string (error)', async () => {

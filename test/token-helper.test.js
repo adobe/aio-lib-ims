@@ -33,7 +33,7 @@ function createHandlerForContext (context = {}, imsPlugin) {
 
   const store = {
     ...mappedContext,
-    'ims.$plugins': imsPlugin ? [imsPlugin] : null
+    'ims.plugins': imsPlugin ? [imsPlugin] : null
   }
 
   return function (key) {

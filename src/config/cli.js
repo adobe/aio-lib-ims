@@ -44,8 +44,8 @@ class CliConfig extends Config {
    * @memberof CliConfig
    * @override
    */
-  async contexts () {
-    return Object.keys(this._cliConfig.get(`${this.configKey}`) || {}).filter(this._keyIsContextName)
+  async keys () {
+    return Object.keys(this._cliConfig.get(`${this.configKey}`) || {})
   }
 }
 

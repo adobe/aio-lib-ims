@@ -38,8 +38,11 @@ afterAll(() => {
   Date.now = DateNowFunc
 })
 
+const reservedKey = 'reservedKey'
+const mockIsValidCtx = k => k !== reservedKey
+
 test('constructor', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   expect(config._data).toEqual({})
   expect(config._state).toEqual(null)
   expect(config._tokensLoaded).toEqual(false)
@@ -47,46 +50,47 @@ test('constructor', async () => {
 
 test('constructor missing __OW_ACTION_NAME ENV', () => {
   delete process.env.__OW_ACTION_NAME
-  expect(() => new ActionConfig('imsKey')).toThrow('missing environment variable(s) \'__OW_ACTION_NAME\'')
+  expect(() => new ActionConfig('imsKey', mockIsValidCtx)).toThrow('missing environment variable(s) \'__OW_ACTION_NAME\'')
 })
 
 test('constructor missing __OW_NAMESPACE ENV', () => {
   delete process.env.__OW_NAMESPACE
-  expect(() => new ActionConfig('imsKey')).toThrow('missing environment variable(s) \'__OW_NAMESPACE\'')
+  expect(() => new ActionConfig('imsKey', mockIsValidCtx)).toThrow('missing environment variable(s) \'__OW_NAMESPACE\'')
 })
 test('constructor missing __OW_API_KEY ENV', () => {
   delete process.env.__OW_API_KEY
-  expect(() => new ActionConfig('imsKey')).toThrow('missing environment variable(s) \'__OW_API_KEY\'')
+  expect(() => new ActionConfig('imsKey', mockIsValidCtx)).toThrow('missing environment variable(s) \'__OW_API_KEY\'')
 })
 
 test('constructor missing __OW_NAMESPACE,__OW_ACTION_NAME,__OW_API_KEY ENV', () => {
   delete process.env.__OW_NAMESPACE
   delete process.env.__OW_ACTION_NAME
   delete process.env.__OW_API_KEY
-  expect(() => new ActionConfig('imsKey')).toThrow('missing environment variable(s) \'__OW_ACTION_NAME,__OW_NAMESPACE,__OW_API_KEY\'')
+  expect(() => new ActionConfig('imsKey', mockIsValidCtx)).toThrow('missing environment variable(s) \'__OW_ACTION_NAME,__OW_NAMESPACE,__OW_API_KEY\'')
 })
 
-test('get($notacontext), no data', async () => {
-  const config = new ActionConfig('imsKey')
+test('get(reservedKey), no data', async () => {
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
 
-  await expect(config.get('$notacontext')).resolves.toBeUndefined()
+  await expect(config.get('reservedKey')).resolves.toBeUndefined()
 })
 
-test('get($notacontext), some data', async () => {
-  const config = new ActionConfig('imsKey')
-  config._data = { $notacontext: 'data' }
-  await expect(config.get('$notacontext')).resolves.toEqual('data')
+test('get(reservedKey), some data', async () => {
+  // make sure although the key is reserved we get the data at config level
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
+  config._data = { reservedKey: 'data' }
+  await expect(config.get('reservedKey')).resolves.toEqual('data')
 })
 
-test('set($notacontext, data)', async () => {
-  const config = new ActionConfig('imsKey')
+test('set(reservedKey, data)', async () => {
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
 
-  await expect(config.set('$notacontext', 'data')).resolves.toBeUndefined()
-  expect(config._data.$notacontext).toEqual('data')
+  await expect(config.set('reservedKey', 'data')).resolves.toBeUndefined()
+  expect(config._data.reservedKey).toEqual('data')
 })
 
 test('get(cow), no data, no tokens', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   await expect(config.get('cow')).resolves.toBeUndefined()
   // no context no token loaded, but state instance is defined
   expect(mockState.get).not.toHaveBeenCalled()
@@ -94,8 +98,8 @@ test('get(cow), no data, no tokens', async () => {
 })
 
 test('get(cow) twice, some data with 2 contexts, no tokens', async () => {
-  const config = new ActionConfig('imsKey')
-  config._data = { cow: 'data', sheep: 'data2', $notcontext: 'data3' }
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
+  config._data = { cow: 'data', sheep: 'data2', reservedKey: 'data3' }
 
   await expect(config.get('cow')).resolves.toEqual('data')
   // should load tokens for each context once
@@ -110,7 +114,7 @@ test('get(cow) twice, some data with 2 contexts, no tokens', async () => {
 })
 
 test('get(cow) twice, some data, some tokens', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 1 }, sheep: { data: 2 } }
   mockState.get.mockResolvedValue({ value: { access_token: 'abc', refresh_token: 'def' } })
 
@@ -128,7 +132,7 @@ test('get(cow) twice, some data, some tokens', async () => {
 })
 
 test('get(cow) twice, some data, state with no token data', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 1 }, sheep: { data: 2 } }
   mockState.get.mockResolvedValue({ value: { yolo_config: 'be' } })
 
@@ -146,7 +150,7 @@ test('get(cow) twice, some data, state with no token data', async () => {
 })
 
 test('set(cow, { data: 1 }) with no previous data', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   await expect(config.set('cow', { data: 1 })).resolves.toBeUndefined()
   expect(mockState.put).not.toHaveBeenCalled()
   expect(config._state).toEqual(null)
@@ -154,7 +158,7 @@ test('set(cow, { data: 1 }) with no previous data', async () => {
 })
 
 test('set(cow, { data: 1 }) and previous data = { cow: { data: 2 }, sheep: { data: 2 } }', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 2 }, sheep: { data: 2 } }
   await expect(config.set('cow', { data: 1 })).resolves.toBeUndefined()
   expect(mockState.put).not.toHaveBeenCalled()
@@ -162,27 +166,27 @@ test('set(cow, { data: 1 }) and previous data = { cow: { data: 2 }, sheep: { dat
   expect(config._data).toEqual({ cow: { data: 1 }, sheep: { data: 2 } })
 })
 
-test('set($cow, { data: 1 }) with no previous data', async () => {
-  const config = new ActionConfig('imsKey')
-  await expect(config.set('$cow', { data: 1 })).resolves.toBeUndefined()
+test('set(reservedKey, { data: 1 }) with no previous data', async () => {
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
+  await expect(config.set('reservedKey', { data: 1 })).resolves.toBeUndefined()
   // no context no token stored
   expect(mockState.put).not.toHaveBeenCalled()
   expect(config._state).toEqual(null)
-  expect(config._data).toEqual({ $cow: { data: 1 } })
+  expect(config._data).toEqual({ reservedKey: { data: 1 } })
 })
 
-test('set($cow, { data: 1 }) and previous data = { $cow: { data: 2 }, cow: { data: 2 } }', async () => {
-  const config = new ActionConfig('imsKey')
-  config._data = { $cow: { data: 2 }, cow: { data: 2 } }
-  await expect(config.set('$cow', { data: 1 })).resolves.toBeUndefined()
+test('set(reservedKey, { data: 1 }) and previous data = { reservedKey: { data: 2 }, cow: { data: 2 } }', async () => {
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
+  config._data = { reservedKey: { data: 2 }, cow: { data: 2 } }
+  await expect(config.set('reservedKey', { data: 1 })).resolves.toBeUndefined()
   // no context no token stored
   expect(mockState.put).not.toHaveBeenCalled()
   expect(config._state).toEqual(null)
-  expect(config._data).toEqual({ $cow: { data: 1 }, cow: { data: 2 } })
+  expect(config._data).toEqual({ reservedKey: { data: 1 }, cow: { data: 2 } })
 })
 
 test('set(cow, { data:1, access_token: { token: hello, expiry: 1000 } }) with no previous data', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   await expect(config.set('cow', { data: 1, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } })).resolves.toBeUndefined()
   expect(config._state).toBeDefined()
   // ttl = 1000ms = 1sec (ttl in sec, while expiry in ms)
@@ -191,7 +195,7 @@ test('set(cow, { data:1, access_token: { token: hello, expiry: 1000 } }) with no
 })
 
 test('set(cow, { data:1, access_token: { token: hello, expiry: +1000 } }) previous data = { cow: { data: 2 } }', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 2 } }
   await expect(config.set('cow', { data: 1, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } })).resolves.toBeUndefined()
   expect(config._state).toBeDefined()
@@ -202,7 +206,7 @@ test('set(cow, { data:1, access_token: { token: hello, expiry: +1000 } }) previo
 
 test('set(cow, { data:1 }) and previous data = { cow: { data: 2 }, access_token: { token: hello, expiry: 1000 } } }', async () => {
   // in that case we should delete the tokens
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 2, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } } }
   await expect(config.set('cow', { data: 1 })).resolves.toBeUndefined()
   expect(config._state).toBeDefined()
@@ -211,7 +215,7 @@ test('set(cow, { data:1 }) and previous data = { cow: { data: 2 }, access_token:
 })
 
 test('set(cow, { data:1, access_token: { token: hello, expiry: +1000 } }, refresh_token: { token: hello2, expiry: +2000 } }) with no previous data', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   await expect(config.set('cow', { data: 1, access_token: { token: 'hello', expiry: DATE_NOW + 1000 }, refresh_token: { token: 'hello2', expiry: DATE_NOW + 2000 } })).resolves.toBeUndefined()
   expect(config._state).toBeDefined()
   // take biggest ttl 2000ms = 1s
@@ -221,7 +225,7 @@ test('set(cow, { data:1, access_token: { token: hello, expiry: +1000 } }, refres
 
 test('set(cow, { data:1, refresh_token: { token: hello2, expiry: +2000 } }) and previous data = { cow: { data: 2 }, access_token: { token: hello, expiry: 1000 } } }', async () => {
   // in that case we should update the state with new ttl and tokens
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 2, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } } }
   await expect(config.set('cow', { data: 1, refresh_token: { token: 'hello2', expiry: DATE_NOW + 2000 } })).resolves.toBeUndefined()
   expect(config._state).toBeDefined()
@@ -231,7 +235,7 @@ test('set(cow, { data:1, refresh_token: { token: hello2, expiry: +2000 } }) and 
 
 test('set(cow, { data:1, access_token: { token: hello2, expiry: +2000 } }) and previous data = { cow: { data: 2 }, access_token: { token: hello, expiry: 1000 } } }', async () => {
   // in that case we should update the state with new ttl and tokens
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   config._data = { cow: { data: 2, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } } }
   await expect(config.set('cow', { data: 1, access_token: { token: 'hello2', expiry: DATE_NOW + 2000 } })).resolves.toBeUndefined()
   expect(config._state).toBeDefined()
@@ -240,7 +244,7 @@ test('set(cow, { data:1, access_token: { token: hello2, expiry: +2000 } }) and p
 })
 
 test('set(cow, { data:1, access_token: { token: hello, expiry: 1000 } }, true) [local=true=nocaching]', async () => {
-  const config = new ActionConfig('imsKey')
+  const config = new ActionConfig('imsKey', mockIsValidCtx)
   await expect(config.set('cow', { data: 1, access_token: { token: 'hello', expiry: DATE_NOW + 1000 } }, true)).resolves.toBeUndefined()
   expect(config._state).toBeNull()
   expect(mockState.put).not.toHaveBeenCalled()

@@ -16,8 +16,9 @@ const Config = require('./config')
 const cloneDeep = require('lodash.clonedeep')
 
 class ActionConfig extends Config {
-  constructor (configKey) {
+  constructor (configKey, isValidCtx) {
     super(configKey)
+    this.isValidCtx = isValidCtx
     // constructor helpers
     /** @private */
     function _checkOWEnv () {
@@ -47,7 +48,7 @@ class ActionConfig extends Config {
    */
   async get (key) {
     debug('get(%s)', key)
-    if (super._keyIsContextName(key)) {
+    if (this.isValidCtx(key)) {
       await this._loadTokensOnce()
     }
 
@@ -61,7 +62,7 @@ class ActionConfig extends Config {
   async set (key, data, local = false) {
     debug('set(%s, %o)', key, data)
 
-    if (!local && super._keyIsContextName(key)) {
+    if (!local && this.isValidCtx(key)) {
       if (this._hasToken(data)) {
         await this._setTokens(key, data)
       } else if (this._hasToken(this._data[key]) && !this._hasToken(data)) {
@@ -79,9 +80,9 @@ class ActionConfig extends Config {
    * @memberof ActionConfig
    * @override
    */
-  async contexts () {
+  async keys () {
     debug('contexts()')
-    return Object.keys(this._data).filter(this._keyIsContextName)
+    return Object.keys(this._data)
   }
 
   /* helpers */
@@ -104,7 +105,7 @@ class ActionConfig extends Config {
   async _loadTokensOnce () {
     await this._initStateOnce()
     if (!this._tokensLoaded) {
-      const contexts = await this.contexts()
+      const contexts = (await this.keys()).filter(this.isValidCtx)
 
       // try to retrieve a token for each context
       const results = await Promise.all(
