@@ -23,7 +23,7 @@ function createHandlerForContext (context = {}, imsPlugin) {
     // prefix ims. to all the keys
     .map(key => {
       return {
-        [`ims.${key}`]: context[key]
+        [`ims.contexts.${key}`]: context[key]
       }
     })
     // merge the objects
@@ -33,7 +33,7 @@ function createHandlerForContext (context = {}, imsPlugin) {
 
   const store = {
     ...mappedContext,
-    'ims.plugins': imsPlugin ? [imsPlugin] : null
+    'ims.config.plugins': imsPlugin ? [imsPlugin] : null
   }
 
   return function (key) {

@@ -61,27 +61,31 @@ Here is an example `ims` configuration
 ```js
 {
   ims: {
-    sample_jwt: {
-      client_id: "<jwt-clientid>",
-      client_secret: "XXX",
-      technical_account_id: "<guid>@techacct.adobe.com",
-      technical_account_email: "<another_guid>@techacct.adobe.com",
-      meta_scopes: [
-        "ent_dataservices_sdk"
-      ],
-      ims_org_id: "<org-guid>@AdobeOrg",
-      private_key: "XXX"
+    contexts: {
+      sample_jwt: {
+        client_id: "<jwt-clientid>",
+        client_secret: "XXX",
+        technical_account_id: "<guid>@techacct.adobe.com",
+        technical_account_email: "<another_guid>@techacct.adobe.com",
+        meta_scopes: [
+          "ent_dataservices_sdk"
+        ],
+        ims_org_id: "<org-guid>@AdobeOrg",
+        private_key: "XXX"
+      },
+      sample_oauth2: {
+        callback_url: "https://callback.example.com",
+        client_id: "<oauth2-clientid>",
+        client_secret: "XXX",
+        scope: "openid AdobeID"
+      },
     },
-    sample_oauth2: {
-      callback_url: "https://callback.example.com",
-      client_id: "<oauth2-clientid>",
-      client_secret: "XXX",
-      scope: "openid AdobeID"
-    },
-    current: "sample_oauth2",
-    plugins: [
-      "sample-aio-lib-ims-plugin"
-    ]
+    config: {
+      current: "sample_oauth2",
+      plugins: [
+        "sample-aio-lib-ims-plugin"
+      ]
+    }
   }
 }
 ```
@@ -101,7 +105,10 @@ const token = await getToken();
 
 ## Running in an Adobe I/O Runtime action
 
-The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
+**Note that Project Firefly applications should not own the responsibility to generate their own IMS access tokens.
+We strongly discourage this approach in favor of more secure implementation patterns that are documented in our [Project Firefly Security Guide](https://github.com/AdobeDocs/project-firefly/blob/master/guides/security_overview.md).**
+
+The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Adobe I/O Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
 
 Here is an Adobe I/O Runtime action example that leverages the AIO IMS:
 
