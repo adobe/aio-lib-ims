@@ -17,7 +17,20 @@
 
 <dl>
 <dt><a href="#Ims">Ims</a></dt>
-<dd></dd>
+<dd><p>The <code>Ims</code> class wraps the IMS API.</p>
+</dd>
+<dt><a href="#ConfigCliContext">ConfigCliContext</a></dt>
+<dd><p>The <code>ConfigCliContext</code> class stores IMS <code>contexts</code> for the Adobe I/O CLI in the local file
+system using the Adobe I/O Core Configuration Library.</p>
+</dd>
+<dt><a href="#Context">Context</a></dt>
+<dd><p>The <code>Context</code> abstract class provides an interface to manage the IMS configuration contexts on behalf of
+the Adobe I/O Lib IMS Library.</p>
+</dd>
+<dt><a href="#StateActionContext">StateActionContext</a></dt>
+<dd><p>The <code>StateActionContext</code> class stores IMS <code>contexts</code> for Adobe I/O Runtime Actions in the
+cloud using the Adobe I/O State Library.</p>
+</dd>
 </dl>
 
 ## Constants
@@ -184,6 +197,8 @@ this refresh token will automatically become invalid as well.
 <a name="Ims"></a>
 
 ## Ims
+The `Ims` class wraps the IMS API.
+
 **Kind**: global class  
 
 * [Ims](#Ims)
@@ -205,7 +220,7 @@ this refresh token will automatically become invalid as well.
 <a name="new_Ims_new"></a>
 
 ### new Ims(env)
-Creats a new IMS connector instance for the stage or prod environment
+Creates a new IMS connector instance for the stage or prod environment
 
 
 | Param | Type | Description |
@@ -417,6 +432,239 @@ environment from the `as` claim in the provided access token.
 | --- | --- | --- |
 | token | <code>string</code> | The access token from which to extract the      environment to setup the `Ims` instancee. |
 
+<a name="ConfigCliContext"></a>
+
+## ConfigCliContext
+The `ConfigCliContext` class stores IMS `contexts` for the Adobe I/O CLI in the local file
+system using the Adobe I/O Core Configuration Library.
+
+**Kind**: global class  
+
+* [ConfigCliContext](#ConfigCliContext)
+    * [.getCli()](#ConfigCliContext+getCli) ⇒ <code>Promise.&lt;any&gt;</code>
+    * [.setCli(contextData, [local], [merge])](#ConfigCliContext+setCli)
+
+<a name="ConfigCliContext+getCli"></a>
+
+### configCliContext.getCli() ⇒ <code>Promise.&lt;any&gt;</code>
+Gets the cli context data
+
+**Kind**: instance method of [<code>ConfigCliContext</code>](#ConfigCliContext)  
+**Returns**: <code>Promise.&lt;any&gt;</code> - the cli context data  
+<a name="ConfigCliContext+setCli"></a>
+
+### configCliContext.setCli(contextData, [local], [merge])
+Sets the cli context data
+
+**Kind**: instance method of [<code>ConfigCliContext</code>](#ConfigCliContext)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| contextData | <code>object</code> |  | the data to save |
+| [local] | <code>boolean</code> | <code>true</code> | set to true to save to local config, false for global config |
+| [merge] | <code>boolean</code> | <code>true</code> | set to true to merge existing data with the new data |
+
+<a name="Context"></a>
+
+## Context
+The `Context` abstract class provides an interface to manage the IMS configuration contexts on behalf of
+the Adobe I/O Lib IMS Library.
+
+**Kind**: global class  
+
+* [Context](#Context)
+    * [.getCurrent()](#Context+getCurrent) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.setCurrent(contextName, [local])](#Context+setCurrent) ⇒ <code>Promise.&lt;any&gt;</code>
+    * [.getPlugins()](#Context+getPlugins) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+    * [.setPlugins(plugins)](#Context+setPlugins)
+    * [.get(contextName)](#Context+get) ⇒ <code>Promise.&lt;object&gt;</code>
+    * [.set(contextName, contextData, local)](#Context+set)
+    * [.keys()](#Context+keys) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+    * [.getConfigValue(configName)](#Context+getConfigValue) ⇒ <code>Promise.&lt;any&gt;</code>
+    * [.setConfigValue(configName, configValue, isLocal)](#Context+setConfigValue)
+    * [.getContextValue(contextName)](#Context+getContextValue) ⇒ <code>Promise.&lt;any&gt;</code>
+    * [.setContextValue(contextName, ctxValue, isLocal)](#Context+setContextValue)
+    * [.contextKeys()](#Context+contextKeys) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+
+<a name="Context+getCurrent"></a>
+
+### context.getCurrent() ⇒ <code>Promise.&lt;string&gt;</code>
+Gets the current context name.
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - the current context name  
+<a name="Context+setCurrent"></a>
+
+### context.setCurrent(contextName, [local]) ⇒ <code>Promise.&lt;any&gt;</code>
+Sets the current context name
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;any&gt;</code> - returns an instance of the Config object  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| contextName | <code>string</code> |  | The name of the context to use as the current context |
+| [local] | <code>boolean</code> | <code>true</code> | Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime. |
+
+<a name="Context+getPlugins"></a>
+
+### context.getPlugins() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
+are required by the AIO Lib IMS library and are always installed and used.
+
+Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
+global configuration.
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - array of plugins  
+<a name="Context+setPlugins"></a>
+
+### context.setPlugins(plugins)
+Sets the list of additional IMS login plugins to consider.
+The JWT and OAuth2 plugins are required by the AIO Lib IMS
+library and are always installed and used.
+
+Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
+global configuration.
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| plugins | <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> | array of plugins |
+
+<a name="Context+get"></a>
+
+### context.get(contextName) ⇒ <code>Promise.&lt;object&gt;</code>
+Returns an object representing the named context.
+If the contextName parameter is empty or missing, it defaults to the
+current context name. The result is an object with two properties:
+
+  - `name`: The actual context name used
+  - `data`: The IMS context data
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - The configuration object  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| contextName | <code>string</code> | Name of the context information to return. |
+
+<a name="Context+set"></a>
+
+### context.set(contextName, contextData, local)
+Updates the named configuration with new configuration data. If a configuration
+object for the named context already exists it is completely replaced with this new
+configuration. If no current contexts are set, then contextName will be set as
+current context.
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| contextName | <code>string</code> |  | Name of the context to update |
+| contextData | <code>object</code> |  | The configuration data to store for the context |
+| local | <code>boolean</code> | <code>false</code> | Persist in local or global configuration. When running in Adobe I/O Runtime, setting `local = true` disables persistence of generated tokens. |
+
+<a name="Context+keys"></a>
+
+### context.keys() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+Returns the names of the configured contexts as an array of strings.
+
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - The names of the currently known configurations.  
+<a name="Context+getConfigValue"></a>
+
+### context.getConfigValue(configName) ⇒ <code>Promise.&lt;any&gt;</code>
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;any&gt;</code> - config value  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| configName | <code>string</code> | config name |
+
+<a name="Context+setConfigValue"></a>
+
+### context.setConfigValue(configName, configValue, isLocal)
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| configName | <code>string</code> | config name |
+| configValue | <code>any</code> | config value |
+| isLocal | <code>boolean</code> | write local or not |
+
+<a name="Context+getContextValue"></a>
+
+### context.getContextValue(contextName) ⇒ <code>Promise.&lt;any&gt;</code>
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;any&gt;</code> - context value  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| contextName | <code>string</code> | context name |
+
+<a name="Context+setContextValue"></a>
+
+### context.setContextValue(contextName, ctxValue, isLocal)
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| contextName | <code>string</code> | config name |
+| ctxValue | <code>any</code> | config value |
+| isLocal | <code>boolean</code> | write local or not |
+
+<a name="Context+contextKeys"></a>
+
+### context.contextKeys() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+**Kind**: instance method of [<code>Context</code>](#Context)  
+**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - return defined contexts  
+**Access**: protected  
+<a name="StateActionContext"></a>
+
+## StateActionContext
+The `StateActionContext` class stores IMS `contexts` for Adobe I/O Runtime Actions in the
+cloud using the Adobe I/O State Library.
+
+**Kind**: global class  
+
+* [StateActionContext](#StateActionContext)
+    * [.getContextValue()](#StateActionContext+getContextValue)
+    * [.getConfigValue()](#StateActionContext+getConfigValue)
+    * [.setContextValue()](#StateActionContext+setContextValue)
+    * [.setConfigValue()](#StateActionContext+setConfigValue)
+    * [.contextKeys()](#StateActionContext+contextKeys)
+
+<a name="StateActionContext+getContextValue"></a>
+
+### stateActionContext.getContextValue()
+**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
+**Access**: protected  
+<a name="StateActionContext+getConfigValue"></a>
+
+### stateActionContext.getConfigValue()
+**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
+**Access**: protected  
+<a name="StateActionContext+setContextValue"></a>
+
+### stateActionContext.setContextValue()
+**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
+**Access**: protected  
+<a name="StateActionContext+setConfigValue"></a>
+
+### stateActionContext.setConfigValue()
+**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
+**Access**: protected  
+<a name="StateActionContext+contextKeys"></a>
+
+### stateActionContext.contextKeys()
+**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
+**Access**: protected  
 <a name="TYPE_ACTION"></a>
 
 ## TYPE\_ACTION

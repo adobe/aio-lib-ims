@@ -185,11 +185,11 @@ function getTokenData (token) {
 }
 
 /**
- * @class
+ * The `Ims` class wraps the IMS API.
  */
 class Ims {
   /**
-   * Creats a new IMS connector instance for the stage or prod environment
+   * Creates a new IMS connector instance for the stage or prod environment
    *
    * @param {string} env The name of the environment. `prod` and `stage`
    *      are the only values supported. `prod` is default and any value
