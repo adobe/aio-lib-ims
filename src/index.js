@@ -35,35 +35,32 @@ const {
  * @exports @adobe/aio-lib-ims
  */
 module.exports = {
-  /** @see (#getTokenData) */
+  /** @see [`getTokenData`](#gettokendata) */
   getTokenData,
 
-  /** @see (#Ims) */
+  /** @see [`Ims`](#ims) */
   Ims,
 
-  /** @see (#ACCESS_TOKEN) */
+  /** @see [`ACCESS_TOKEN`](#access_token) */
   ACCESS_TOKEN,
 
-  /** @see (#REFRESH_TOKEN) */
+  /** @see [`REFRESH_TOKEN`](#refresh_token) */
   REFRESH_TOKEN,
 
-  /** @see (#AUTHORIZATION_CODE) */
+  /** @see [`AUTHORIZATION_CODE`](#authorization_code) */
   AUTHORIZATION_CODE,
 
-  /** @see (#CLIENT_ID) */
+  /** @see [`CLIENT_ID`](#client_id) */
   CLIENT_ID,
 
-  /** @see (#CLIENT_SECRET) */
+  /** @see [`CLIENT_SECRET`](#client_secret) */
   CLIENT_SECRET,
 
-  /** @see (#SCOPE) */
+  /** @see [`SCOPE`](#scope) */
   SCOPE,
 
   /**
-   * The `context` object manages the IMS configuration contexts on behalf of
-   * the Adobe I/O Lib IMS Library.
-   *
-   * @see The context [`context`](#context) object
+   * @see [`Context`](#context)
    */
   context: getContext(),
 

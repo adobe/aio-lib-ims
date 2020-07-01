@@ -118,50 +118,47 @@ The `@adobe/aio-lib-ims` module offers three kinds of elements:
 
 ### @adobe/aio-lib-ims.getTokenData
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#getTokenData)  
+**See**: [`getTokenData`](#gettokendata)  
 <a name="module_@adobe/aio-lib-ims.Ims"></a>
 
 ### @adobe/aio-lib-ims.Ims
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#Ims)  
+**See**: [`Ims`](#ims)  
 <a name="module_@adobe/aio-lib-ims.ACCESS_TOKEN"></a>
 
 ### @adobe/aio-lib-ims.ACCESS\_TOKEN
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#ACCESS_TOKEN)  
+**See**: [`ACCESS_TOKEN`](#access_token)  
 <a name="module_@adobe/aio-lib-ims.REFRESH_TOKEN"></a>
 
 ### @adobe/aio-lib-ims.REFRESH\_TOKEN
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#REFRESH_TOKEN)  
+**See**: [`REFRESH_TOKEN`](#refresh_token)  
 <a name="module_@adobe/aio-lib-ims.AUTHORIZATION_CODE"></a>
 
 ### @adobe/aio-lib-ims.AUTHORIZATION\_CODE
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#AUTHORIZATION_CODE)  
+**See**: [`AUTHORIZATION_CODE`](#authorization_code)  
 <a name="module_@adobe/aio-lib-ims.CLIENT_ID"></a>
 
 ### @adobe/aio-lib-ims.CLIENT\_ID
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#CLIENT_ID)  
+**See**: [`CLIENT_ID`](#client_id)  
 <a name="module_@adobe/aio-lib-ims.CLIENT_SECRET"></a>
 
 ### @adobe/aio-lib-ims.CLIENT\_SECRET
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#CLIENT_SECRET)  
+**See**: [`CLIENT_SECRET`](#client_secret)  
 <a name="module_@adobe/aio-lib-ims.SCOPE"></a>
 
 ### @adobe/aio-lib-ims.SCOPE
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: (#SCOPE)  
+**See**: [`SCOPE`](#scope)  
 <a name="module_@adobe/aio-lib-ims.context"></a>
 
 ### @adobe/aio-lib-ims.context
-The `context` object manages the IMS configuration contexts on behalf of
-the Adobe I/O Lib IMS Library.
-
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
-**See**: The context [`context`](#context) object  
+**See**: [`Context`](#context)  
 <a name="module_@adobe/aio-lib-ims.getToken"></a>
 
 ### @adobe/aio-lib-ims.getToken(contextName, [force]) ⇒ <code>Promise</code>
