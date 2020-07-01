@@ -28,7 +28,7 @@ class ConfigCliContext extends Context {
   /**
    * Gets the cli context data
    *
-   * @returns {object} the cli context data
+   * @returns {Promise<any>} the cli context data
    */
   async getCli () {
     debug('get cli')
@@ -50,7 +50,7 @@ class ConfigCliContext extends Context {
       throw new Error('contextData must be an object')
     }
 
-    const existingData = await this.getCli()
+    const existingData = merge ? await this.getCli() : {}
     this.setContextValue(`${this.keyNames.CLI}`, { ...existingData, ...contextData }, local)
   }
 

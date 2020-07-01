@@ -11,9 +11,9 @@ governing permissions and limitations under the License.
 */
 
 const debug = require('debug')('@adobe/aio-lib-ims/ctx/StateActionContext')
+const cloneDeep = require('lodash.clonedeep')
 const Context = require('./Context')
 const State = require('@adobe/aio-lib-state')
-const cloneDeep = require('lodash.clonedeep')
 
 /**
  * The `StateActionContext` class stores IMS `contexts` for Adobe I/O Runtime Actions in the
@@ -89,6 +89,8 @@ class StateActionContext extends Context {
         await this.deleteTokens(key)
       }
     }
+
+    this.data[this.keyNames.CONTEXTS][key] = cloneDeep(value)
   }
 
   /**
@@ -131,10 +133,10 @@ class StateActionContext extends Context {
       results.forEach(ret => {
         if (ret.stateData && ret.stateData.value) {
           if (ret.stateData.value.access_token) {
-            this.data[ret.contextName].access_token = ret.stateData.value.access_token
+            this.data[this.keyNames.CONTEXTS][ret.contextName].access_token = ret.stateData.value.access_token
           }
           if (ret.stateData.value.refresh_token) {
-            this.data[ret.contextName].refresh_token = ret.stateData.value.refresh_token
+            this.data[this.keyNames.CONTEXTS][ret.contextName].refresh_token = ret.stateData.value.refresh_token
           }
         }
       })
