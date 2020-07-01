@@ -16,10 +16,6 @@
 ## Classes
 
 <dl>
-<dt><a href="#Context">Context</a></dt>
-<dd><p>The <code>context</code> object manages the IMS configuration contexts on behalf of
-the Adobe I/O Lib IMS Library.</p>
-</dd>
 <dt><a href="#Ims">Ims</a></dt>
 <dd></dd>
 </dl>
@@ -35,6 +31,12 @@ the Adobe I/O Lib IMS Library.</p>
 </dd>
 <dt><a href="#IMS">IMS</a></dt>
 <dd><p>Name of the IMS configuration context data structure</p>
+</dd>
+<dt><a href="#CONTEXTS">CONTEXTS</a></dt>
+<dd><p>Property holding an object with all contexts</p>
+</dd>
+<dt><a href="#CONFIG">CONFIG</a></dt>
+<dd><p>Property holding an object with context management configuration</p>
 </dd>
 <dt><a href="#CLI">CLI</a></dt>
 <dd><p>Property holding the cli context name</p>
@@ -68,7 +70,7 @@ the Adobe I/O Lib IMS Library.</p>
 ## Functions
 
 <dl>
-<dt><a href="#_sendPost">_sendPost(postUrl, token, postData)</a></dt>
+<dt><a href="#_sendPost">_sendPost(postUrl, token, postData)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Send a request via POST.</p>
 </dd>
 <dt><a href="#getTokenData">getTokenData(token)</a> ⇒ <code>object</code></dt>
@@ -97,7 +99,7 @@ The `@adobe/aio-lib-ims` module offers three kinds of elements:
     * [.SCOPE](#module_@adobe/aio-lib-ims.SCOPE)
     * [.context](#module_@adobe/aio-lib-ims.context)
     * [.getToken(contextName, [force])](#module_@adobe/aio-lib-ims.getToken) ⇒ <code>Promise</code>
-    * [.invalidateToken(contextName, [force])](#module_@adobe/aio-lib-ims.invalidateToken)
+    * [.invalidateToken(contextName, [force])](#module_@adobe/aio-lib-ims.invalidateToken) ⇒ <code>Promise</code>
 
 <a name="module_@adobe/aio-lib-ims.getTokenData"></a>
 
@@ -162,7 +164,7 @@ Returns an access token for the given context name.
 
 <a name="module_@adobe/aio-lib-ims.invalidateToken"></a>
 
-### @adobe/aio-lib-ims.invalidateToken(contextName, [force])
+### @adobe/aio-lib-ims.invalidateToken(contextName, [force]) ⇒ <code>Promise</code>
 Invalidates the access and optionally refresh of an IMS context.
 The name of the IMS context is given as its first parameter and defaults
 to the current context if missing or empty. The force parameter indicates
@@ -172,137 +174,13 @@ exists and is validated, all access tokens which have been created with
 this refresh token will automatically become invalid as well.
 
 **Kind**: static method of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
+**Returns**: <code>Promise</code> - Promise that resolves with the request data  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | contextName | <code>string</code> | The name of the IMS context for which to              invalidate the token(s). If this is empty, the token(s) of              the current IMS context are invalidated. |
 | [force] | <code>boolean</code> | Whether to invalidate just the access token or              to also invalidate the refresh token. Defaults to `false`. |
 
-<a name="Context"></a>
-
-## Context
-The `context` object manages the IMS configuration contexts on behalf of
-the Adobe I/O Lib IMS Library.
-
-**Kind**: global class  
-
-* [Context](#Context)
-    * [.getCli()](#Context+getCli) ⇒ <code>object</code>
-    * [.setCli(contextData, [local], [merge])](#Context+setCli)
-    * [.getCurrent()](#Context+getCurrent) ⇒ <code>Promise.&lt;string&gt;</code>
-    * [.setCurrent(contextName, [local])](#Context+setCurrent)
-    * [.getPlugins()](#Context+getPlugins) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-    * [.setPlugins(plugins)](#Context+setPlugins)
-    * [.get(contextName)](#Context+get) ⇒ <code>Promise.&lt;object&gt;</code>
-    * [.set(contextName, contextData, local)](#Context+set)
-    * [.keys()](#Context+keys) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-
-<a name="Context+getCli"></a>
-
-### context.getCli() ⇒ <code>object</code>
-Gets the cli context data
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>object</code> - the cli context data  
-<a name="Context+setCli"></a>
-
-### context.setCli(contextData, [local], [merge])
-Sets the cli context data
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| contextData | <code>object</code> |  | the data to save |
-| [local] | <code>boolean</code> | <code>true</code> | set to true to save to local config, false for global config |
-| [merge] | <code>boolean</code> | <code>true</code> | set to true to merge existing data with the new data |
-
-<a name="Context+getCurrent"></a>
-
-### context.getCurrent() ⇒ <code>Promise.&lt;string&gt;</code>
-Gets the current context name.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;string&gt;</code> - the current context name  
-<a name="Context+setCurrent"></a>
-
-### context.setCurrent(contextName, [local])
-Sets the current context name
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| contextName | <code>string</code> |  | The name of the context to use as the current context |
-| [local] | <code>boolean</code> | <code>true</code> | Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime. |
-
-<a name="Context+getPlugins"></a>
-
-### context.getPlugins() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
-are required by the AIO Lib IMS library and are always installed and used.
-
-Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
-global configuration.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - array of plugins  
-<a name="Context+setPlugins"></a>
-
-### context.setPlugins(plugins)
-Sets the list of additional IMS login plugins to consider.
-The JWT and OAuth2 plugins are required by the AIO Lib IMS
-library and are always installed and used.
-
-Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
-global configuration.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| plugins | <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> | array of plugins |
-
-<a name="Context+get"></a>
-
-### context.get(contextName) ⇒ <code>Promise.&lt;object&gt;</code>
-Returns an object representing the named context.
-If the contextName parameter is empty or missing, it defaults to the
-current context name. The result is an object with two properties:
-
-  - `name`: The actual context name used
-  - `data`: The IMS context data
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;object&gt;</code> - The configuration object  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| contextName | <code>string</code> | Name of the context information to return. |
-
-<a name="Context+set"></a>
-
-### context.set(contextName, contextData, local)
-Updates the named configuration with new configuration data. If a configuration
-object for the named context already exists it is completely replaced with this new
-configuration. If no current contexts are set, then contextName will be set as
-current context.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| contextName | <code>string</code> |  | Name of the context to update |
-| contextData | <code>object</code> |  | The configuration data to store for the context |
-| local | <code>boolean</code> | <code>false</code> | Persist in local or global configuration. When running in Adobe I/O Runtime, setting `local = true` disables persistence of generated tokens. |
-
-<a name="Context+keys"></a>
-
-### context.keys() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-Returns the names of the configured contexts as an array of strings.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - The names of the currently known configurations.  
 <a name="Ims"></a>
 
 ## Ims
@@ -316,9 +194,10 @@ Returns the names of the configured contexts as an array of strings.
         * [.get(api, token, parameters)](#Ims+get) ⇒ <code>Promise</code>
         * [.post(api, token, parameters)](#Ims+post) ⇒ <code>Promise</code>
         * [.getAccessToken(authCode, clientId, clientSecret, scopes)](#Ims+getAccessToken) ⇒ <code>Promise</code>
-        * [.exchangeJwtToken(clientId, clientSecret, signedJwtToken)](#Ims+exchangeJwtToken)
-        * [.invalidateToken(token, clientId, clientSecret)](#Ims+invalidateToken)
-        * [.validateToken(token, [clientId])](#Ims+validateToken)
+        * [.exchangeJwtToken(clientId, clientSecret, signedJwtToken)](#Ims+exchangeJwtToken) ⇒ <code>Promise</code>
+        * [.invalidateToken(token, clientId, clientSecret)](#Ims+invalidateToken) ⇒ <code>Promise</code>
+        * [.validateToken(token, [clientId])](#Ims+validateToken) ⇒ <code>object</code>
+        * [.getOrganizations(token)](#Ims+getOrganizations) ⇒ <code>object</code>
         * [.toTokenResult(token)](#Ims+toTokenResult) ⇒ <code>Promise</code>
     * _static_
         * [.fromToken(token)](#Ims.fromToken) ⇒ <code>Promise</code>
@@ -432,7 +311,7 @@ The promise resolve to the token result JavaScript object as follows:
 
 <a name="Ims+exchangeJwtToken"></a>
 
-### ims.exchangeJwtToken(clientId, clientSecret, signedJwtToken)
+### ims.exchangeJwtToken(clientId, clientSecret, signedJwtToken) ⇒ <code>Promise</code>
 Asks for the signed JWT token to be exchanged for a valid access
 token as well as a refresh token.
 The promise resolve to the token result JavaScript object as follows:
@@ -452,6 +331,7 @@ The promise resolve to the token result JavaScript object as follows:
 Note that there is no `refresh_token` in a JWT tokan exchange.
 
 **Kind**: instance method of [<code>Ims</code>](#Ims)  
+**Returns**: <code>Promise</code> - returns a Promise that resolves to the token result object  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -461,12 +341,13 @@ Note that there is no `refresh_token` in a JWT tokan exchange.
 
 <a name="Ims+invalidateToken"></a>
 
-### ims.invalidateToken(token, clientId, clientSecret)
+### ims.invalidateToken(token, clientId, clientSecret) ⇒ <code>Promise</code>
 Invalidates the given token. If the token is a refresh token, all the
 access tokens created with that refresh token will also be invalidated
 at the same time.
 
 **Kind**: instance method of [<code>Ims</code>](#Ims)  
+**Returns**: <code>Promise</code> - Promise that resolves with the request data  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -476,15 +357,28 @@ at the same time.
 
 <a name="Ims+validateToken"></a>
 
-### ims.validateToken(token, [clientId])
+### ims.validateToken(token, [clientId]) ⇒ <code>object</code>
 Verifies a given token.
 
 **Kind**: instance method of [<code>Ims</code>](#Ims)  
+**Returns**: <code>object</code> - the server response  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | the access token |
 | [clientId] | <code>string</code> | the client id, optional |
+
+<a name="Ims+getOrganizations"></a>
+
+### ims.getOrganizations(token) ⇒ <code>object</code>
+Gets the IMS organizations attached to the given token.
+
+**Kind**: instance method of [<code>Ims</code>](#Ims)  
+**Returns**: <code>object</code> - the server response  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | the access token |
 
 <a name="Ims+toTokenResult"></a>
 
@@ -539,6 +433,18 @@ Name of context type cli
 
 ## IMS
 Name of the IMS configuration context data structure
+
+**Kind**: global constant  
+<a name="CONTEXTS"></a>
+
+## CONTEXTS
+Property holding an object with all contexts
+
+**Kind**: global constant  
+<a name="CONFIG"></a>
+
+## CONFIG
+Property holding an object with context management configuration
 
 **Kind**: global constant  
 <a name="CLI"></a>
@@ -597,10 +503,11 @@ The constant string `scope`.
 **Kind**: global constant  
 <a name="_sendPost"></a>
 
-## \_sendPost(postUrl, token, postData)
+## \_sendPost(postUrl, token, postData) ⇒ <code>Promise</code>
 Send a request via POST.
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - Promise that resolves with the request data  
 
 | Param | Type | Description |
 | --- | --- | --- |
