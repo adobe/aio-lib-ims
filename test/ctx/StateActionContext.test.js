@@ -145,6 +145,7 @@ describe('getContextValue', () => {
     context.data[keyNames.CONTEXTS].fake = { the: 'value' }
     context.data[keyNames.CONTEXTS].fake2 = { the: 'value2' }
     context.data[keyNames.CONTEXTS].fake3 = { the: 'value3' }
+
     mockStateInstance.get.mockImplementation(k => {
       if (k.endsWith('fake')) return { value: { access_token: 123, refresh_token: 456, other: 'dontcare' } }
       if (k.endsWith('fake2')) return { value: { access_token: 789, other: 'dontcare' } }

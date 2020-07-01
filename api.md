@@ -1,4 +1,4 @@
-# Adobe I/O Lib Core IMS Library API Documentation
+# Adobe I/O Lib IMS Library API Documentation
 
 ## Modules
 
@@ -18,7 +18,7 @@
 <dl>
 <dt><a href="#Context">Context</a></dt>
 <dd><p>The <code>context</code> object manages the IMS configuration contexts on behalf of
-the Adobe I/O Lib Core IMS Library.</p>
+the Adobe I/O Lib IMS Library.</p>
 </dd>
 <dt><a href="#Ims">Ims</a></dt>
 <dd></dd>
@@ -143,7 +143,7 @@ The `@adobe/aio-lib-ims` module offers three kinds of elements:
 
 ### @adobe/aio-lib-ims.context
 The `context` object manages the IMS configuration contexts on behalf of
-the Adobe I/O Lib Core IMS Library.
+the Adobe I/O Lib IMS Library.
 
 **Kind**: static property of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
 **See**: The context [`context`](#context) object  
@@ -182,7 +182,7 @@ this refresh token will automatically become invalid as well.
 
 ## Context
 The `context` object manages the IMS configuration contexts on behalf of
-the Adobe I/O Lib Core IMS Library.
+the Adobe I/O Lib IMS Library.
 
 **Kind**: global class  
 
@@ -240,7 +240,7 @@ Sets the current context name
 
 ### context.getPlugins() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
 Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
-are required by the AIO Lib Core IMS library and are always installed and used.
+are required by the AIO Lib IMS library and are always installed and used.
 
 Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
 global configuration.
@@ -251,7 +251,7 @@ global configuration.
 
 ### context.setPlugins(plugins)
 Sets the list of additional IMS login plugins to consider.
-The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
+The JWT and OAuth2 plugins are required by the AIO Lib IMS
 library and are always installed and used.
 
 Unless running in Adobe I/O Runtime, the list of plugins is always stored in the

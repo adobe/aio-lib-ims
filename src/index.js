@@ -61,7 +61,7 @@ module.exports = {
 
   /**
    * The `context` object manages the IMS configuration contexts on behalf of
-   * the Adobe I/O Lib Core IMS Library.
+   * the Adobe I/O Lib IMS Library.
    *
    * @see The context [`context`](#context) object
    */

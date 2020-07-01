@@ -14,7 +14,7 @@ const debug = require('debug')('@adobe/aio-lib-ims/ctx/Context')
 
 /**
  * The `Context` abstract class provides an interface to manage the IMS configuration contexts on behalf of
- * the Adobe I/O Lib Core IMS Library.
+ * the Adobe I/O Lib IMS Library.
  */
 class Context {
   constructor (keyNames) {
@@ -45,7 +45,7 @@ class Context {
 
   /**
    * Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
-   * are required by the AIO Lib Core IMS library and are always installed and used.
+   * are required by the AIO Lib IMS library and are always installed and used.
    *
    * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
    * global configuration.
@@ -59,7 +59,7 @@ class Context {
 
   /**
    * Sets the list of additional IMS login plugins to consider.
-   * The JWT and OAuth2 plugins are required by the AIO Lib Core IMS
+   * The JWT and OAuth2 plugins are required by the AIO Lib IMS
    * library and are always installed and used.
    *
    * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
