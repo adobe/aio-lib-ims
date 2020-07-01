@@ -480,11 +480,6 @@ the Adobe I/O Lib IMS Library.
     * [.get(contextName)](#Context+get) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.set(contextName, contextData, local)](#Context+set)
     * [.keys()](#Context+keys) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-    * [.getConfigValue(configName)](#Context+getConfigValue) ⇒ <code>Promise.&lt;any&gt;</code>
-    * [.setConfigValue(configName, configValue, isLocal)](#Context+setConfigValue)
-    * [.getContextValue(contextName)](#Context+getContextValue) ⇒ <code>Promise.&lt;any&gt;</code>
-    * [.setContextValue(contextName, ctxValue, isLocal)](#Context+setContextValue)
-    * [.contextKeys()](#Context+contextKeys) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
 
 <a name="Context+getCurrent"></a>
 
@@ -573,58 +568,6 @@ Returns the names of the configured contexts as an array of strings.
 
 **Kind**: instance method of [<code>Context</code>](#Context)  
 **Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - The names of the currently known configurations.  
-<a name="Context+getConfigValue"></a>
-
-### context.getConfigValue(configName) ⇒ <code>Promise.&lt;any&gt;</code>
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;any&gt;</code> - config value  
-**Access**: protected  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| configName | <code>string</code> | config name |
-
-<a name="Context+setConfigValue"></a>
-
-### context.setConfigValue(configName, configValue, isLocal)
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Access**: protected  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| configName | <code>string</code> | config name |
-| configValue | <code>any</code> | config value |
-| isLocal | <code>boolean</code> | write local or not |
-
-<a name="Context+getContextValue"></a>
-
-### context.getContextValue(contextName) ⇒ <code>Promise.&lt;any&gt;</code>
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;any&gt;</code> - context value  
-**Access**: protected  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| contextName | <code>string</code> | context name |
-
-<a name="Context+setContextValue"></a>
-
-### context.setContextValue(contextName, ctxValue, isLocal)
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Access**: protected  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| contextName | <code>string</code> | config name |
-| ctxValue | <code>any</code> | config value |
-| isLocal | <code>boolean</code> | write local or not |
-
-<a name="Context+contextKeys"></a>
-
-### context.contextKeys() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - return defined contexts  
-**Access**: protected  
 <a name="StateActionContext"></a>
 
 ## StateActionContext
@@ -632,39 +575,6 @@ The `StateActionContext` class stores IMS `contexts` for Adobe I/O Runtime Actio
 cloud using the Adobe I/O State Library.
 
 **Kind**: global class  
-
-* [StateActionContext](#StateActionContext)
-    * [.getContextValue()](#StateActionContext+getContextValue)
-    * [.getConfigValue()](#StateActionContext+getConfigValue)
-    * [.setContextValue()](#StateActionContext+setContextValue)
-    * [.setConfigValue()](#StateActionContext+setConfigValue)
-    * [.contextKeys()](#StateActionContext+contextKeys)
-
-<a name="StateActionContext+getContextValue"></a>
-
-### stateActionContext.getContextValue()
-**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
-**Access**: protected  
-<a name="StateActionContext+getConfigValue"></a>
-
-### stateActionContext.getConfigValue()
-**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
-**Access**: protected  
-<a name="StateActionContext+setContextValue"></a>
-
-### stateActionContext.setContextValue()
-**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
-**Access**: protected  
-<a name="StateActionContext+setConfigValue"></a>
-
-### stateActionContext.setConfigValue()
-**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
-**Access**: protected  
-<a name="StateActionContext+contextKeys"></a>
-
-### stateActionContext.contextKeys()
-**Kind**: instance method of [<code>StateActionContext</code>](#StateActionContext)  
-**Access**: protected  
 <a name="TYPE_ACTION"></a>
 
 ## TYPE\_ACTION

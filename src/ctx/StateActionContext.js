@@ -49,9 +49,9 @@ class StateActionContext extends Context {
   }
 
   /**
-   * @memberof StateActionContext
    * @protected
    * @override
+   * @ignore
    */
   async getContextValue (key) {
     debug('getContextValue(%s)', key)
@@ -61,9 +61,9 @@ class StateActionContext extends Context {
   }
 
   /**
-   * @memberof StateActionContext
    * @protected
    * @override
+   * @ignore
    */
   async getConfigValue (key) {
     debug('getConfigValue(%s)', key)
@@ -71,9 +71,9 @@ class StateActionContext extends Context {
   }
 
   /**
-   * @memberof StateActionContext
    * @protected
    * @override
+   * @ignore
    */
   async setContextValue (key, value, isLocal) {
     debug('setContextValue(%s, %o, isLocal=%s)', key, value, isLocal)
@@ -94,9 +94,9 @@ class StateActionContext extends Context {
   }
 
   /**
-   * @memberof StateActionContext
    * @protected
    * @override
+   * @ignore
    */
   async setConfigValue (key, value) {
     debug('setConfigValue(%s, %o, isLocal=true)', key, value)
@@ -105,9 +105,9 @@ class StateActionContext extends Context {
   }
 
   /**
-   * @memberof StateActionContext
    * @protected
    * @override
+   * @ignore
    */
   async contextKeys () {
     return Object.keys(this.data[this.keyNames.CONTEXTS])

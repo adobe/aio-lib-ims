@@ -55,9 +55,9 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * @memberof AioConfigCliContext
    * @protected
    * @override
+   * @ignore
    */
   async getContextValue (key) {
     debug('getContextValue(%s)', key)
@@ -65,9 +65,9 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * @memberof AioConfigCliContext
    * @protected
    * @override
+   * @ignore
    */
   async getConfigValue (key) {
     debug('getConfigValue(%s)', key)
@@ -75,9 +75,9 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * @memberof AioConfigCliContext
    * @protected
    * @override
+   * @ignore
    */
   async setContextValue (key, value, isLocal) {
     debug('setContextValue(%s, %o, isLocal=%s)', key, value, isLocal)
@@ -85,9 +85,9 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * @memberof AioConfigCliContext
    * @protected
    * @override
+   * @ignore
    */
   async setConfigValue (key, value, isLocal) {
     debug('setConfigValue(%s, %o, isLocal=%s)', key, value, isLocal)
@@ -95,9 +95,9 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * @memberof AioConfigCliContext
    * @protected
    * @override
+   * @ignore
    */
   async contextKeys () {
     return Object.keys(this.aioConfig.get(`${this.keyNames.IMS}.${this.keyNames.CONTEXTS}`) || {})

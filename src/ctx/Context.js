@@ -151,6 +151,7 @@ class Context {
    * @param {string} configName config name
    * @returns {Promise<any>} config value
    * @protected
+   * @ignore
    */
   async getConfigValue (configName) {
     throwNotImplemented()
@@ -161,6 +162,7 @@ class Context {
    * @param {any} configValue config value
    * @param {boolean} isLocal write local or not
    * @protected
+   * @ignore
    */
   async setConfigValue (configName, configValue, isLocal) {
     throwNotImplemented()
@@ -170,6 +172,7 @@ class Context {
    * @param {string} contextName context name
    * @returns {Promise<any>} context value
    * @protected
+   * @ignore
    */
   async getContextValue (contextName) {
     throwNotImplemented()
@@ -180,12 +183,14 @@ class Context {
    * @param {any} ctxValue config value
    * @param {boolean} isLocal write local or not
    * @protected
+   * @ignore
    */
   async setContextValue (contextName, ctxValue, isLocal) {
     throwNotImplemented()
   }
 
   /**
+   * @ignore
    * @protected
    * @returns {Promise<string[]>} return defined contexts
    */
