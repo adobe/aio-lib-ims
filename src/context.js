@@ -42,10 +42,10 @@ const PLUGINS = 'plugins'
 /** @private */
 function guessContextType () {
   if (process.env.__OW_ACTION_NAME) {
-    debug('guessing context type:', TYPE_ACTION)
+    debug(`guessing context type: ${TYPE_ACTION}`)
     return TYPE_ACTION
   }
-  debug('guessing context type:', TYPE_CLI)
+  debug(`guessing context type: ${TYPE_CLI}`)
   return TYPE_CLI
 }
 
