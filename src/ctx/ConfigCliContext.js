@@ -50,7 +50,9 @@ class ConfigCliContext extends Context {
       throw new Error('contextData must be an object')
     }
 
-    const existingData = merge ? await this.getCli() : {}
+    // make sure to not merge any global config into local and vice versa
+    const getCli = source => this.getContextValueFromOptionalSource(this.keyNames.CLI, source)
+    const existingData = merge ? (local ? getCli('local') : getCli('global')) : {}
     this.setContextValue(`${this.keyNames.CLI}`, { ...existingData, ...contextData }, local)
   }
 
@@ -61,7 +63,8 @@ class ConfigCliContext extends Context {
    */
   async getContextValue (key) {
     debug('getContextValue(%s)', key)
-    return this.aioConfig.get(`${this.keyNames.IMS}.${this.keyNames.CONTEXTS}.${key}`)
+    // no source option -> always get it from all sources
+    return this.getContextValueFromOptionalSource(key)
   }
 
   /**
@@ -101,6 +104,12 @@ class ConfigCliContext extends Context {
    */
   async contextKeys () {
     return Object.keys(this.aioConfig.get(`${this.keyNames.IMS}.${this.keyNames.CONTEXTS}`) || {})
+  }
+
+  /** @private */
+  getContextValueFromOptionalSource (key, source) {
+    const fullKey = `${this.keyNames.IMS}.${this.keyNames.CONTEXTS}.${key}`
+    return source !== undefined ? this.aioConfig.get(fullKey, source) : this.aioConfig.get(fullKey)
   }
 }
 
