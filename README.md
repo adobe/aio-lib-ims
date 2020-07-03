@@ -47,41 +47,45 @@ See the [API Documentation](api.md) for full details.
 The AIO IMS Library transparently maintains the login configuration and keep
 access and refresh tokens for reuse before they expire.
 
-All configuration is stored in a single `$ims` root property.
+All configuration is stored in a single `ims` root property.
 
 The library supports maintaining multiple configurations for different use cases.
-Each such configuration is stored in its own named object with the `$ims` configuration.
+Each such configuration is stored in its own named object with the `ims` configuration.
 Such a configuration is called an _IMS (configuration) context_ and has a label which allows to refer to the configuration by name.
 
 To simplify usage, there may be a designated _current context_ which is always used if explicit context is not given to the command.
-Inside the `$ims` configuration object, the name of the _current context_ is stored in the `$current` property.
+Inside the `ims` configuration object, the name of the _current context_ is stored in the `current` property.
 
-Here is an example `$ims` configuration
+Here is an example `ims` configuration
 
 ```js
 {
-  $ims: {
-    sample_jwt: {
-      client_id: "<jwt-clientid>",
-      client_secret: "XXX",
-      technical_account_id: "<guid>@techacct.adobe.com",
-      technical_account_email: "<another_guid>@techacct.adobe.com",
-      meta_scopes: [
-        "ent_dataservices_sdk"
-      ],
-      ims_org_id: "<org-guid>@AdobeOrg",
-      private_key: "XXX"
+  ims: {
+    contexts: {
+      sample_jwt: {
+        client_id: "<jwt-clientid>",
+        client_secret: "XXX",
+        technical_account_id: "<guid>@techacct.adobe.com",
+        technical_account_email: "<another_guid>@techacct.adobe.com",
+        meta_scopes: [
+          "ent_dataservices_sdk"
+        ],
+        ims_org_id: "<org-guid>@AdobeOrg",
+        private_key: "XXX"
+      },
+      sample_oauth2: {
+        callback_url: "https://callback.example.com",
+        client_id: "<oauth2-clientid>",
+        client_secret: "XXX",
+        scope: "openid AdobeID"
+      },
     },
-    sample_oauth2: {
-      callback_url: "https://callback.example.com",
-      client_id: "<oauth2-clientid>",
-      client_secret: "XXX",
-      scope: "openid AdobeID"
-    },
-    $current: "sample_oauth2",
-    $plugins: [
-      "sample-aio-lib-ims-plugin"
-    ]
+    config: {
+      current: "sample_oauth2",
+      plugins: [
+        "sample-aio-lib-ims-plugin"
+      ]
+    }
   }
 }
 ```
@@ -101,7 +105,10 @@ const token = await getToken();
 
 ## Running in an Adobe I/O Runtime action
 
-The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
+**Note that Project Firefly applications should not own the responsibility to generate their own IMS access tokens.
+We strongly discourage this approach in favor of more secure implementation patterns that are documented in our [Project Firefly Security Guide](https://github.com/AdobeDocs/project-firefly/blob/master/guides/security_overview.md).**
+
+The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Adobe I/O Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
 
 Here is an Adobe I/O Runtime action example that leverages the AIO IMS:
 
@@ -223,7 +230,7 @@ Multiple plugins must be implemented in separate plugins.
 The configuration support modules for [JWT](/adobe/aio-lib-ims-jwt) and [OAuth2](/adobe/aio-lib-ims-oauth) are two such packages.
 The IMS Library has a dependency on the _JWT_ and _OAuth2_ plugins and will always try to use those.
 
-Additional plugins must be `npm install`-ed and listed in the `$ims/$plugins` array property.
+Additional plugins must be `npm install`-ed and listed in the `ims/plugins` array property.
 This can easily be done in the package `postinstall` script like this:
 
 ```js
