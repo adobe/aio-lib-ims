@@ -39,10 +39,10 @@ class ConfigCliContext extends Context {
    * Sets the cli context data
    *
    * @param {object} contextData the data to save
-   * @param {boolean} [local=true] set to true to save to local config, false for global config
+   * @param {boolean} [local=false] set to true to save to local config, false for global config
    * @param {boolean} [merge=true] set to true to merge existing data with the new data
    */
-  async setCli (contextData, local = true, merge = true) {
+  async setCli (contextData, local = false, merge = true) {
     debug(`set cli=${JSON.stringify(contextData)} local:${!!local} merge:${!!merge}`)
 
     const dataIsObject = (typeof contextData === 'object' && contextData !== null)

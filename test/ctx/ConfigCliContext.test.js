@@ -52,14 +52,14 @@ describe('setCli', () => {
     aioConfig.get.mockReturnValue(undefined)
     await expect(context.setCli({ the: 'value' })).resolves.toEqual(undefined)
     expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`)
-    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value' }, true)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value' }, false)
   })
 
   test('{ the: value }, prev={ another: fakevalue }', async () => {
     aioConfig.get.mockReturnValue({ another: 'fakevalue' })
     await expect(context.setCli({ the: 'value' })).resolves.toEqual(undefined)
     expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`)
-    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value', another: 'fakevalue' }, true)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value', another: 'fakevalue' }, false)
   })
 
   test('{ the: value }, local=false, merge=false, prev={ another: fakevalue }', async () => {
@@ -69,11 +69,11 @@ describe('setCli', () => {
     expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value' }, false)
   })
 
-  test('{ the: value }, local=false, merge=true, prev={ another: fakevalue }', async () => {
+  test('{ the: value }, local=true, merge=true, prev={ another: fakevalue }', async () => {
     aioConfig.get.mockReturnValue({ another: 'fakevalue' })
-    await expect(context.setCli({ the: 'value' }, false, true)).resolves.toEqual(undefined)
+    await expect(context.setCli({ the: 'value' }, true, true)).resolves.toEqual(undefined)
     expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`)
-    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value', another: 'fakevalue' }, false)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value', another: 'fakevalue' }, true)
   })
 
   test('{ the: value }, local=false, merge=true, prev={ the: valueold }', async () => {
