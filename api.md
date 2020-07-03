@@ -458,7 +458,7 @@ Sets the cli context data
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | contextData | <code>object</code> |  | the data to save |
-| [local] | <code>boolean</code> | <code>true</code> | set to true to save to local config, false for global config |
+| [local] | <code>boolean</code> | <code>false</code> | set to true to save to local config, false for global config |
 | [merge] | <code>boolean</code> | <code>true</code> | set to true to merge existing data with the new data |
 
 <a name="Context"></a>
@@ -471,7 +471,7 @@ the Adobe I/O Lib IMS Library.
 
 * [Context](#Context)
     * [.getCurrent()](#Context+getCurrent) ⇒ <code>Promise.&lt;string&gt;</code>
-    * [.setCurrent(contextName, [local])](#Context+setCurrent) ⇒ <code>Promise.&lt;any&gt;</code>
+    * [.setCurrent(contextName)](#Context+setCurrent) ⇒ <code>Promise.&lt;any&gt;</code>
     * [.getPlugins()](#Context+getPlugins) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
     * [.setPlugins(plugins)](#Context+setPlugins)
     * [.get(contextName)](#Context+get) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -487,16 +487,15 @@ Gets the current context name.
 **Returns**: <code>Promise.&lt;string&gt;</code> - the current context name  
 <a name="Context+setCurrent"></a>
 
-### context.setCurrent(contextName, [local]) ⇒ <code>Promise.&lt;any&gt;</code>
-Sets the current context name
+### context.setCurrent(contextName) ⇒ <code>Promise.&lt;any&gt;</code>
+Sets the current context name in the local configuration
 
 **Kind**: instance method of [<code>Context</code>](#Context)  
 **Returns**: <code>Promise.&lt;any&gt;</code> - returns an instance of the Config object  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| contextName | <code>string</code> |  | The name of the context to use as the current context |
-| [local] | <code>boolean</code> | <code>true</code> | Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime. |
+| Param | Type | Description |
+| --- | --- | --- |
+| contextName | <code>string</code> | The name of the context to use as the current context |
 
 <a name="Context+getPlugins"></a>
 

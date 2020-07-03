@@ -32,15 +32,15 @@ class Context {
   }
 
   /**
-   * Sets the current context name
+   * Sets the current context name in the local configuration
    *
    * @param {string} contextName The name of the context to use as the current context
-   * @param {boolean} [local=true] Persist the current name in local or global configuration, this is not relevant when running in Adobe I/O Runtime.
    * @returns {Promise<any>} returns an instance of the Config object
    */
-  async setCurrent (contextName, local = true) {
+  async setCurrent (contextName) {
     debug('set current=%s', contextName)
-    await this.setConfigValue(this.keyNames.CURRENT, contextName, local)
+    // enforce to local config, current should not conflict with global IMS contexts such as `cli`
+    await this.setConfigValue(this.keyNames.CURRENT, contextName, true)
   }
 
   /**

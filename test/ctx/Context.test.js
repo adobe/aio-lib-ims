@@ -84,12 +84,6 @@ describe('setCurrent', () => {
     expect(ret).toEqual(undefined)
     expect(context.setConfigValue).toHaveBeenCalledWith(keyNames.CURRENT, 'fake', true)
   })
-  test('(fake, false)', async () => {
-    context.setConfigValue = jest.fn().mockResolvedValue('returnValue')
-    const ret = await context.setCurrent('fake', false)
-    expect(ret).toEqual(undefined)
-    expect(context.setConfigValue).toHaveBeenCalledWith(keyNames.CURRENT, 'fake', false)
-  })
 })
 
 describe('get', () => {
