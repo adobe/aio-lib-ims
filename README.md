@@ -146,7 +146,8 @@ JWT (service to service integration) configuration requires the following proper
 | technical_account_email | The _Technical Account Email_ from the integration overview screen in the I/O Console
 | meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the *meta_scopes* property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`. |
 | ims_org_id | The _Organization ID_ from the integration overview screen in the I/O Console. |
-| private_key | The private key matching any one of the _Public Keys_ of the integration. |
+| private_key | The private key matching any one of the _Public Keys_ of the integration. This can be the private key all in one line as a string, or an array of strings (each element is a line from the key file)  |
+| passphrase | (_Optional_). The passphrase of the private key. |
 
 
 ## OAuth2 Configuration
