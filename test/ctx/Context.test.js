@@ -138,8 +138,7 @@ describe('set', () => {
     const ret = await context.set('fake', { data: 'fake' })
     expect(ret).toEqual(undefined)
     expect(context.setContextValue).toHaveBeenCalledWith('fake', { data: 'fake' }, false)
-    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.CURRENT)
-    expect(context.setConfigValue).toHaveBeenCalledWith(keyNames.CURRENT, 'fake', true)
+    expect(context.setConfigValue).toHaveBeenCalledTimes(0)
   })
 
   test('(fake, { data: fake }), current=other', async () => {
@@ -149,7 +148,6 @@ describe('set', () => {
     const ret = await context.set('fake', { data: 'fake' })
     expect(ret).toEqual(undefined)
     expect(context.setContextValue).toHaveBeenCalledWith('fake', { data: 'fake' }, false)
-    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.CURRENT)
     expect(context.setConfigValue).toHaveBeenCalledTimes(0)
   })
 })
