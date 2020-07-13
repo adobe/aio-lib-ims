@@ -546,8 +546,7 @@ current context name. The result is an object with two properties:
 ### context.set(contextName, contextData, local)
 Updates the named configuration with new configuration data. If a configuration
 object for the named context already exists it is completely replaced with this new
-configuration. If no current contexts are set, then contextName will be set as
-current context.
+configuration.
 
 **Kind**: instance method of [<code>Context</code>](#Context)  
 

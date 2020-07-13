@@ -104,8 +104,7 @@ class Context {
   /**
    * Updates the named configuration with new configuration data. If a configuration
    * object for the named context already exists it is completely replaced with this new
-   * configuration. If no current contexts are set, then contextName will be set as
-   * current context.
+   * configuration.
    *
    * @param {string} contextName Name of the context to update
    * @param {object} contextData The configuration data to store for the context
@@ -126,12 +125,6 @@ class Context {
     }
 
     await this.setContextValue(contextName, contextData, !!local)
-
-    // if there is no current context set, set this one
-    if (!current && !await this.getCurrent()) {
-      debug(`current is not set, setting current to '${contextName}'`, contextName)
-      await this.setCurrent(contextName)
-    }
   }
 
   /**
