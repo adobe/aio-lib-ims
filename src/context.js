@@ -36,9 +36,6 @@ const CLI = 'cli'
 /** Property holding the current context name */
 const CURRENT = 'current'
 
-/** Property holding the list of additional login plugins */
-const PLUGINS = 'plugins'
-
 /** @private */
 function guessContextType () {
   if (process.env.__OW_ACTION_NAME) {
@@ -54,9 +51,9 @@ let context = null
 function getContext () {
   if (!context) {
     if (guessContextType() === TYPE_ACTION) {
-      context = new ActionContext({ IMS, CONTEXTS, CONFIG, CURRENT, PLUGINS })
+      context = new ActionContext({ IMS, CONTEXTS, CONFIG, CURRENT })
     } else {
-      context = new CliContext({ IMS, CONTEXTS, CONFIG, CURRENT, PLUGINS, CLI })
+      context = new CliContext({ IMS, CONTEXTS, CONFIG, CURRENT, CLI })
     }
   }
   return context
@@ -75,7 +72,6 @@ module.exports = {
   IMS,
   CURRENT,
   CLI,
-  PLUGINS,
   CONTEXTS,
   CONFIG
 }

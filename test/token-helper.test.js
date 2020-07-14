@@ -10,15 +10,35 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const mockSupports = jest.fn()
+const mockImsLogin = jest.fn()
+
+const setImsPluginMocks = (supports, token) => {
+  mockSupports.mockReturnValue(supports)
+  mockImsLogin.mockReturnValue(token)
+}
+
+jest.mock('@adobe/aio-lib-ims-jwt', () => ({
+  supports: mockSupports,
+  imsLogin: mockImsLogin
+}))
+
 const { IMS_TOKEN_MANAGER } = require('../src/token-helper')
 const config = require('@adobe/aio-lib-core-config')
+
+// ////////////////////////////////////////////
+
+beforeEach(() => {
+  mockSupports.mockRestore()
+  mockImsLogin.mockRestore()
+})
 
 afterEach(() => {
   jest.restoreAllMocks()
 })
 
 /** @private */
-function createHandlerForContext (context = {}, imsPlugin) {
+function createHandlerForContext (context = {}) {
   const mappedContext = Object.keys(context)
     // prefix ims. to all the keys
     .map(key => {
@@ -32,8 +52,7 @@ function createHandlerForContext (context = {}, imsPlugin) {
     }, {})
 
   const store = {
-    ...mappedContext,
-    'ims.config.plugins': imsPlugin ? [imsPlugin] : null
+    ...mappedContext
   }
 
   return function (key) {
@@ -67,9 +86,9 @@ test('getToken - string', async () => {
     }
   }
 
-  // known context, handled by ./test/ims-plugins/imsPlugin
+  setImsPluginMocks(true, 'abc123')
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/imsPlugin')
+    createHandlerForContext(context)
   )
 
   // no force
@@ -93,9 +112,9 @@ test('getToken - object', async () => {
     }
   }
 
-  // known context, handled by ./test/ims-plugins/imsPlugin
+  setImsPluginMocks(true, 'abc123')
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/imsPlugin')
+    createHandlerForContext(context)
   )
 
   // no force
@@ -114,9 +133,9 @@ test('getToken - object (refresh token expired)', async () => {
     }
   }
 
-  // known context, handled by ./test/ims-plugins/imsPlugin
+  setImsPluginMocks(true, 'abc123')
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/imsPlugin')
+    createHandlerForContext(context)
   )
 
   // no force
@@ -127,25 +146,30 @@ test('getToken - object (refresh token expired)', async () => {
 
 test('invalidateToken - has access and refresh token', async () => {
   const contextName = 'known-context'
+  // eslint-disable-next-line camelcase
+  const access_token = {
+    token: 'tabcd123',
+    expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+  // eslint-disable-next-line camelcase
+  const refresh_token = {
+    token: 'wxyz123',
+    expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+
   const context = {
     [contextName]: {
       foo: 'bar',
       returnType: 'object',
       expired: 'no',
-      access_token: {
-        token: 'abcd123',
-        expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
-      },
-      refresh_token: {
-        token: 'wxyz123',
-        expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
-      }
+      access_token,
+      refresh_token
     }
   }
 
-  // known context, handled by ./test/ims-plugins/imsPlugin
+  setImsPluginMocks(true, {})
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/imsPlugin')
+    createHandlerForContext(context)
   )
 
   // no force
@@ -159,6 +183,7 @@ test('invalidateToken - unknown context', async () => {
   const contextName = 'unknown-context'
   const context = {}
 
+  setImsPluginMocks(false, {})
   // unknown context
   config.get.mockImplementation(
     createHandlerForContext(context)
@@ -179,9 +204,9 @@ test('invalidateToken - token missing or expired', async () => {
     }
   }
 
-  // known context, handled by ./test/ims-plugins/imsPlugin
+  setImsPluginMocks(true, 'abc123')
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/imsPlugin')
+    createHandlerForContext(context)
   )
 
   // no force
@@ -191,13 +216,14 @@ test('invalidateToken - token missing or expired', async () => {
 })
 
 test('getToken - unknown plugin', async () => {
-  const contextName = 'known-context'
+  const contextName = 'known-context-unknown-plugin'
   const context = {
     [contextName]: {
       foo: 'bar'
     }
   }
 
+  setImsPluginMocks(false, {})
   // plugin not specified
   config.get.mockImplementation(
     createHandlerForContext(context)
@@ -215,8 +241,9 @@ test('getToken - bad ims plugin, throws exception (coverage)', async () => {
     }
   }
 
+  setImsPluginMocks(false, {})
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/badImsPlugin')
+    createHandlerForContext(context)
   )
 
   // `supports` function throws an exception
@@ -232,8 +259,9 @@ test('getToken - incomplete ims plugin (coverage)', async () => {
     }
   }
 
+  setImsPluginMocks(false, {})
   config.get.mockImplementation(
-    createHandlerForContext(context, '../test/ims-plugins/incompleteImsPlugin')
+    createHandlerForContext(context)
   )
 
   // imsLogin function is missing

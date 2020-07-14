@@ -14,13 +14,21 @@ const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const debug = require('debug')('@adobe/aio-lib-ims/token-helper')
 const { getContext } = require('./context')
 
+const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
+const imsJwtPlugin = require('@adobe/aio-lib-ims-jwt')
+const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
+
 /**
  * This is the default list of NPM packages used as plugins to create tokens
  * as part of the getToken(contextName) function.
  *
  * @private
  */
-const DEFAULT_CREATE_TOKEN_PLUGINS = ['@adobe/aio-lib-ims-oauth/src/ims-cli', '@adobe/aio-lib-ims-jwt', '@adobe/aio-lib-ims-oauth']
+const DEFAULT_CREATE_TOKEN_PLUGINS = {
+  cli: imsCliPlugin,
+  jwt: imsJwtPlugin,
+  oauth: imsOAuthPlugin
+}
 
 const IMS_TOKEN_MANAGER = {
 
@@ -88,17 +96,12 @@ const IMS_TOKEN_MANAGER = {
   async _generateToken (ims, config, reason, force) {
     debug('_generateToken(reason=%s, force=%s)', reason, force)
 
-    let imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
+    const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
 
-    const contextPlugins = await this._context.getPlugins()
-    if (contextPlugins) {
-      imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS.concat(contextPlugins)
-    }
-
-    for (const imsLoginPlugin of imsLoginPlugins) {
-      debug('  > Trying: %s', imsLoginPlugin)
+    for (const name of Object.keys(imsLoginPlugins)) {
+      debug('  > Trying: %s', name)
       try {
-        const { supports, imsLogin } = require(imsLoginPlugin)
+        const { supports, imsLogin } = imsLoginPlugins[name]
         debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
           const result = imsLogin(ims, config, force)
@@ -106,7 +109,7 @@ const IMS_TOKEN_MANAGER = {
           return result
         }
       } catch (e) {
-        debug('  > Ignoring failure loading or calling plugin %s: %o', imsLoginPlugin, e)
+        debug('  > Ignoring failure loading or calling plugin %s: %o', name, e)
       }
     }
 

@@ -20,7 +20,6 @@ const keyNames = {
   CONFIG: 'b',
   CONTEXTS: 'c',
   CURRENT: 'd',
-  PLUGINS: 'e',
   CLI: 'd'
 }
 
