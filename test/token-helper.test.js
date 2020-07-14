@@ -14,8 +14,17 @@ const mockSupports = jest.fn()
 const mockImsLogin = jest.fn()
 
 const setImsPluginMocks = (supports, token) => {
-  mockSupports.mockReturnValue(supports)
-  mockImsLogin.mockReturnValue(token)
+  if (typeof supports === 'function') {
+    mockSupports.mockImplementation(supports)
+  } else {
+    mockSupports.mockReturnValue(supports)
+  }
+
+  if (typeof token === 'function') {
+    mockImsLogin.mockImplementation(token)
+  } else {
+    mockImsLogin.mockReturnValue(token)
+  }
 }
 
 jest.mock('@adobe/aio-lib-ims-jwt', () => ({
@@ -123,8 +132,20 @@ test('getToken - object', async () => {
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
 })
 
-test('getToken - object (refresh token expired)', async () => {
+test('getToken - object (refresh token expired, coverage)', async () => {
   const contextName = 'known-context'
+
+  // eslint-disable-next-line camelcase
+  const access_token = {
+    token: 'tabcd123',
+    expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+  // eslint-disable-next-line camelcase
+  const refresh_token = {
+    token: 'wxyz123',
+    expiry: Date.now() - 20 * 60 * 1000 // 20 minutes back
+  }
+
   const context = {
     [contextName]: {
       foo: 'bar',
@@ -133,15 +154,58 @@ test('getToken - object (refresh token expired)', async () => {
     }
   }
 
-  setImsPluginMocks(true, 'abc123')
+  const result = {
+    access_token,
+    refresh_token
+  }
+
+  setImsPluginMocks(true, result)
   config.get.mockImplementation(
     createHandlerForContext(context)
   )
 
   // no force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual(access_token.token)
   // force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual(access_token.token)
+})
+
+test('getToken - object (refresh token ok, coverage)', async () => {
+  const contextName = 'known-context'
+
+  // eslint-disable-next-line camelcase
+  const access_token = {
+    token: 'tabcd123',
+    expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+  // eslint-disable-next-line camelcase
+  const refresh_token = {
+    token: 'rwxyz123',
+    expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+
+  const context = {
+    [contextName]: {
+      foo: 'bar',
+      returnType: 'object',
+      expired: 'refresh_token'
+    }
+  }
+
+  const result = {
+    access_token,
+    refresh_token
+  }
+
+  setImsPluginMocks(true, result)
+  config.get.mockImplementation(
+    createHandlerForContext(context)
+  )
+
+  // no force
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual(access_token.token)
+  // force
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual(access_token.token)
 })
 
 test('invalidateToken - has access and refresh token', async () => {
@@ -183,7 +247,7 @@ test('invalidateToken - unknown context', async () => {
   const contextName = 'unknown-context'
   const context = {}
 
-  setImsPluginMocks(false, {})
+  setImsPluginMocks(false, null)
   // unknown context
   config.get.mockImplementation(
     createHandlerForContext(context)
@@ -204,7 +268,7 @@ test('invalidateToken - token missing or expired', async () => {
     }
   }
 
-  setImsPluginMocks(true, 'abc123')
+  setImsPluginMocks(false, null)
   config.get.mockImplementation(
     createHandlerForContext(context)
   )
@@ -223,7 +287,7 @@ test('getToken - unknown plugin', async () => {
     }
   }
 
-  setImsPluginMocks(false, {})
+  setImsPluginMocks(false, null)
   // plugin not specified
   config.get.mockImplementation(
     createHandlerForContext(context)
@@ -241,30 +305,12 @@ test('getToken - bad ims plugin, throws exception (coverage)', async () => {
     }
   }
 
-  setImsPluginMocks(false, {})
+  setImsPluginMocks(() => { throw new Error('some error') }, null)
   config.get.mockImplementation(
     createHandlerForContext(context)
   )
 
   // `supports` function throws an exception
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
-    .rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
-})
-
-test('getToken - incomplete ims plugin (coverage)', async () => {
-  const contextName = 'known-context'
-  const context = {
-    [contextName]: {
-      somekey: 'xyz'
-    }
-  }
-
-  setImsPluginMocks(false, {})
-  config.get.mockImplementation(
-    createHandlerForContext(context)
-  )
-
-  // imsLogin function is missing
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
     .rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
 })
