@@ -28,7 +28,7 @@ Before using the AIO IMS Library you need to create an integration on Adobe I/O 
 const { context, getToken, getTokenData } = require('@adobe/aio-lib-ims');
 
 const config = {
-  callback_url: "https://callback.example.org",
+  redirect_uri: "https://callback.example.org",
   client_id: "123456cafebabe",
   client_secret: "12345678-cafe-babe-cafe-9999",
   scope: "openid"
@@ -73,7 +73,7 @@ Here is an example `ims` configuration
         private_key: "XXX"
       },
       sample_oauth2: {
-        callback_url: "https://callback.example.com",
+        redirect_uri: "https://callback.example.com",
         client_id: "<oauth2-clientid>",
         client_secret: "XXX",
         scope: "openid AdobeID"
@@ -158,7 +158,7 @@ OAuth2 configuration requires the following properties:
 |--|--|
 | client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe I/O Console. |
 | client_secret | The IMS (OAUth2) Client Secret |
-| callback_url| The _Default redirect URI_ from the integration overview screen in the I/O Console. Alternatively, any URI matching one of the _Redirect URI patterns_ may be used. |
+| redirect_uri | The _Default redirect URI_ from the integration overview screen in the I/O Console. Alternatively, any URI matching one of the _Redirect URI patterns_ may be used. |
 | scope | Scopes to assign to the tokens. This is a string of space separated scope names which depends on the services this integration is subscribed to. Adobe I/O Console does not currently expose the list of scopes defined for OAuth2 integrations, a good list of scopes by service can be found in [OAuth 2.0 Scopes](https://www.adobe.io/authentication/auth-methods.html#!AdobeDocs/adobeio-auth/master/OAuth/Scopes.md). At the very least you may want to enter `openid`. |
 
 
