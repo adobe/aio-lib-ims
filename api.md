@@ -57,9 +57,6 @@ cloud using the Adobe I/O State Library.</p>
 <dt><a href="#CURRENT">CURRENT</a></dt>
 <dd><p>Property holding the current context name</p>
 </dd>
-<dt><a href="#PLUGINS">PLUGINS</a></dt>
-<dd><p>Property holding the list of additional login plugins</p>
-</dd>
 <dt><a href="#ACCESS_TOKEN">ACCESS_TOKEN</a></dt>
 <dd><p>The constant string <code>access_token</code>.</p>
 </dd>
@@ -472,8 +469,6 @@ the Adobe I/O Lib IMS Library.
 * [Context](#Context)
     * [.getCurrent()](#Context+getCurrent) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.setCurrent(contextName)](#Context+setCurrent) ⇒ <code>Promise.&lt;any&gt;</code>
-    * [.getPlugins()](#Context+getPlugins) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-    * [.setPlugins(plugins)](#Context+setPlugins)
     * [.get(contextName)](#Context+get) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.set(contextName, contextData, local)](#Context+set)
     * [.keys()](#Context+keys) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
@@ -496,33 +491,6 @@ Sets the current context name in the local configuration
 | Param | Type | Description |
 | --- | --- | --- |
 | contextName | <code>string</code> | The name of the context to use as the current context |
-
-<a name="Context+getPlugins"></a>
-
-### context.getPlugins() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
-are required by the AIO Lib IMS library and are always installed and used.
-
-Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
-global configuration.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - array of plugins  
-<a name="Context+setPlugins"></a>
-
-### context.setPlugins(plugins)
-Sets the list of additional IMS login plugins to consider.
-The JWT and OAuth2 plugins are required by the AIO Lib IMS
-library and are always installed and used.
-
-Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
-global configuration.
-
-**Kind**: instance method of [<code>Context</code>](#Context)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| plugins | <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> | array of plugins |
 
 <a name="Context+get"></a>
 
@@ -610,12 +578,6 @@ Property holding the cli context name
 
 ## CURRENT
 Property holding the current context name
-
-**Kind**: global constant  
-<a name="PLUGINS"></a>
-
-## PLUGINS
-Property holding the list of additional login plugins
 
 **Kind**: global constant  
 <a name="ACCESS_TOKEN"></a>
