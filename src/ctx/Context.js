@@ -44,35 +44,6 @@ class Context {
   }
 
   /**
-   * Gets the list of additional IMS login plugins to consider. The JWT and OAuth2 plugins
-   * are required by the AIO Lib IMS library and are always installed and used.
-   *
-   * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
-   * global configuration.
-   *
-   * @returns {Promise<Array<string>>} array of plugins
-   */
-  async getPlugins () {
-    debug('get plugins')
-    return this.getConfigValue(this.keyNames.PLUGINS)
-  }
-
-  /**
-   * Sets the list of additional IMS login plugins to consider.
-   * The JWT and OAuth2 plugins are required by the AIO Lib IMS
-   * library and are always installed and used.
-   *
-   * Unless running in Adobe I/O Runtime, the list of plugins is always stored in the
-   * global configuration.
-   *
-   * @param {Promise<Array<string>>} plugins array of plugins
-   */
-  async setPlugins (plugins) {
-    debug('set plugins=%o', plugins)
-    await this.setConfigValue(this.keyNames.PLUGINS, plugins, false)
-  }
-
-  /**
    * Returns an object representing the named context.
    * If the contextName parameter is empty or missing, it defaults to the
    * current context name. The result is an object with two properties:

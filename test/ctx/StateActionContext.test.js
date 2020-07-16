@@ -48,8 +48,7 @@ const keyNames = {
   IMS: 'a',
   CONFIG: 'b',
   CONTEXTS: 'c',
-  CURRENT: 'd',
-  PLUGINS: 'e'
+  CURRENT: 'd'
 }
 
 let context

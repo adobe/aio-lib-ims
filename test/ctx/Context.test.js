@@ -16,8 +16,7 @@ const keyNames = {
   IMS: 'a',
   CONFIG: 'b',
   CONTEXTS: 'c',
-  CURRENT: 'd',
-  PLUGINS: 'e'
+  CURRENT: 'd'
 }
 
 let context
@@ -47,24 +46,6 @@ describe('not implemented methods', () => {
   })
   test('Context.contextKeys', async () => {
     await expect(context.contextKeys('key', 'value')).rejects.toThrow('abstract method is not implemented')
-  })
-})
-
-describe('getPlugins', () => {
-  test('(<no args>)', async () => {
-    context.getConfigValue = jest.fn().mockResolvedValue('returnValue')
-    const ret = await context.getPlugins()
-    expect(ret).toEqual('returnValue')
-    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.PLUGINS)
-  })
-})
-
-describe('setPlugins', () => {
-  test('([a,b,c])', async () => {
-    context.setConfigValue = jest.fn().mockResolvedValue('returnValue')
-    const ret = await context.setPlugins(['a', 'b', 'c'])
-    expect(ret).toEqual(undefined)
-    expect(context.setConfigValue).toHaveBeenCalledWith(keyNames.PLUGINS, ['a', 'b', 'c'], false)
   })
 })
 
