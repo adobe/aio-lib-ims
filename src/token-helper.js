@@ -25,6 +25,8 @@ let DEFAULT_CREATE_TOKEN_PLUGINS = {
   jwt: imsJwtPlugin
 }
 
+/* The global var WEBPACK_ACTION_BUILD is expected to be set during build time
+by aio-lib-runtime */
 /* eslint no-undef: 0 */
 const ACTION_BUILD = (typeof WEBPACK_ACTION_BUILD === 'undefined') ? false : WEBPACK_ACTION_BUILD
 if (!ACTION_BUILD) {
