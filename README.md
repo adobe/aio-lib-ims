@@ -80,10 +80,7 @@ Here is an example `ims` configuration
       },
     },
     config: {
-      current: "sample_oauth2",
-      plugins: [
-        "sample-aio-lib-ims-plugin"
-      ]
+      current: "sample_oauth2"
     }
   }
 }
