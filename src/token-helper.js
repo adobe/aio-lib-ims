@@ -13,10 +13,7 @@ governing permissions and limitations under the License.
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const debug = require('debug')('@adobe/aio-lib-ims/token-helper')
 const { getContext } = require('./context')
-
-const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
 const imsJwtPlugin = require('@adobe/aio-lib-ims-jwt')
-const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
@@ -24,10 +21,24 @@ const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
  *
  * @private
  */
-const DEFAULT_CREATE_TOKEN_PLUGINS = {
-  cli: imsCliPlugin,
-  jwt: imsJwtPlugin,
-  oauth: imsOAuthPlugin
+let DEFAULT_CREATE_TOKEN_PLUGINS = {
+  jwt: imsJwtPlugin
+}
+
+/* The global var WEBPACK_ACTION_BUILD is expected to be set during build time
+by aio-lib-runtime */
+/* eslint no-undef: 0 */
+const ACTION_BUILD = (typeof WEBPACK_ACTION_BUILD === 'undefined') ? false : WEBPACK_ACTION_BUILD
+if (!ACTION_BUILD) {
+  // use OAuth and CLI imports only when WEBPACK_ACTION_BUILD global is not set
+  const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
+  const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
+
+  DEFAULT_CREATE_TOKEN_PLUGINS = {
+    cli: imsCliPlugin,
+    jwt: imsJwtPlugin,
+    oauth: imsOAuthPlugin
+  }
 }
 
 const IMS_TOKEN_MANAGER = {
