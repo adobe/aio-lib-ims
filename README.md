@@ -120,9 +120,9 @@ function main ({ imsContextConfig, ...params }) {
 }
 ```
 
-Note that for now cached tokens will only be accessible from the action that created them. In
-the above example, the token persisted under `'my_ctx'` will not be retrievable from a
-different action even if it uses the same context key.
+Note that setting local=true in `context.set('my_ctx', imsContextConfig, true)` will not have any effect here.
+
+Also note that internally tokens are cached for a single I/O Runtime action only, this means that cached tokens can't be retrieved across actions and running `getToken` in another action with the same context name will regenerate a new token. Instead, we recommend using a single I/O Runtime non-web action annotated with that is responsible for generating the token and passing it to other web actions, which then can use the token to integrate with one or several Adobe APIs. In this way, a single action generates the token, effectively (re-)using the cache.
 
 ## IMS Environment
 

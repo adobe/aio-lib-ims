@@ -159,15 +159,16 @@ The `@adobe/aio-lib-ims` module offers three kinds of elements:
 <a name="module_@adobe/aio-lib-ims.getToken"></a>
 
 ### @adobe/aio-lib-ims.getToken(contextName, [force]) ⇒ <code>Promise</code>
-Returns an access token for the given context name.
+Returns an access token for the given context name. When running in Adobe I/O Runtime
+tokens will be persisted in the [`State SDK`](https://github.com/adobe/aio-lib-state).
 
 **Kind**: static method of [<code>@adobe/aio-lib-ims</code>](#module_@adobe/aio-lib-ims)  
 **Returns**: <code>Promise</code> - Resolving to an access token (string)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| contextName | <code>string</code> | The name of the IMS context for which to return the              access token. If this is empty, the token(s) of the current IMS              context are invalidated. |
-| [force] | <code>boolean</code> | Forces a login in the selected plugin's `imslogin`              function. See [Forced `imsLogin`](README.md#forced-imslogin) for more              information on this flag. The default value is `false`. |
+| contextName | <code>string</code> | The name of the IMS context for which to return the              access token. If this is empty, the token(s) of the current IMS context              are invalidated. |
+| [force] | <code>boolean</code> | Forces a login in the selected plugin's `imslogin` function.              See [Forced `imsLogin`](README.md#forced-imslogin) for more information              on this flag. The default value is `false`. |
 
 <a name="module_@adobe/aio-lib-ims.invalidateToken"></a>
 
@@ -522,7 +523,7 @@ configuration.
 | --- | --- | --- | --- |
 | contextName | <code>string</code> |  | Name of the context to update |
 | contextData | <code>object</code> |  | The configuration data to store for the context |
-| local | <code>boolean</code> | <code>false</code> | Persist in local or global configuration. When running in Adobe I/O Runtime, setting `local = true` disables persistence of generated tokens. |
+| local | <code>boolean</code> | <code>false</code> | Persist in local or global configuration. When running in      Adobe I/O Runtime, this has no effect unless `contextData` contains an      `access_token` or `refresh_token` field, in which case setting `local=true` will      prevent the persistence of those fields in the [`State      SDK`](https://github.com/adobe/aio-lib-state). Please note that when calling      `getToken` in an I/O Runtime Action, generated tokens will always be persisted      as `getToken` internally calls `context.set` with `local=false`. |
 
 <a name="Context+keys"></a>
 

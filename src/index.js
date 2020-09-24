@@ -65,14 +65,15 @@ module.exports = {
   context: getContext(),
 
   /**
-   * Returns an access token for the given context name.
+   * Returns an access token for the given context name. When running in Adobe I/O Runtime
+   * tokens will be persisted in the [`State SDK`](https://github.com/adobe/aio-lib-state).
    *
    * @param {string} contextName The name of the IMS context for which to return the
-   *              access token. If this is empty, the token(s) of the current IMS
-   *              context are invalidated.
-   * @param {boolean} [force] Forces a login in the selected plugin's `imslogin`
-   *              function. See [Forced `imsLogin`](README.md#forced-imslogin) for more
-   *              information on this flag. The default value is `false`.
+   *              access token. If this is empty, the token(s) of the current IMS context
+   *              are invalidated.
+   * @param {boolean} [force] Forces a login in the selected plugin's `imslogin` function.
+   *              See [Forced `imsLogin`](README.md#forced-imslogin) for more information
+   *              on this flag. The default value is `false`.
    *
    * @returns {Promise} Resolving to an access token (string)
    */
