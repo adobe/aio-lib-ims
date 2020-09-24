@@ -120,7 +120,9 @@ function main ({ imsContextConfig, ...params }) {
 }
 ```
 
-Note that for now cached tokens will only be accessible from the action that created them. In
+Note that setting local=true in `context.set('my_ctx', imsContextConfig, true)` will not have any effect here.
+
+Also note that for now cached tokens will only be accessible from the action that created them. In
 the above example, the token persisted under `'my_ctx'` will not be retrievable from a
 different action even if it uses the same context key.
 

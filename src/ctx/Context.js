@@ -80,7 +80,12 @@ class Context {
    * @param {string} contextName Name of the context to update
    * @param {object} contextData The configuration data to store for the context
    * @param {boolean} local Persist in local or global configuration. When running in
-   * Adobe I/O Runtime, setting `local = true` disables persistence of generated tokens.
+   *      Adobe I/O Runtime, this has no effect unless `contextData` contains an
+   *      `access_token` or `refresh_token` field, in which case setting `local=true` will
+   *      prevent the persistence of those fields in the
+   *      [`State SDK`](https://github.com/adobe/aio-lib-state). Please note that when calling `getToken` in an I/O
+   *      Runtime Action, generated tokens will always be persisted as `getToken`
+   *      internally calls `context.set` with `local=false`.
    *
    */
   async set (contextName, contextData, local = false) {
