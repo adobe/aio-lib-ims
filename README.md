@@ -35,7 +35,7 @@ const config = {
 };
 await context.set('example', config, true)
 
-const token = await getToken('example)
+const token = await getToken('example')
 const tokenDecoded = getTokenData(token)
 ```
 
