@@ -25,7 +25,7 @@ $ npm install @adobe/aio-lib-ims --save
 Before using the AIO IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
 ```js
-const { context, getToken, getTokenData } = require('@adobe/aio-lib-ims');
+const { context, getToken, getTokenData } = require('@adobe/aio-lib-ims')
 
 const config = {
   redirect_uri: "https://callback.example.org",
@@ -33,11 +33,10 @@ const config = {
   client_secret: "12345678-cafe-babe-cafe-9999",
   scope: "openid"
 };
-await context.set('example', config, true);
-await context.setCurrent('example');
+await context.set('example', config, true)
 
-const token = await getToken();
-const tokenDecoded = getTokenData(token);
+const token = await getToken('example')
+const tokenDecoded = getTokenData(token)
 ```
 
 See the [API Documentation](api.md) for full details.
@@ -52,8 +51,6 @@ All configuration is stored in a single `ims` root property.
 The library supports maintaining multiple configurations for different use cases.
 Each such configuration is stored in its own named object with the `ims` configuration.
 Such a configuration is called an _IMS (configuration) context_ and has a label which allows to refer to the configuration by name.
-
-Inside the `ims` configuration object, the name of the _current context_ is stored in the `config.current` property.
 
 Here is an example `ims` configuration
 
@@ -78,9 +75,6 @@ Here is an example `ims` configuration
         client_secret: "XXX",
         scope: "openid AdobeID"
       },
-    },
-    config: {
-      current: "sample_oauth2"
     }
   }
 }
@@ -93,10 +87,10 @@ When running on your local machine the AIO IMS is leveraging the [Configuration 
 Here is an example that relies on the AIO IMS to generate a token from an existing configuration:
 
 ```js
-const { context, getToken } = require('@adobe/aio-lib-ims');
+const { context, getToken } = require('@adobe/aio-lib-ims')
 
-await context.setCurrent('my-config');
-const token = await getToken();
+await context.setCurrent('my-config')
+const token = await getToken('my-config')
 ```
 
 ## Running in an Adobe I/O Runtime action
@@ -109,7 +103,7 @@ The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this cas
 Here is an Adobe I/O Runtime action example that leverages the AIO IMS:
 
 ```js
-const { context, getToken } = require('@adobe/aio-lib-ims');
+const { context, getToken } = require('@adobe/aio-lib-ims')
 
 function main ({ imsContextConfig, ...params }) {
   // the IMS context configuration is passed as an action parameter
@@ -130,6 +124,31 @@ The use of IMS environments is reserved to Adobe use.
 For information it is indicated by the `env` configuration context property and takes one of the values `prod` and `stage`.
 The default value is `prod`.
 In general, you do not need to deal with this property.
+
+## Set Current Context (Advanced)
+
+The default context can be set locally with `await context.setCurrent('contextname')`. 
+This will write the following configuration to the `ims` key in the `.aio` file of the current working directory:
+
+```js
+  ims {
+    config: {
+      current: "contextname"
+    }
+  }
+```
+
+If running the library in the same working directory, then `getToken` can be called without passing the `contextname`:
+
+```js
+await context.set('contextname', config, true)
+await context.setCurrent('contextname')
+const token = await getToken() // generate a token for the config in the 'contextname' context
+```
+
+**Please note that `context.setCurrent` rewrites the local configuration and replaces the default `aio` CLI OAuth configuration in a desktop environment.
+This will break `aio` commands that run from the same directory.**
+You can revert to the original behaviour by executing `aio config delete ims.config.current` from that directory.
 
 ## JWT Configuration
 
