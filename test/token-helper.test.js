@@ -107,7 +107,6 @@ test('getToken - string (jwt)', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX'
@@ -176,7 +175,6 @@ test('getToken - object', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX',
@@ -217,7 +215,6 @@ test('getToken - object (refresh token expired, coverage)', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX'
@@ -259,7 +256,6 @@ test('getToken - object (refresh token ok, coverage)', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX'
@@ -300,7 +296,6 @@ test('invalidateToken - has access and refresh token', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX',
@@ -343,7 +338,6 @@ test('invalidateToken - token missing or expired', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX'
@@ -385,7 +379,6 @@ test('getToken - bad ims plugin, throws exception (coverage)', async () => {
       client_id: 'bar',
       client_secret: 'baz',
       technical_account_id: 'foo@bar',
-      technical_account_email: 'foo@bar.baz',
       meta_scopes: [],
       ims_org_id: 'ABCDEFG',
       private_key: 'XYXYXYX'
