@@ -17,7 +17,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') })
 const {
   IMS_CLIENT_ID,
   IMS_CLIENT_SECRET,
-  IMS_JWT_TOKEN
+  IMS_SIGNED_JWT
 } = process.env
 
 let gImsObj
@@ -30,7 +30,7 @@ beforeAll(async () => {
 test('init test', async () => {
   expect(IMS_CLIENT_ID).toBeDefined()
   expect(IMS_CLIENT_SECRET).toBeDefined()
-  expect(IMS_JWT_TOKEN).toBeDefined()
+  expect(IMS_SIGNED_JWT).toBeDefined()
 
   expect(gImsObj).toBeDefined()
   expect(typeof gImsObj).toEqual('object')
@@ -51,7 +51,7 @@ test('getAccessToken', async () => {
 })
 
 test('exchangeJwtToken', () => {
-  const result = gImsObj.exchangeJwtToken(IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_JWT_TOKEN)
+  const result = gImsObj.exchangeJwtToken(IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SIGNED_JWT)
   return result
     .then(tokens => {
       expect(tokens).toBeDefined()
