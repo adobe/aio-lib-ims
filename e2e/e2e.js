@@ -9,7 +9,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { AUTHORIZATION_CODE, Ims } = require('../src/ims')
+const { AUTHORIZATION_CODE, getTokenData, Ims } = require('../src/ims')
 const path = require('path')
 // load .env values in the e2e folder, if any
 require('dotenv').config({ path: path.join(__dirname, '.env') })
@@ -61,6 +61,20 @@ test('exchangeJwtToken', () => {
       // should not get here if successful
       expect(err).not.toBeDefined()
     })
+})
+
+test('getTokenData', async () => {
+  expect(gTokens).toBeDefined()
+  expect(typeof gTokens).toEqual('object')
+
+  const result = getTokenData(gTokens.access_token.token)
+  expect(typeof result).toEqual('object')
+  expect(result).toMatchObject({
+    type: 'access_token',
+    expires_in: expect.any(String),
+    created_at: expect.any(String),
+    client_id: IMS_CLIENT_ID
+  })
 })
 
 test('getOrganizations', async () => {
