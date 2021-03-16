@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const rp = require('request-promise-native')
-const debug = require('debug')('@adobe/aio-cli-ims/ims')
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ims', { provider: 'debug' })
 const url = require('url')
 const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
 
@@ -148,25 +148,25 @@ function _getTokenType (token) {
  * @returns {object} the result data
  */
 async function _toTokenResult (apiResponse) {
-  debug('toTokenResult(%o)', apiResponse)
+  aioLogger.debug('toTokenResult(%o)', apiResponse)
   const result = {
     payload: apiResponse
   }
 
   for (const label of [ACCESS_TOKEN, REFRESH_TOKEN]) {
-    debug(' > %s', label)
+    aioLogger.debug(' > %s', label)
     const token = apiResponse[label]
-    debug(' > %o', token)
+    aioLogger.debug(' > %o', token)
     if (token) {
       result[label] = {
         token: token,
         expiry: _calculateExpiry(token)
       }
-      debug(' > %o', result[label])
+      aioLogger.debug(' > %o', result[label])
     }
   }
 
-  debug('<< %o', result)
+  aioLogger.debug('<< %o', result)
   return result
 }
 
@@ -230,7 +230,7 @@ class Ims {
    * @returns {string} the OAuth2 login URL
    */
   getSusiUrl (clientId, scopes, callbackUrl, state) {
-    debug('getSusiUrl(%s, %s, %s, %s)', clientId, scopes, callbackUrl, state)
+    aioLogger.debug('getSusiUrl(%s, %s, %s, %s)', clientId, scopes, callbackUrl, state)
 
     const app = new url.URL(this.getApiUrl('/ims/authorize/v1'))
     app.searchParams.set('response_type', 'code')
@@ -252,7 +252,7 @@ class Ims {
    * @returns {Promise} a promise resolving to the result of the request
    */
   async get (api, token, parameters) {
-    debug('get(%s, %s, %o)', api, token, parameters)
+    aioLogger.debug('get(%s, %s, %o)', api, token, parameters)
 
     return _sendGet(this.getApiUrl(api), token, parameters)
   }
@@ -268,7 +268,7 @@ class Ims {
    * @returns {Promise} a promise resolving to the result of the request
    */
   async post (api, token, parameters) {
-    debug('post(%s, %s, %o)', api, token, parameters)
+    aioLogger.debug('post(%s, %s, %o)', api, token, parameters)
 
     return _sendPost(this.getApiUrl(api), token, parameters)
   }
@@ -305,7 +305,7 @@ class Ims {
    *      {@link toTokenResult} or rejects to an error message.
    */
   async getAccessToken (authCode, clientId, clientSecret, scopes) {
-    debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
+    aioLogger.debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
 
     // prepare the data with common data
     const postData = {
@@ -358,7 +358,7 @@ class Ims {
    * @returns {Promise} returns a Promise that resolves to the token result object
    */
   async exchangeJwtToken (clientId, clientSecret, signedJwtToken) {
-    debug('exchangeJwtToken(%s, %s, %s)', clientId, clientSecret, signedJwtToken)
+    aioLogger.debug('exchangeJwtToken(%s, %s, %s)', clientId, clientSecret, signedJwtToken)
 
     const postData = {
       client_id: clientId,
@@ -381,7 +381,7 @@ class Ims {
    * @returns {Promise} Promise that resolves with the request data
    */
   async invalidateToken (token, clientId, clientSecret) {
-    debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
+    aioLogger.debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
 
     if (clientId && clientSecret) {
       const postData = {
@@ -407,7 +407,7 @@ class Ims {
    * @returns {object} the server response
    */
   async validateToken (token, clientId) {
-    debug('validateToken(%s, %s)', token, clientId)
+    aioLogger.debug('validateToken(%s, %s)', token, clientId)
 
     let tokenData
     try {
@@ -421,7 +421,7 @@ class Ims {
 
     if (clientId === undefined) {
       clientId = tokenData.client_id
-      debug('extracted clientId from token: %s', clientId)
+      aioLogger.debug('extracted clientId from token: %s', clientId)
     }
 
     const postData = {
@@ -444,7 +444,7 @@ class Ims {
    * @returns {object} the server response
    */
   async getOrganizations (token) {
-    debug('getOrganizations(%s)', token)
+    aioLogger.debug('getOrganizations(%s)', token)
 
     const res = await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
     try {
@@ -488,13 +488,13 @@ class Ims {
  * @returns {Promise} A `Promise` resolving to the `Ims` instance.
  */
 Ims.fromToken = async token => {
-  debug('Ims.fromToken(%s)', token)
+  aioLogger.debug('Ims.fromToken(%s)', token)
   const as = getTokenData(token).as
   if (as) {
     const url = `https://${as}.adobelogin.com`
     for (const env in IMS_ENDPOINTS) {
       if (url === IMS_ENDPOINTS[env]) {
-        debug('  > %s=%s', env, IMS_ENDPOINTS[env])
+        aioLogger.debug('  > %s=%s', env, IMS_ENDPOINTS[env])
         return Promise.resolve({ token, ims: new Ims(env) })
       }
     }

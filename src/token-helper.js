@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
-const debug = require('debug')('@adobe/aio-lib-ims/token-helper')
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:token-helper', { provider: 'debug' })
 const { getContext } = require('./context')
 const imsJwtPlugin = require('@adobe/aio-lib-ims-jwt')
 
@@ -44,7 +44,7 @@ if (!ACTION_BUILD) {
 const IMS_TOKEN_MANAGER = {
 
   async getToken (contextName, force) {
-    debug('getToken(%s, %s)', contextName, force)
+    aioLogger.debug('getToken(%s, %s)', contextName, force)
 
     return this._resolveContext(contextName)
       .then(context => { return { ...context, result: this._getOrCreateToken(context.data, force) } })
@@ -52,7 +52,7 @@ const IMS_TOKEN_MANAGER = {
   },
 
   async invalidateToken (contextName, force) {
-    debug('invalidateToken(%s, %s)', contextName, force)
+    aioLogger.debug('invalidateToken(%s, %s)', contextName, force)
 
     const tokenLabel = force ? REFRESH_TOKEN : ACCESS_TOKEN
     const { name, data } = await this._resolveContext(contextName)
@@ -81,7 +81,7 @@ const IMS_TOKEN_MANAGER = {
 
   async _resolveContext (contextName) {
     const context = await this._context.get(contextName)
-    debug('LoginCommand:contextData - %O', context)
+    aioLogger.debug('LoginCommand:contextData - %O', context)
 
     if (context.data) {
       return Promise.resolve(context)
@@ -91,7 +91,7 @@ const IMS_TOKEN_MANAGER = {
   },
 
   async _getOrCreateToken (config, force) {
-    debug('_getOrCreateToken(config=%o, force=%s)', config, force)
+    aioLogger.debug('_getOrCreateToken(config=%o, force=%s)', config, force)
     const ims = new Ims(config.env)
     return this.getTokenIfValid(config.access_token)
       .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
@@ -99,28 +99,28 @@ const IMS_TOKEN_MANAGER = {
   },
 
   async _fromRefreshToken (ims, token, config) {
-    debug('_fromRefreshToken(token=%s, config=%o)', token, config)
+    aioLogger.debug('_fromRefreshToken(token=%s, config=%o)', token, config)
     return this.getTokenIfValid(token)
       .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope))
   },
 
   async _generateToken (ims, config, reason, force) {
-    debug('_generateToken(reason=%s, force=%s)', reason, force)
+    aioLogger.debug('_generateToken(reason=%s, force=%s)', reason, force)
 
     const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
 
     for (const name of Object.keys(imsLoginPlugins)) {
-      debug('  > Trying: %s', name)
+      aioLogger.debug('  > Trying: %s', name)
       try {
         const { supports, imsLogin } = imsLoginPlugins[name]
-        debug('  > supports(%o): %s', config, supports(config))
+        aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
           const result = imsLogin(ims, config, force)
-          debug('  > result: %o', result)
+          aioLogger.debug('  > result: %o', result)
           return result
         }
       } catch (e) {
-        debug('  > Ignoring failure loading or calling plugin %s: %o', name, e)
+        aioLogger.debug('  > Ignoring failure loading or calling plugin %s: %o', name, e)
       }
     }
 
@@ -139,7 +139,7 @@ const IMS_TOKEN_MANAGER = {
    * @returns {Promise<string>} resolves to the access token
    */
   async _persistTokens (context, contextData, resultPromise) {
-    debug('persistTokens(%s, %o, %o)', context, contextData, resultPromise)
+    aioLogger.debug('persistTokens(%s, %o, %o)', context, contextData, resultPromise)
 
     const result = await resultPromise
     if (typeof (result) === 'string') {
@@ -171,10 +171,10 @@ const IMS_TOKEN_MANAGER = {
    * @returns {Promise<string>} the token if existing and not expired, else a rejected Promise
    */
   async getTokenIfValid (token) {
-    debug('getTokenIfValid(token=%o)', token)
+    aioLogger.debug('getTokenIfValid(token=%o)', token)
     const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
     if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
-      debug('  => %o', token.token)
+      aioLogger.debug('  => %o', token.token)
       return token.token
     }
 
