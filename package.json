@@ -6,6 +6,7 @@
   "bugs": "https://github.com/adobe/aio-lib-ims/issues",
   "dependencies": {
     "@adobe/aio-lib-core-config": "^2.0.0",
+    "@adobe/aio-lib-env": "^1.0.0",
     "@adobe/aio-lib-ims-jwt": "^2.0.0",
     "@adobe/aio-lib-ims-oauth": "^3.0.0",
     "@adobe/aio-lib-state": "^1.0.4",

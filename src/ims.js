@@ -13,9 +13,7 @@ governing permissions and limitations under the License.
 const rp = require('request-promise-native')
 const debug = require('debug')('@adobe/aio-cli-ims/ims')
 const url = require('url')
-
-// default IMS environment
-const DEFAULT_ENVIRONMENT = 'prod'
+const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
 
 const IMS_ENDPOINTS = {
   stage: 'https://ims-na1-stg1.adobelogin.com',
@@ -194,11 +192,11 @@ class Ims {
    * @param {string} env The name of the environment. `prod` and `stage`
    *      are the only values supported. `prod` is default and any value
    *      other than `prod` or `stage` stage is assumed to be the default
-   *      value of `prod`.
+   *      value of `prod`. If not set, it will get the global cli env value. See https://github.com/adobe/aio-lib-env
    */
-  constructor (env) {
+  constructor (env = getCliEnv()) {
     if (!env || !IMS_ENDPOINTS[env]) {
-      env = DEFAULT_ENVIRONMENT
+      env = DEFAULT_ENV
     }
 
     this.endpoint = IMS_ENDPOINTS[env]
