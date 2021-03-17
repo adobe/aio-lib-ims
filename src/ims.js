@@ -191,15 +191,12 @@ class Ims {
    *
    * @param {string} env The name of the environment. `prod` and `stage`
    *      are the only values supported. `prod` is default and any value
-   *      other than `prod` or `stage` stage is assumed to be the default
+   *      other than `prod` or `stage` it is assumed to be the default
    *      value of `prod`. If not set, it will get the global cli env value. See https://github.com/adobe/aio-lib-env
+   *      (which defaults to `prod` as well if not set)
    */
   constructor (env = getCliEnv()) {
-    if (!env || !IMS_ENDPOINTS[env]) {
-      env = DEFAULT_ENV
-    }
-
-    this.endpoint = IMS_ENDPOINTS[env]
+    this.endpoint = IMS_ENDPOINTS[env] || IMS_ENDPOINTS[DEFAULT_ENV]
   }
 
   /**

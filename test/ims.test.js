@@ -70,6 +70,10 @@ test('constructor', () => {
   ims = new Ims('gibberish')
   expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
 
+  // if constructor parameter is set to null, should use PROD endpoint (default env)
+  ims = new Ims(null)
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
   // if global cli env is set to STAGE, should use it
   libEnv.getCliEnv.mockReturnValue(STAGE_ENV)
   ims = new Ims()
