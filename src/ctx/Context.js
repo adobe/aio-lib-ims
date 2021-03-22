@@ -10,7 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const debug = require('debug')('@adobe/aio-lib-ims/ctx/Context')
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:Context', { provider: 'debug' })
 
 /**
  * The `Context` abstract class provides an interface to manage the IMS configuration contexts on behalf of
@@ -27,7 +27,7 @@ class Context {
    * @returns {Promise<string>} the current context name
    */
   async getCurrent () {
-    debug('get current')
+    aioLogger.debug('get current')
     return this.getConfigValue(this.keyNames.CURRENT)
   }
 
@@ -38,7 +38,7 @@ class Context {
    * @returns {Promise<any>} returns an instance of the Config object
    */
   async setCurrent (contextName) {
-    debug('set current=%s', contextName)
+    aioLogger.debug('set current=%s', contextName)
     // enforce to local config, current should not conflict with global IMS contexts such as `cli`
     await this.setConfigValue(this.keyNames.CURRENT, contextName, true)
   }
@@ -55,7 +55,7 @@ class Context {
    * @returns {Promise<object>} The configuration object
    */
   async get (contextName) {
-    debug('get(%s)', contextName)
+    aioLogger.debug('get(%s)', contextName)
 
     if (!contextName) {
       contextName = await this.getCurrent()
@@ -89,7 +89,7 @@ class Context {
    *
    */
   async set (contextName, contextData, local = false) {
-    debug('set(%s, %o)', contextName, contextData, !!local)
+    aioLogger.debug('set(%s, %o)', contextName, contextData, !!local)
 
     let current
     if (!contextName) {
@@ -109,7 +109,7 @@ class Context {
    * @returns {Promise<string[]>} The names of the currently known configurations.
    */
   async keys () {
-    debug('keys()')
+    aioLogger.debug('keys()')
     return this.contextKeys()
   }
 

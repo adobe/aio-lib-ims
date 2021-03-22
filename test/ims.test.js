@@ -11,6 +11,10 @@ governing permissions and limitations under the License.
 */
 
 const rp = require('request-promise-native')
+const libEnv = require('@adobe/aio-lib-env')
+const { STAGE_ENV, PROD_ENV } = jest.requireActual('@adobe/aio-lib-env')
+
+jest.mock('@adobe/aio-lib-env')
 jest.mock('request-promise-native')
 
 const {
@@ -26,6 +30,7 @@ const {
 
 afterEach(() => {
   jest.restoreAllMocks()
+  libEnv.getCliEnv.mockReturnValue(PROD_ENV) // default
   rp.mockRestore()
 })
 
@@ -44,6 +49,45 @@ test('exports', async () => {
   expect(typeof CLIENT_ID).toEqual('string')
   expect(typeof CLIENT_SECRET).toEqual('string')
   expect(typeof SCOPE).toEqual('string')
+})
+
+test('constructor', () => {
+  const endpoints = {
+    PROD_ENV: 'https://ims-na1.adobelogin.com',
+    STAGE_ENV: 'https://ims-na1-stg1.adobelogin.com'
+  }
+  let ims
+
+  // default, should use PROD endpoint (default for global cli env is PROD)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // if constructor parameter is set to STAGE, should use STAGE endpoint (overrides global env)
+  ims = new Ims(STAGE_ENV)
+  expect(ims.endpoint).toEqual(endpoints.STAGE_ENV)
+
+  // if constructor parameter is set to an unknown string, should use PROD endpoint (default env)
+  ims = new Ims('gibberish')
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // if constructor parameter is set to null, should use PROD endpoint (default env)
+  ims = new Ims(null)
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // if global cli env is set to STAGE, should use it
+  libEnv.getCliEnv.mockReturnValue(STAGE_ENV)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.STAGE_ENV)
+
+  // if global cli env is set to PROD, should use it
+  libEnv.getCliEnv.mockReturnValue(PROD_ENV)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // default, should use PROD endpoint (global cli env is not set)
+  libEnv.getCliEnv.mockReturnValue(null)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
 })
 
 test('getTokenData', () => {
