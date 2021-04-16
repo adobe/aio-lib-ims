@@ -160,9 +160,31 @@ JWT (service to service integration) configuration requires the following proper
 | technical_account_id | The _Technical Account ID_ from the integration overview screen in the I/O Console
 | meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the *meta_scopes* property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`. |
 | ims_org_id | The _Organization ID_ from the integration overview screen in the I/O Console. |
-| private_key | The private key matching any one of the _Public Keys_ of the integration. This can be the private key all in one line as a string, or an array of strings (each element is a line from the key file)  |
+| private_key | The private key matching any one of the _Public Keys_ of the integration. This can be the private key all in one line as a string, or an array of strings (each element is a line from the key file) See the [Setting the Private Key](#setting-the-private-key) section. |
 | passphrase | (_Optional_). The passphrase of the private key. |
 
+
+## Setting the Private Key
+
+For a JWT configuration, your private key is generated in Adobe I/O Console, and is downloaded to your computer when you generate it. 
+
+Adobe I/O Console does not keep the private key (only your corresponding public key) so you will have to set the private key that was downloaded manually in your IMS context configuration.
+
+You can set your private key in the config via two ways:
+1. Import the private key as a string
+2. Set a file reference to the private key
+
+The instructions below assume a private key file called `private.key` and `CONTEXT_NAME` is the name of your JWT context.
+
+1. To import your private key as a string:
+
+`aio config:set ims.contexts.CONTEXT_NAME.private_key path/to/your/private.key --file`
+
+2. To set a file reference to the private key instead:
+
+`aio config:set ims.contexts.CONTEXT_NAME.private_key path/to/your/private.key`
+
+Note that the path to your private key, if it is a relative path, will be resolved relative to the current working directory.
 
 ## OAuth2 Configuration
 
