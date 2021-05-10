@@ -142,7 +142,8 @@ test('getToken - string (oauth)', async () => {
     createHandlerForContext(context)
   )
 
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
+    .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
 })
 
 test('getToken - string (cli)', async () => {
@@ -158,7 +159,8 @@ test('getToken - string (cli)', async () => {
     createHandlerForContext(context)
   )
 
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
+    .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
 })
 
 test('getToken - object', async () => {
@@ -362,7 +364,7 @@ test('getToken - unknown plugin', async () => {
   )
 
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
-    .rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
+    .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
 })
 
 test('getToken - bad ims plugin, throws exception (coverage)', async () => {
@@ -385,6 +387,6 @@ test('getToken - bad ims plugin, throws exception (coverage)', async () => {
 
   // `supports` function throws an exception
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
-    .rejects.toEqual(new Error('Cannot generate token because no plugin supports configuration'))
+    .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
 })
 global.WEBPACK_ACTION_BUILD = undefined
