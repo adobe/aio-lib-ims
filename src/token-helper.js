@@ -108,23 +108,33 @@ const IMS_TOKEN_MANAGER = {
     aioLogger.debug('_generateToken(reason=%s, force=%s)', reason, force)
 
     const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
+    let pluginErrors = ['Cannot generate token because no plugin supports configuration:'] // eslint-disable-line prefer-const
 
     for (const name of Object.keys(imsLoginPlugins)) {
       aioLogger.debug('  > Trying: %s', name)
       try {
-        const { supports, imsLogin } = imsLoginPlugins[name]
+        const { canSupport, supports, imsLogin } = imsLoginPlugins[name]
         aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
           const result = imsLogin(ims, config, force)
           aioLogger.debug('  > result: %o', result)
           return result
         }
+
+        // plugin doesn't match: we log the specific plugin errors
+        if (typeof canSupport === 'function') {
+          try {
+            await canSupport(config)
+          } catch (e) {
+            pluginErrors.push(`[plugin:${name}]: ${e.message}`)
+          }
+        }
       } catch (e) {
         aioLogger.debug('  > Ignoring failure loading or calling plugin %s: %o', name, e)
       }
     }
 
-    return Promise.reject(new Error('Cannot generate token because no plugin supports configuration'))
+    return Promise.reject(new Error(pluginErrors.join('\n')))
   },
 
   /**
