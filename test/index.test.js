@@ -23,23 +23,20 @@ test('exports', async () => {
 
 test('getToken', async () => {
   jest.mock('../src/token-helper')
-  expect.assertions(7)
+  expect.assertions(3)
 
   /** @private */
-  function _curry (contextName, options, retVal) {
-    return function (n, f) {
+  function _curry (contextName, retVal) {
+    return function (n) {
       expect(n).toEqual(contextName)
-      expect(f).toEqual(options)
       return new Promise(resolve => resolve(retVal))
     }
   }
 
   expect(typeof index.getToken).toEqual('function')
 
-  tokenHelper.IMS_TOKEN_MANAGER.getToken = jest.fn(_curry('myContext1', true, 'retVal1'))
-  expect(await index.getToken('myContext1', true)).toEqual('retVal1')
-  tokenHelper.IMS_TOKEN_MANAGER.getToken = jest.fn(_curry('myContext2', false, 'retVal2'))
-  expect(await index.getToken('myContext2')).toEqual('retVal2')
+  tokenHelper.IMS_TOKEN_MANAGER.getToken = jest.fn(_curry('myContext1', 'retVal1'))
+  expect(await index.getToken('myContext1')).toEqual('retVal1')
 })
 
 test('invalidateToken', async () => {

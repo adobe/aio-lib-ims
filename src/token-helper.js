@@ -43,11 +43,11 @@ if (!ACTION_BUILD) {
 
 const IMS_TOKEN_MANAGER = {
 
-  async getToken (contextName, force) {
-    aioLogger.debug('getToken(%s, %s)', contextName, force)
+  async getToken (contextName) {
+    aioLogger.debug('getToken(%s, %s)', contextName)
 
     return this._resolveContext(contextName)
-      .then(context => { return { ...context, result: this._getOrCreateToken(context.data, force) } })
+      .then(context => { return { ...context, result: this._getOrCreateToken(context.data) } })
       .then(result => this._persistTokens(result.name, result.data, result.result))
   },
 
@@ -90,12 +90,12 @@ const IMS_TOKEN_MANAGER = {
     }
   },
 
-  async _getOrCreateToken (config, force) {
-    aioLogger.debug('_getOrCreateToken(config=%o, force=%s)', config, force)
+  async _getOrCreateToken (config) {
+    aioLogger.debug('_getOrCreateToken(config=%o)', config)
     const ims = new Ims(config.env)
     return this.getTokenIfValid(config.access_token)
       .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
-      .catch(reason => this._generateToken(ims, config, reason, force))
+      .catch(reason => this._generateToken(ims, config, reason))
   },
 
   async _fromRefreshToken (ims, token, config) {
@@ -104,8 +104,8 @@ const IMS_TOKEN_MANAGER = {
       .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope))
   },
 
-  async _generateToken (ims, config, reason, force) {
-    aioLogger.debug('_generateToken(reason=%s, force=%s)', reason, force)
+  async _generateToken (ims, config, reason) {
+    aioLogger.debug('_generateToken(reason=%s)', reason)
 
     const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
     let pluginErrors = ['Cannot generate token because no plugin supports configuration:'] // eslint-disable-line prefer-const
@@ -116,7 +116,7 @@ const IMS_TOKEN_MANAGER = {
         const { canSupport, supports, imsLogin } = imsLoginPlugins[name]
         aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
-          const result = imsLogin(ims, config, force)
+          const result = imsLogin(ims, config)
           aioLogger.debug('  > result: %o', result)
           return result
         }
