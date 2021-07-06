@@ -41,13 +41,19 @@ if (!ACTION_BUILD) {
   }
 }
 
+/**
+ * Returns a consolidated list of login plugins to try for acquiring the token.
+ *
+ * @param {object} context The configuration context providing additional plugins
+ * @returns {Promise<string[]>} The list of login plugins to try
+ */
 async function getMergedPlugins (context) {
-  aioLogger.debug("getMergedPlugins(%o)", context);
+  aioLogger.debug('getMergedPlugins(%o)', context)
 
   return context.getPlugins()
     .then((plugins) => {
       if (plugins instanceof Array && plugins.length > 0) {
-        aioLogger.debug("  > adding configured plugins: %o", plugins)
+        aioLogger.debug('  > adding configured plugins: %o', plugins)
         const configPluginMap = Object.fromEntries(plugins.map(element => [element, element]))
         return Object.assign(configPluginMap, DEFAULT_CREATE_TOKEN_PLUGINS)
       } else if (plugins !== undefined) {
@@ -57,17 +63,27 @@ async function getMergedPlugins (context) {
       aioLogger.debug('  > using default plugins only')
       return DEFAULT_CREATE_TOKEN_PLUGINS
     }
-  )
+    )
 }
 
+/**
+ * Loads the requested plugin and returns it or a dummy pluggin in case
+ * of a load failure. The dummy plugin returns "false" for the supports()
+ * function and will reject the canSupport() function regardless of supplied
+ * parameters.
+ *
+ * @param {string} name The name of the plugin to try to load
+ * @param {string} location The location from where to load the plugin
+ * @returns {object} The loaded plugin or a dummy in case of failure to load
+ */
 function loadPlugin (name, location) {
-  aioLogger.debug("loadPlugin(%s, %s)", name, location)
+  aioLogger.debug('loadPlugin(%s, %s)', name, location)
 
   try {
     return require(location)
   } catch (error) {
-    aioLogger.debug("Ignoring plugin %s due to load failure from %s", name, location)
-    aioLogger.debug("Error: %o", error)
+    aioLogger.debug('Ignoring plugin %s due to load failure from %s', name, location)
+    aioLogger.debug('Error: %o', error)
     return {
       supports: () => false,
       canSupport: async () => Promise.reject(new Error(`Plugin not loaded: ${JSON.stringify(error)}`))
@@ -76,7 +92,7 @@ function loadPlugin (name, location) {
 }
 
 const IMS_TOKEN_MANAGER = {
-  async getToken(contextName) {
+  async getToken (contextName) {
     aioLogger.debug('getToken(%s, %s)', contextName)
 
     return this._resolveContext(contextName)
@@ -84,7 +100,7 @@ const IMS_TOKEN_MANAGER = {
       .then(result => this._persistTokens(result.name, result.data, result.result))
   },
 
-  async invalidateToken(contextName, force) {
+  async invalidateToken (contextName, force) {
     aioLogger.debug('invalidateToken(%s, %s)', contextName, force)
 
     const tokenLabel = force ? REFRESH_TOKEN : ACCESS_TOKEN
@@ -108,11 +124,11 @@ const IMS_TOKEN_MANAGER = {
       })
   },
 
-  get _context() {
+  get _context () {
     return getContext()
   },
 
-  async _resolveContext(contextName) {
+  async _resolveContext (contextName) {
     const context = await this._context.get(contextName)
     aioLogger.debug('LoginCommand:contextData - %O', context)
 
@@ -123,7 +139,7 @@ const IMS_TOKEN_MANAGER = {
     }
   },
 
-  async _getOrCreateToken(config) {
+  async _getOrCreateToken (config) {
     aioLogger.debug('_getOrCreateToken(config=%o)', config)
     const ims = new Ims(config.env)
     return this.getTokenIfValid(config.access_token)
@@ -131,23 +147,23 @@ const IMS_TOKEN_MANAGER = {
       .catch(reason => this._generateToken(ims, config, reason))
   },
 
-  async _fromRefreshToken(ims, token, config) {
+  async _fromRefreshToken (ims, token, config) {
     aioLogger.debug('_fromRefreshToken(token=%s, config=%o)', token, config)
     return this.getTokenIfValid(token)
       .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope))
   },
 
-  async _generateToken(ims, config, reason) {
+  async _generateToken (ims, config, reason) {
     aioLogger.debug('_generateToken(reason=%s)', reason)
 
-    const imsLoginPlugins = await getMergedPlugins(this._context);
-    aioLogger.debug("  > Got imsLoginPlugins: %o", imsLoginPlugins);
+    const imsLoginPlugins = await getMergedPlugins(this._context)
+    aioLogger.debug('  > Got imsLoginPlugins: %o', imsLoginPlugins)
     let pluginErrors = ['Cannot generate token because no plugin supports configuration:'] // eslint-disable-line prefer-const
 
     for (const name of Object.keys(imsLoginPlugins)) {
       aioLogger.debug('  > Trying: %s', name)
       try {
-        const { canSupport, supports, imsLogin } = await loadPlugin(name, imsLoginPlugins[name]);
+        const { canSupport, supports, imsLogin } = await loadPlugin(name, imsLoginPlugins[name])
         aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
           const result = imsLogin(ims, config)
@@ -182,7 +198,7 @@ const IMS_TOKEN_MANAGER = {
    * @param {Promise} resultPromise the promise that contains the results (access token, or access token and refresh token)
    * @returns {Promise<string>} resolves to the access token
    */
-  async _persistTokens(context, contextData, resultPromise) {
+  async _persistTokens (context, contextData, resultPromise) {
     aioLogger.debug('persistTokens(%s, %o, %o)', context, contextData, resultPromise)
 
     const result = await resultPromise
@@ -214,7 +230,7 @@ const IMS_TOKEN_MANAGER = {
    *
    * @returns {Promise<string>} the token if existing and not expired, else a rejected Promise
    */
-  async getTokenIfValid(token) {
+  async getTokenIfValid (token) {
     aioLogger.debug('getTokenIfValid(token=%o)', token)
     const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
     if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
