@@ -57,6 +57,31 @@ class ConfigCliContext extends Context {
   }
 
   /**
+   * Override super class implementation to prevent return the
+   * plugins if configured at all
+   *
+   * @override
+   */
+  async getPlugins () {
+    aioLogger.debug('getPlugins()')
+    return this.getConfigValue(this.keyNames.PLUGINS) || []
+  }
+
+  /**
+   * Override super class implementation to prevent return the
+   * plugins if configured at all
+   *
+   * @override
+   */
+  async setPlugins (plugins, local = false) {
+    aioLogger.debug('setPlugins(%o, %s)', plugins, !!local)
+
+    if (plugins instanceof Array || plugins === null) {
+      this.setConfigValue(this.keyNames.PLUGINS, plugins, !!local)
+    }
+  }
+
+  /**
    * @protected
    * @override
    * @ignore
@@ -104,6 +129,15 @@ class ConfigCliContext extends Context {
    */
   async contextKeys () {
     return Object.keys(this.aioConfig.get(`${this.keyNames.IMS}.${this.keyNames.CONTEXTS}`) || {})
+  }
+
+  /**
+   * @protected
+   * @override
+   * @ignore
+   */
+  async plugins () {
+    return this.getConfigValue(this.keyNames.PLUGINS)
   }
 
   /** @private */
