@@ -131,15 +131,6 @@ class ConfigCliContext extends Context {
     return Object.keys(this.aioConfig.get(`${this.keyNames.IMS}.${this.keyNames.CONTEXTS}`) || {})
   }
 
-  /**
-   * @protected
-   * @override
-   * @ignore
-   */
-  async plugins () {
-    return this.getConfigValue(this.keyNames.PLUGINS)
-  }
-
   /** @private */
   getContextValueFromOptionalSource (key, source) {
     const fullKey = `${this.keyNames.IMS}.${this.keyNames.CONTEXTS}.${key}`

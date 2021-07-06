@@ -202,15 +202,6 @@ class Context {
   async contextKeys () {
     throwNotImplemented()
   }
-
-  /**
-   * @ignore
-   * @protected
-   * @returns {Promise<string[]>} return plugins, empty by default
-   */
-  async plugins () {
-    return []
-  }
 }
 
 /** @private */
