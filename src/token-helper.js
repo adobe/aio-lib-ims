@@ -50,8 +50,11 @@ async function getMergedPlugins (context) {
         aioLogger.debug("  > adding configured plugins: %o", plugins)
         const configPluginMap = Object.fromEntries(plugins.map(element => [element, element]))
         return Object.assign(configPluginMap, DEFAULT_CREATE_TOKEN_PLUGINS)
+      } else if (plugins !== undefined) {
+        aioLogger.debug('Ignored configured plugins: Expected string[], got: \'%o\'', plugins)
       }
 
+      aioLogger.debug('  > using default plugins only')
       return DEFAULT_CREATE_TOKEN_PLUGINS
     }
   )
