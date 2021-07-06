@@ -64,7 +64,7 @@ class ConfigCliContext extends Context {
    */
   async getPlugins () {
     aioLogger.debug('getPlugins()')
-    return this.getConfigValue(this.keyNames.PLUGINS) || []
+    return this.getConfigValue(this.keyNames.PLUGINS)
   }
 
   /**
