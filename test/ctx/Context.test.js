@@ -47,6 +47,9 @@ describe('not implemented methods', () => {
   test('Context.contextKeys', async () => {
     await expect(context.contextKeys('key', 'value')).rejects.toThrow('abstract method is not implemented')
   })
+  test('Context.setPlugins', async () => {
+    await expect(context.setPlugins(['plugin'])).rejects.toThrow('abstract method is not implemented')
+  })
 })
 
 describe('getCurrent', () => {
@@ -139,5 +142,12 @@ describe('keys', () => {
     const ret = await context.keys()
     expect(ret).toEqual(['fake', 'other'])
     expect(context.contextKeys).toHaveBeenCalledWith()
+  })
+})
+
+describe('getPlugins', () => {
+  test('(<no args>)', async () => {
+    const ret = await context.getPlugins()
+    expect(ret).toEqual([])
   })
 })

@@ -63,7 +63,7 @@ afterEach(() => {
 })
 
 /** @private */
-function createHandlerForContext (context = {}) {
+function createHandlerForContext (context = {}, withPlugin) {
   const mappedContext = Object.keys(context)
     // prefix ims. to all the keys
     .map(key => {
@@ -75,6 +75,14 @@ function createHandlerForContext (context = {}) {
     .reduce((acc, cur) => {
       return Object.assign(acc, cur)
     }, {})
+
+  // add unresolvable plugin or illegale configuration value depending
+  // on withPlugin parameter (default is unsupported value)
+  if (withPlugin) {
+    mappedContext['ims.config.plugins'] = ['@adobe/__non_existing_login_plugin__']
+  } else {
+    mappedContext['ims.config.plugins'] = '__unsupported_value__'
+  }
 
   const store = {
     ...mappedContext
@@ -139,7 +147,7 @@ test('getToken - string (oauth)', async () => {
 
   setImsPluginMock('oauth', 'abc123')
   config.get.mockImplementation(
-    createHandlerForContext(context)
+    createHandlerForContext(context, true)
   )
 
   // no force
@@ -229,7 +237,7 @@ test('getToken - object (refresh token expired, coverage)', async () => {
 
   setImsPluginMock('jwt', result)
   config.get.mockImplementation(
-    createHandlerForContext(context)
+    createHandlerForContext(context, true)
   )
 
   // no force
