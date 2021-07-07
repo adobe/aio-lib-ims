@@ -57,8 +57,8 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * Override super class implementation to prevent return the
-   * plugins if configured at all
+   * Override super class implementation to return the plugins configured
+   * in the `plugins` configuration property.
    *
    * @override
    */
@@ -68,8 +68,11 @@ class ConfigCliContext extends Context {
   }
 
   /**
-   * Override super class implementation to prevent return the
-   * plugins if configured at all
+   * Override super class implementation to persist the provided plugins
+   * in the `plugins` configuration property.
+   *
+   * This implementation silently ignores a `plugins` parameter which is
+   * neither and array nor `null`.
    *
    * @override
    */
@@ -78,6 +81,8 @@ class ConfigCliContext extends Context {
 
     if (plugins instanceof Array || plugins === null) {
       this.setConfigValue(this.keyNames.PLUGINS, plugins, !!local)
+    } else {
+      aioLogger.debug('  > Ignoring unexpected plugins parameter \'%o\'', plugins)
     }
   }
 

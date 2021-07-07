@@ -2,7 +2,7 @@
 [![Downloads/week](https://img.shields.io/npm/dw/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
 [![Build Status](https://travis-ci.com/adobe/aio-lib-ims.svg?branch=master)](https://travis-ci.com/adobe/aio-lib-ims)
 [![License](https://img.shields.io/npm/l/@adobe/aio-lib-ims.svg)](https://github.com/adobe/aio-lib-ims/blob/master/package.json)
-[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/) 
+[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/)
 
 
 # Adobe I/O IMS Library
@@ -126,7 +126,7 @@ In general, you do not need to deal with this property.
 
 ## Set Current Context (Advanced)
 
-The default context can be set locally with `await context.setCurrent('contextname')`. 
+The default context can be set locally with `await context.setCurrent('contextname')`.
 This will write the following configuration to the `ims` key in the `.aio` file of the current working directory:
 
 ```js
@@ -166,7 +166,7 @@ JWT (service to service integration) configuration requires the following proper
 
 ## Setting the Private Key
 
-For a JWT configuration, your private key is generated in Adobe I/O Console, and is downloaded to your computer when you generate it. 
+For a JWT configuration, your private key is generated in Adobe I/O Console, and is downloaded to your computer when you generate it.
 
 Adobe I/O Console does not keep the private key (only your corresponding public key) so you will have to set the private key that was downloaded manually in your IMS context configuration.
 
@@ -196,6 +196,31 @@ OAuth2 configuration requires the following properties:
 | client_secret | The IMS (OAUth2) Client Secret |
 | redirect_uri | The _Default redirect URI_ from the integration overview screen in the I/O Console. Alternatively, any URI matching one of the _Redirect URI patterns_ may be used. |
 | scope | Scopes to assign to the tokens. This is a string of space separated scope names which depends on the services this integration is subscribed to. Adobe I/O Console does not currently expose the list of scopes defined for OAuth2 integrations, a good list of scopes by service can be found in [OAuth 2.0 Scopes](https://www.adobe.io/authentication/auth-methods.html#!AdobeDocs/adobeio-auth/master/OAuth/Scopes.md). At the very least you may want to enter `openid`. |
+
+
+## Token Creation Plugins
+
+Additional token creation plugins can be registered with the Adobe I/O IMS library configuration.
+Such token creation plugins must comply with the following contract:
+
+* Implemented as a JavaScript module which can be `require()`-ed by the IMS library
+* Registered with the module path used by the `require()` function
+* Implementing 3 functions as follows:
+  * `Promise<any> canSupport(config)` -- Receives the configuration properties of the selected context and returns a promise as to whether the token creation plugin can be used with this configuration. The promise must resolve to `true` if supported or be rejected with an `Error` explaining why the configuration is not supported by the plugin.
+  * `boolean supports(config)` -- Receives the configuration properties of the selected context and returns `true` if supported or `false` if not supported. This is a syncronous function.
+  * `Promise<any> imsLogin(ims, config)` -- Receives an instance of the IMS token manager class and the configuration properties of the selected context to create an access token from. If the token creation plugin does not support the configuration or if an error occurs creating the token, the function must return a `Promise` rejecting with an `Error` explaining the problem. Otherwise the promise should resolve to an `object` containing the access token and optionally a refresh token.
+
+The `Context` class offers two methods to manage token creation plugins:
+
+* `Context.getPlugins()` returning a `Promise<string[]>` listing the additional token creation plugins.
+* `Context.setPlugins(string[])` taking the list of additional token creation plugins to configure.
+
+**Note 1**: the `setPlugins` method completely replaces the current list of plugins.
+Any selective addition of removal must be done in a three step process: Get the plugins, update the list, set the plugins.
+
+**Note 2**: The token creation plugins supporting [JWT](https://github.com/adobe/aio-lib-ims-jwt/blob/master/src/ims-jwt.js), [OAuth2](https://github.com/adobe/aio-lib-ims-oauth/blob/master/src/ims-oauth.js), and [CLI](https://github.com/adobe/aio-lib-ims-oauth/blob/master/src/ims-cli.js) login, are always present.
+As such they are note returned by the `getPlugins` method and should not be provided in the `setPlugins` method.
+
 
 # Contributing
 Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for more information.

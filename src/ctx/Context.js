@@ -119,7 +119,7 @@ class Context {
    * token creation plugins must override to return the list of
    * plugins which can be require-d.
    *
-   * @returns {Promise<string[]>} the token creation plugins
+   * @returns {Promise<string[]>} empty list of token creation plugins
    */
   async getPlugins () {
     aioLogger.debug('getPlugins() (none)')
@@ -128,10 +128,9 @@ class Context {
 
   /**
    * Sets the list of configured token creation plugins. This base
-   * implementation throws an Error as plugins are not support.
+   * implementation throws an Error as plugins are not supported.
    * Extensions supporting token creation plugins must override to
-   * return check and persist the list of plugins which can be
-   * require-d.
+   * check and persist the list of plugins which can be require-d.
    *
    * If the plugins parameter is an empty array or null, the current
    * plugins configuration is removed. Otherwise the current

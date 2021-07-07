@@ -35,7 +35,7 @@ const CLI = 'cli'
 /** Property holding the current context name */
 const CURRENT = 'current'
 
-/** Property holding the list of additional plugins */
+/** Property holding the list of additional token creation plugins */
 const PLUGINS = 'plugins'
 
 /** @private */
