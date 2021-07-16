@@ -33,11 +33,13 @@ if (!ACTION_BUILD) {
   // use OAuth and CLI imports only when WEBPACK_ACTION_BUILD global is not set
   const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
   const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
+  const imsS2sPlugin = require('@adobe/aio-lib-ims-s2s')
 
   DEFAULT_CREATE_TOKEN_PLUGINS = {
     cli: imsCliPlugin,
     jwt: imsJwtPlugin,
-    oauth: imsOAuthPlugin
+    oauth: imsOAuthPlugin,
+    s2s: imsS2sPlugin
   }
 }
 
