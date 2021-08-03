@@ -183,9 +183,12 @@ const IMS_TOKEN_MANAGER = {
   async getTokenIfValid (token) {
     aioLogger.debug('getTokenIfValid(token=%o)', token)
     const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
-    if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
-      aioLogger.debug('  => %o', token.token)
-      return token.token
+    if (token && token.expiry) {
+      const tokenExpiry = Number(token.expiry)
+      if (typeof (tokenExpiry) === 'number' && tokenExpiry > minExpiry && typeof (token.token) === 'string') {
+        aioLogger.debug('  => %o', token.token)
+        return token.token
+      }
     }
 
     return Promise.reject(new Error('Token missing or expired'))
