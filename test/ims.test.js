@@ -109,7 +109,7 @@ test('Ims.fromToken - bad payload', async () => {
   const badPayloadBase64 = Buffer.from(JSON.stringify(badPayload)).toString('base64')
   const token = `header.${badPayloadBase64}.signature`
 
-  return expect(Ims.fromToken(token)).rejects.toEqual(new Error('Cannot resolve to IMS environment from token'))
+  return expect(Ims.fromToken(token)).rejects.toThrow('[IMSSDK:CANNOT_RESOLVE_ENVIRONMENT] Cannot resolve to IMS environment from token')
 })
 
 test('Ims.fromToken - ok payload', async () => {
@@ -374,7 +374,7 @@ test('Ims.getAccessToken', async () => {
   authCode = createTokenFromPayload(payload)
 
   await expect(ims.getAccessToken(authCode, clientId, clientSecret, scopes))
-    .rejects.toEqual(new Error('Unknown type of authCode: unknown_type'))
+    .rejects.toThrow('[IMSSDK:UNKNOWN_AUTHCODE_TYPE] Unknown type of authCode: unknown_type')
 
   const serverResponsePayload = {
     access_token: 'my-access-token',
