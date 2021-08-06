@@ -91,7 +91,7 @@ test('exports', async () => {
 
 test('getTokenIfValid', async () => {
   // invalid token
-  await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toEqual(new Error('Token missing or expired'))
+  await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
 
   // valid token
   const token = {
@@ -327,9 +327,9 @@ test('invalidateToken - unknown context', async () => {
   )
 
   // no force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error(`IMS context '${contextName}' is not configured`))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toThrow(`[IMSSDK:CONTEXT_NOT_CONFIGURED] IMS context '${contextName}' is not configured`)
   // force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error(`IMS context '${contextName}' is not configured`))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toThrow(`[IMSSDK:CONTEXT_NOT_CONFIGURED] IMS context '${contextName}' is not configured`)
 })
 
 test('invalidateToken - token missing or expired', async () => {
@@ -351,9 +351,9 @@ test('invalidateToken - token missing or expired', async () => {
   )
 
   // no force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error('Token missing or expired'))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
   // force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, true)).rejects.toEqual(new Error('Token missing or expired'))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, true)).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
 })
 
 test('getToken - unknown plugin', async () => {
@@ -370,7 +370,7 @@ test('getToken - unknown plugin', async () => {
   )
 
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
-    .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
+    .rejects.toThrow('[IMSSDK:CANNOT_GENERATE_TOKEN] Cannot generate token because no plugin supports configuration:')
 })
 
 test('getToken - bad ims plugin, throws exception (coverage)', async () => {
@@ -393,5 +393,5 @@ test('getToken - bad ims plugin, throws exception (coverage)', async () => {
 
   // `supports` function throws an exception
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false))
-    .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
+    .rejects.toThrow('[IMSSDK:CANNOT_GENERATE_TOKEN] Cannot generate token because no plugin supports configuration:')
 })

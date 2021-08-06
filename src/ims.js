@@ -14,6 +14,7 @@ const rp = require('request-promise-native')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ims', { provider: 'debug' })
 const url = require('url')
 const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
+const { codes: errors } = require('./errors')
 
 const IMS_ENDPOINTS = {
   stage: 'https://ims-na1-stg1.adobelogin.com',
@@ -323,7 +324,7 @@ class Ims {
       postData.grant_type = REFRESH_TOKEN
       postData.refresh_token = authCode
     } else {
-      return Promise.reject(new Error(`Unknown type of authCode: ${tokenType}`))
+      return Promise.reject(new errors.UNKNOWN_AUTHCODE_TYPE({ messageValues: tokenType }))
     }
 
     return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
@@ -496,7 +497,7 @@ Ims.fromToken = async token => {
       }
     }
   }
-  return Promise.reject(new Error('Cannot resolve to IMS environment from token'))
+  return Promise.reject(new errors.CANNOT_RESOLVE_ENVIRONMENT())
 }
 
 module.exports = {

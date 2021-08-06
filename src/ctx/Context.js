@@ -11,6 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:Context', { provider: 'debug' })
+const { codes: errors } = require('../errors')
 
 /**
  * The `Context` abstract class provides an interface to manage the IMS configuration contexts on behalf of
@@ -97,7 +98,7 @@ class Context {
       contextName = current
     }
     if (!contextName) {
-      throw new Error('Missing IMS context label to set context data for')
+      throw new errors.MISSING_CONTEXT_LABEL()
     }
 
     await this.setContextValue(contextName, contextData, !!local)
@@ -170,7 +171,7 @@ class Context {
 
 /** @private */
 function throwNotImplemented () {
-  throw new Error('abstract method is not implemented')
+  throw new errors.NOT_IMPLEMENTED()
 }
 
 module.exports = Context
