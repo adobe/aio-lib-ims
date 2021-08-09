@@ -14,6 +14,7 @@ const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:token-helper', { provider: 'debug' })
 const { getContext } = require('./context')
 const imsJwtPlugin = require('@adobe/aio-lib-ims-jwt')
+const { codes: errors } = require('./errors')
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
@@ -86,7 +87,7 @@ const IMS_TOKEN_MANAGER = {
     if (context.data) {
       return Promise.resolve(context)
     } else {
-      return Promise.reject(new Error(`IMS context '${context.name}' is not configured`))
+      return Promise.reject(new errors.CONTEXT_NOT_CONFIGURED({ messageValues: contextName }))
     }
   },
 
@@ -108,7 +109,7 @@ const IMS_TOKEN_MANAGER = {
     aioLogger.debug('_generateToken(reason=%s)', reason)
 
     const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
-    let pluginErrors = ['Cannot generate token because no plugin supports configuration:'] // eslint-disable-line prefer-const
+    const pluginErrors = []
 
     for (const name of Object.keys(imsLoginPlugins)) {
       aioLogger.debug('  > Trying: %s', name)
@@ -134,7 +135,7 @@ const IMS_TOKEN_MANAGER = {
       }
     }
 
-    return Promise.reject(new Error(pluginErrors.join('\n')))
+    return Promise.reject(new errors.CANNOT_GENERATE_TOKEN({ messageValues: pluginErrors.join('\n') }))
   },
 
   /**
@@ -191,7 +192,7 @@ const IMS_TOKEN_MANAGER = {
       }
     }
 
-    return Promise.reject(new Error('Token missing or expired'))
+    return Promise.reject(new errors.INVALID_TOKEN())
   }
 }
 

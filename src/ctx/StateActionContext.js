@@ -14,6 +14,7 @@ const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:Sta
 const cloneDeep = require('lodash.clonedeep')
 const Context = require('./Context')
 const State = require('@adobe/aio-lib-state')
+const { codes: errors } = require('../errors')
 
 /**
  * The `StateActionContext` class stores IMS `contexts` for Adobe I/O Runtime Actions in the
@@ -33,7 +34,7 @@ class StateActionContext extends Context {
         }
       })
       if (missing.length > 0) {
-        throw new Error(`missing environment variable(s) '${missing}', are you actually in an action's runtime?`)
+        throw new errors.MISSING_ENVIRONMENT_VARIABLE({ messageValues: missing.join(',') })
       }
     }
 

@@ -79,7 +79,7 @@ describe('constructor', () => {
     delete process.env.__OW_NAMESPACE
     delete process.env.__OW_ACTION_NAME
     delete process.env.__OW_API_KEY
-    expect(() => new TheContext(keyNames)).toThrow('missing environment variable(s) \'__OW_ACTION_NAME,__OW_NAMESPACE,__OW_API_KEY\'')
+    expect(() => new TheContext(keyNames)).toThrow('[IMSSDK:MISSING_ENVIRONMENT_VARIABLE] missing environment variable(s) \'__OW_ACTION_NAME,__OW_NAMESPACE,__OW_API_KEY\'')
   })
 })
 
