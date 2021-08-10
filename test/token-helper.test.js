@@ -100,7 +100,7 @@ test('getTokenIfValid', async () => {
   }
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
 
-  //expiry as string
+  // expiry as string
   token = {
     token: 'abcdefghijklmnop',
     expiry: (Date.now() + 20 * 60 * 1000).toString()
