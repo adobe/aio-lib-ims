@@ -94,9 +94,16 @@ test('getTokenIfValid', async () => {
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
 
   // valid token
-  const token = {
+  let token = {
     token: 'abcdefghijklmnop',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+  await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
+
+  // expiry as string
+  token = {
+    token: 'abcdefghijklmnop',
+    expiry: (Date.now() + 20 * 60 * 1000).toString()
   }
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
 })
