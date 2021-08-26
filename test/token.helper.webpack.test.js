@@ -11,7 +11,10 @@ governing permissions and limitations under the License.
 */
 
 global.WEBPACK_ACTION_BUILD = true
-jest.mock('request-promise-native')
+const mockExponentialBackoff = jest.fn()
+jest.mock('@adobe/aio-lib-core-networking', () => ({
+  exponentialBackoff: mockExponentialBackoff
+}))
 
 const IMS_PLUGINS = {
   cli: {
@@ -298,6 +301,13 @@ test('invalidateToken - has access and refresh token', async () => {
       refresh_token
     }
   }
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(true)
+  }
+
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
 
   setImsPluginMock('jwt', {})
   config.get.mockImplementation(

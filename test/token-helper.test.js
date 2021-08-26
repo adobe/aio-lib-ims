@@ -10,7 +10,10 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-jest.mock('request-promise-native')
+const mockExponentialBackoff = jest.fn()
+jest.mock('@adobe/aio-lib-core-networking', () => ({
+  exponentialBackoff: mockExponentialBackoff
+}))
 
 const IMS_PLUGINS = {
   cli: {
@@ -316,6 +319,13 @@ test('invalidateToken - has access and refresh token', async () => {
   config.get.mockImplementation(
     createHandlerForContext(context)
   )
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(true)
+  }
+
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
 
   // no force
   await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).resolves.not.toThrow()
