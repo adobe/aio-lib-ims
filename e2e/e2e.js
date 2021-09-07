@@ -60,7 +60,7 @@ test('exchangeJwtToken', () => {
     })
     .catch(err => {
       // should not get here if successful
-      expect(err).toBeDefined()
+      expect(err).not.toBeDefined()
     })
 })
 
