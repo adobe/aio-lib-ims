@@ -13,11 +13,12 @@ governing permissions and limitations under the License.
 const FormData = require('form-data')
 const libEnv = require('@adobe/aio-lib-env')
 const { STAGE_ENV, PROD_ENV } = jest.requireActual('@adobe/aio-lib-env')
-const libNetworking = require('@adobe/aio-lib-core-networking')
 
 const mockExponentialBackoff = jest.fn()
 jest.mock('@adobe/aio-lib-env')
-jest.mock('@adobe/aio-lib-core-networking')
+jest.mock('@adobe/aio-lib-core-networking', () => ({
+  exponentialBackoff: mockExponentialBackoff
+}))
 
 const {
   getTokenData,
@@ -30,16 +31,10 @@ const {
   SCOPE
 } = require('../src/ims')
 
-beforeEach(() => {
-  mockExponentialBackoff.mockClear()
-  libNetworking.HttpExponentialBackoff.mockImplementation(() => ({
-    exponentialBackoff: mockExponentialBackoff
-  }))
-})
-
 afterEach(() => {
   jest.restoreAllMocks()
   libEnv.getCliEnv.mockReturnValue(PROD_ENV) // default
+  mockExponentialBackoff.mockClear()
 })
 
 /** @private */

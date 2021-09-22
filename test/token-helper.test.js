@@ -10,10 +10,10 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const libNetworking = require('@adobe/aio-lib-core-networking')
-
 const mockExponentialBackoff = jest.fn()
-jest.mock('@adobe/aio-lib-core-networking')
+jest.mock('@adobe/aio-lib-core-networking', () => ({
+  exponentialBackoff: mockExponentialBackoff
+}))
 
 const IMS_PLUGINS = {
   cli: {
@@ -55,11 +55,6 @@ const config = require('@adobe/aio-lib-core-config')
 // ////////////////////////////////////////////
 
 beforeEach(() => {
-  mockExponentialBackoff.mockClear()
-  libNetworking.HttpExponentialBackoff.mockImplementation(() => ({
-    exponentialBackoff: mockExponentialBackoff
-  }))
-
   for (const key in IMS_PLUGINS) {
     const { imsLogin } = IMS_PLUGINS[key]
     imsLogin.mockRestore()
