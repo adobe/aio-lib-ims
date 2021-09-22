@@ -16,6 +16,7 @@
     "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {
+    "@adobe/aio-lib-test-proxy": "^1.0.0",
     "@adobe/eslint-config-aio-lib-config": "^1.0.2",
     "@types/jest": "^25.1.0",
     "dotenv": "^8.2.0",
