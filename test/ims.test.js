@@ -15,9 +15,10 @@ const libEnv = require('@adobe/aio-lib-env')
 const { STAGE_ENV, PROD_ENV } = jest.requireActual('@adobe/aio-lib-env')
 
 const mockExponentialBackoff = jest.fn()
+const mockHttpExponentialBackoff = jest.fn()
 jest.mock('@adobe/aio-lib-env')
 jest.mock('@adobe/aio-lib-core-networking', () => ({
-  exponentialBackoff: mockExponentialBackoff
+  HttpExponentialBackoff: mockHttpExponentialBackoff
 }))
 
 const {
@@ -30,6 +31,12 @@ const {
   CLIENT_SECRET,
   SCOPE
 } = require('../src/ims')
+
+beforeEach(() => {
+  mockHttpExponentialBackoff.mockReturnValue({
+    exponentialBackoff: mockExponentialBackoff
+  })
+})
 
 afterEach(() => {
   jest.restoreAllMocks()

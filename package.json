@@ -29,7 +29,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "form-data": "^4.0.0",
-    "jest": "^24",
+    "jest": "^27",
     "jest-junit": "^10.0.0",
     "jsdoc-to-markdown": "^5.0.3",
     "stdout-stderr": "^0.1.9"

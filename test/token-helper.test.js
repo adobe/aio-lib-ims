@@ -11,8 +11,10 @@ governing permissions and limitations under the License.
 */
 
 const mockExponentialBackoff = jest.fn()
+const mockHttpExponentialBackoff = jest.fn()
+jest.mock('@adobe/aio-lib-env')
 jest.mock('@adobe/aio-lib-core-networking', () => ({
-  exponentialBackoff: mockExponentialBackoff
+  HttpExponentialBackoff: mockHttpExponentialBackoff
 }))
 
 const IMS_PLUGINS = {
@@ -55,6 +57,10 @@ const config = require('@adobe/aio-lib-core-config')
 // ////////////////////////////////////////////
 
 beforeEach(() => {
+  mockHttpExponentialBackoff.mockReturnValue({
+    exponentialBackoff: mockExponentialBackoff
+  })
+
   for (const key in IMS_PLUGINS) {
     const { imsLogin } = IMS_PLUGINS[key]
     imsLogin.mockRestore()
