@@ -9,8 +9,9 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-
-const rp = require('request-promise-native')
+// eslint-disable-next-line node/no-unpublished-require
+const FormData = require('form-data')
+const fetchRetry = require('@adobe/aio-lib-core-networking')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ims', { provider: 'debug' })
 const url = require('url')
 const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
@@ -44,34 +45,55 @@ const SCOPE = 'scope'
  *
  * @private
  * @param {string} method the http method
- * @param {string} url the url endppoint
+ * @param {string} url the url endpoint
  * @param {string} token the access token authorization
  * @param {object} data the data to send
  * @returns {Promise} Promise that resolves with the request data
  */
 async function _sendRequest (method, url, token, data) {
-  const options = {
-    uri: url,
+  const requestOptions = {
     method: method,
     headers: {
       'User-Agent': 'aio-cli-ims'
-    },
-    json: true
-  }
-
-  if (data) {
-    if (method === 'GET') {
-      options.qs = data
-    } else {
-      options.form = data
     }
   }
 
-  if (token) {
-    options.auth = { bearer: token }
+  if (method === 'POST') {
+    let formData = data
+    if (!(formData instanceof FormData)) {
+      formData = Object.keys(data).reduce((formData, key) => {
+        formData.append(key, data[key])
+        return formData
+      }, new FormData())
+    }
+    requestOptions.body = formData
   }
 
-  return rp(options)
+  if (token) {
+    requestOptions.headers.Authorization = `Bearer ${token}`
+  }
+
+  const retryOptions = { maxRetries: 3, initialDelayInMillis: 500 }
+
+  const validateResponse = (res) => {
+    if (res.status === 200) {
+      return res
+    }
+    throw (new Error(`${res.status} (${res.statusText})`))
+  }
+
+  const handleTextResponse = (text) => {
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      return text
+    }
+  }
+
+  return fetchRetry.exponentialBackoff(url, requestOptions, retryOptions)
+    .then(validateResponse)
+    .then((res) => res.text())
+    .then(handleTextResponse)
 }
 
 /**
@@ -328,7 +350,7 @@ class Ims {
     }
 
     return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
-      .then(response => _toTokenResult(response))
+      .then(_toTokenResult)
   }
 
   /**
@@ -348,7 +370,7 @@ class Ims {
    * }
    * ```
    *
-   * Note that there is no `refresh_token` in a JWT tokan exchange.
+   * Note that there is no `refresh_token` in a JWT token exchange.
    *
    * @param {string} clientId The client ID of the owning application
    * @param {string} clientSecret The client's secret
@@ -364,8 +386,9 @@ class Ims {
       jwt_token: signedJwtToken
     }
 
-    return _sendPost(this.getApiUrl('/ims/exchange/jwt'), undefined, postData)
-      .then(response => _toTokenResult(response))
+    const postURL = this.getApiUrl('/ims/exchange/jwt')
+
+    return _sendPost(postURL, undefined, postData).then(_toTokenResult)
   }
 
   /**
@@ -380,7 +403,6 @@ class Ims {
    */
   async invalidateToken (token, clientId, clientSecret) {
     aioLogger.debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
-
     if (clientId && clientSecret) {
       const postData = {
         token_type: _getTokenType(token),
@@ -427,12 +449,7 @@ class Ims {
       client_id: clientId
     }
 
-    const res = await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
-    try {
-      return JSON.parse(res)
-    } catch (e) {
-      return res
-    }
+    return await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
   }
 
   /**
@@ -444,12 +461,7 @@ class Ims {
   async getOrganizations (token) {
     aioLogger.debug('getOrganizations(%s)', token)
 
-    const res = await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
-    try {
-      return JSON.parse(res)
-    } catch (e) {
-      return res
-    }
+    return await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
   }
 
   /**

@@ -52,6 +52,7 @@ test('getAccessToken', async () => {
 
 test('exchangeJwtToken', () => {
   const result = gImsObj.exchangeJwtToken(IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SIGNED_JWT)
+  expect(result).toBeDefined()
   return result
     .then(tokens => {
       expect(tokens).toBeDefined()
@@ -105,5 +106,5 @@ test('invalidateToken', () => {
   expect(typeof gTokens).toEqual('object')
 
   const result = gImsObj.invalidateToken(gTokens.access_token.token, IMS_CLIENT_ID, IMS_CLIENT_SECRET)
-  return expect(result).resolves.toBeUndefined()
+  return expect(result).resolves.toBe('')
 })
