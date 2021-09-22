@@ -1,7 +1,6 @@
 [![Version](https://img.shields.io/npm/v/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
 [![Downloads/week](https://img.shields.io/npm/dw/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
-[![Build Status](https://travis-ci.com/adobe/aio-lib-ims.svg?branch=master)](https://travis-ci.com/adobe/aio-lib-ims)
-[![License](https://img.shields.io/npm/l/@adobe/aio-lib-ims.svg)](https://github.com/adobe/aio-lib-ims/blob/master/package.json)
+[![Node.js CI](https://github.com/adobe/aio-lib-ims/actions/workflows/node.js.yml/badge.svg)](https://github.com/adobe/aio-lib-ims/actions/workflows/node.js.yml)[![License](https://img.shields.io/npm/l/@adobe/aio-lib-ims.svg)](https://github.com/adobe/aio-lib-ims/blob/master/package.json)
 [![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/) 
 
 
