@@ -11,10 +11,10 @@ governing permissions and limitations under the License.
 */
 
 global.WEBPACK_ACTION_BUILD = true
+const libNetworking = require('@adobe/aio-lib-core-networking')
+
 const mockExponentialBackoff = jest.fn()
-jest.mock('@adobe/aio-lib-core-networking', () => ({
-  exponentialBackoff: mockExponentialBackoff
-}))
+jest.mock('@adobe/aio-lib-core-networking')
 
 const IMS_PLUGINS = {
   cli: {
@@ -55,6 +55,11 @@ const config = require('@adobe/aio-lib-core-config')
 // ////////////////////////////////////////////
 
 beforeEach(() => {
+  mockExponentialBackoff.mockClear()
+  libNetworking.HttpExponentialBackoff.mockImplementation(() => ({
+    exponentialBackoff: mockExponentialBackoff
+  }))
+
   for (const key in IMS_PLUGINS) {
     const { imsLogin } = IMS_PLUGINS[key]
     imsLogin.mockRestore()
