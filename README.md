@@ -93,8 +93,8 @@ const token = await getToken('my-config')
 
 ## Running in an Adobe I/O Runtime action
 
-**Note that Project Firefly applications should not own the responsibility to generate their own IMS access tokens.
-We strongly discourage this approach in favor of more secure implementation patterns that are documented in our [Project Firefly Security Guide](https://github.com/AdobeDocs/project-firefly/blob/master/guides/security_overview.md).**
+**Note that Adobe Developer App Builder applications should not own the responsibility to generate their own IMS access tokens.
+We strongly discourage this approach in favor of more secure implementation patterns that are documented in our [App Builder Security Guide](https://github.com/AdobeDocs/project-firefly/blob/master/guides/security_overview.md).**
 
 The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Adobe I/O Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
 
