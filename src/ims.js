@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 // eslint-disable-next-line node/no-unpublished-require
 const FormData = require('form-data')
-const fetchRetry = require('@adobe/aio-lib-core-networking')
+const { HttpExponentialBackoff } = require('@adobe/aio-lib-core-networking')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ims', { provider: 'debug' })
 const url = require('url')
 const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
@@ -90,6 +90,7 @@ async function _sendRequest (method, url, token, data) {
     }
   }
 
+  const fetchRetry = new HttpExponentialBackoff()
   return fetchRetry.exponentialBackoff(url, requestOptions, retryOptions)
     .then(validateResponse)
     .then((res) => res.text())
