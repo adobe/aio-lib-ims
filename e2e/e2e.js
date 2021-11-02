@@ -50,6 +50,23 @@ test('getAccessToken', async () => {
   await expect(result).rejects.toThrow('400') // 400 access_denied
 })
 
+test('valid and non-expired signed jwt', () => {
+  const [, encodedPayload] = IMS_SIGNED_JWT.split('.', 3)
+  const payload = JSON.parse(Buffer.from(encodedPayload, 'base64'))
+
+  expect(payload.exp).toBeDefined()
+  expect(payload.iss).toBeDefined()
+  expect(payload.sub).toBeDefined()
+  expect(payload.aud).toBeDefined()
+  expect(payload.iat).toBeDefined()
+
+  const expiryDate = new Date(payload.exp * 1000).getTime()
+  const now = Date.now()
+  const isExpired = (expiryDate - now) <= 0
+
+  expect(isExpired).not.toEqual(true)
+})
+
 test('exchangeJwtToken', () => {
   const result = gImsObj.exchangeJwtToken(IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SIGNED_JWT)
   expect(result).toBeDefined()
