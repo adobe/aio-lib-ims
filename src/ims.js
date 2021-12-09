@@ -198,7 +198,6 @@ async function _toTokenResult (apiResponse) {
  * Returns the decoded token value as JavaScript object.
  *
  * @param {string} token The token to decode and extract the token value from
- *
  * @returns {object} The decoded token payload data without header and signature
  */
 function getTokenData (token) {
@@ -231,7 +230,6 @@ class Ims {
    * to the path.
    *
    * @param {string} api The API (path) for which to return the URL
-   *
    * @returns {string} The absolute URI for the IMS API
    */
   getApiUrl (api) {
@@ -247,7 +245,6 @@ class Ims {
    * @param {string} scopes The list of scopes to request as a blank separated list
    * @param {string} callbackUrl The callback URL after the user signed in
    * @param {string} state Any state value which is passed back from sign in
-   *
    * @returns {string} the OAuth2 login URL
    */
   getSusiUrl (clientId, scopes, callbackUrl, state) {
@@ -269,7 +266,6 @@ class Ims {
    * @param {string} api The IMS API to `GET` from, e.g. `/ims/profile/v1`
    * @param {string} token The IMS access token to call the API
    * @param {Map} parameters A map of request parameters
-   *
    * @returns {Promise} a promise resolving to the result of the request
    */
   async get (api, token, parameters) {
@@ -285,7 +281,6 @@ class Ims {
    * @param {string} api The IMS API to `POST` to, e.g. `/ims/profile/v1`
    * @param {string} token The IMS access token to call the API
    * @param {Map} parameters A map of request parameters
-   *
    * @returns {Promise} a promise resolving to the result of the request
    */
   async post (api, token, parameters) {
@@ -321,7 +316,6 @@ class Ims {
    * @param {string} clientId The Client ID
    * @param {string} clientSecret The Client Secrete proving client ID ownership
    * @param {string} scopes The list of scopes to request as a blank separated list
-   *
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
@@ -481,7 +475,6 @@ class Ims {
    * since the epoch.
    *
    * @param {string} token The access token to wrap into a token result
-   *
    * @returns {Promise} a `Promise` resolving to an object as described.
    */
   async toTokenResult (token) {
@@ -495,7 +488,6 @@ class Ims {
  *
  * @param {string} token The access token from which to extract the
  *      environment to setup the `Ims` instancee.
- *
  * @returns {Promise} A `Promise` resolving to the `Ims` instance.
  */
 Ims.fromToken = async token => {

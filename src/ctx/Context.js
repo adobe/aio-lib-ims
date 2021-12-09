@@ -87,7 +87,6 @@ class Context {
    *      SDK`](https://github.com/adobe/aio-lib-state). Please note that when calling
    *      `getToken` in an I/O Runtime Action, generated tokens will always be persisted
    *      as `getToken` internally calls `context.set` with `local=false`.
-   *
    */
   async set (contextName, contextData, local = false) {
     aioLogger.debug('set(%s, %o)', contextName, contextData, !!local)

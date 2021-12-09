@@ -71,7 +71,6 @@ module.exports = {
    * @param {string} contextName The name of the IMS context for which to return the
    *              access token. If this is empty, the token(s) of the current IMS context
    *              are invalidated.
-   *
    * @returns {Promise} Resolving to an access token (string)
    */
   getToken: async (contextName) => IMS_TOKEN_MANAGER.getToken(contextName),
