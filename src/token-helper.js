@@ -44,11 +44,11 @@ if (!ACTION_BUILD) {
 
 const IMS_TOKEN_MANAGER = {
 
-  async getToken (contextName) {
-    aioLogger.debug('getToken(%s, %s)', contextName)
+  async getToken (contextName, options) {
+    aioLogger.debug('getToken(%s, %o)', contextName, options)
 
     return this._resolveContext(contextName)
-      .then(context => { return { ...context, result: this._getOrCreateToken(context.data) } })
+      .then(context => { return { ...context, result: this._getOrCreateToken(context.data, options) } })
       .then(result => this._persistTokens(result.name, result.data, result.result))
   },
 
@@ -91,12 +91,12 @@ const IMS_TOKEN_MANAGER = {
     }
   },
 
-  async _getOrCreateToken (config) {
-    aioLogger.debug('_getOrCreateToken(config=%o)', config)
+  async _getOrCreateToken (config, options) {
+    aioLogger.debug('_getOrCreateToken(config=%o, options=%o)', config, options)
     const ims = new Ims(config.env)
     return this.getTokenIfValid(config.access_token)
       .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
-      .catch(reason => this._generateToken(ims, config, reason))
+      .catch(reason => this._generateToken(ims, config, reason, options))
   },
 
   async _fromRefreshToken (ims, token, config) {
@@ -105,7 +105,7 @@ const IMS_TOKEN_MANAGER = {
       .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope))
   },
 
-  async _generateToken (ims, config, reason) {
+  async _generateToken (ims, config, reason, options) {
     aioLogger.debug('_generateToken(reason=%s)', reason)
 
     const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
@@ -117,7 +117,8 @@ const IMS_TOKEN_MANAGER = {
         const { canSupport, supports, imsLogin } = imsLoginPlugins[name]
         aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
-          const result = imsLogin(ims, config)
+          const loginConfig = (typeof options === 'object') ? { ...config, ...options } : config
+          const result = imsLogin(ims, loginConfig)
           aioLogger.debug('  > result: %o', result)
           return result
         }
