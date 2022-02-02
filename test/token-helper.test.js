@@ -142,6 +142,27 @@ test('getToken - string (jwt)', async () => {
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
 })
 
+test('getTokenWithOptions - string (jwt)', async () => {
+  const contextName = 'known-context-jwt'
+  const context = {
+    [contextName]: {
+      client_id: 'bar',
+      client_secret: 'baz',
+      technical_account_id: 'foo@bar',
+      meta_scopes: [],
+      ims_org_id: 'ABCDEFG',
+      private_key: 'XYXYXYX'
+    }
+  }
+
+  setImsPluginMock('jwt', (ctx, options) => options.testToken)
+  config.get.mockImplementation(
+    createHandlerForContext(context)
+  )
+
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, { testToken: '123abc' })).resolves.toEqual('123abc')
+})
+
 test('getToken - string (oauth)', async () => {
   const contextName = 'known-context-oauth'
   const context = {
