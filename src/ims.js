@@ -333,7 +333,7 @@ class Ims {
     const tokenType = _getTokenType(authCode)
     if (tokenType === AUTHORIZATION_CODE) {
       // for service tokens this is the static authCode
-      // for OAuth Tokerns this is the code received from the redirect
+      // for OAuth Tokens this is the code received from the redirect
       postData.grant_type = AUTHORIZATION_CODE
       postData.code = authCode
     } else if (tokenType === REFRESH_TOKEN) {
@@ -487,7 +487,7 @@ class Ims {
  * environment from the `as` claim in the provided access token.
  *
  * @param {string} token The access token from which to extract the
- *      environment to setup the `Ims` instancee.
+ *      environment to setup the `Ims` instance.
  * @returns {Promise} A `Promise` resolving to the `Ims` instance.
  */
 Ims.fromToken = async token => {

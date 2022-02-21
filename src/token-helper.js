@@ -186,8 +186,9 @@ const IMS_TOKEN_MANAGER = {
     const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
     if (token && token.expiry) {
       const tokenExpiry = Number(token.expiry)
-      if (typeof (tokenExpiry) === 'number' && tokenExpiry > minExpiry && typeof (token.token) === 'string') {
+      if (tokenExpiry > minExpiry && typeof (token.token) === 'string') {
         aioLogger.debug('  => %o', token.token)
+        await imsJwtPlugin.verifyJwt(token.token)
         return token.token
       }
     }

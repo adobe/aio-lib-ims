@@ -10,7 +10,7 @@
     "@adobe/aio-lib-core-logging": "^1.2.0",
     "@adobe/aio-lib-core-networking": "^2.0.0",
     "@adobe/aio-lib-env": "^1.0.0",
-    "@adobe/aio-lib-ims-jwt": "^3.0.0",
+    "@adobe/aio-lib-ims-jwt": "https://github.com/adobe/aio-lib-ims-jwt.git#d6bb934c76e8223051f0da316d6b8386f5542fbd",
     "@adobe/aio-lib-ims-oauth": "^4.1.0",
     "@adobe/aio-lib-state": "^1.0.4",
     "lodash.clonedeep": "^4.5.0",

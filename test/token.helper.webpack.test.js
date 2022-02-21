@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 
 global.WEBPACK_ACTION_BUILD = true
-
+const mockVerifyJwt = jest.fn()
 const mockExponentialBackoff = jest.fn()
 const mockHttpExponentialBackoff = jest.fn()
 jest.mock('@adobe/aio-lib-env')
@@ -38,7 +38,8 @@ for (const key in IMS_PLUGINS) {
   (function (mockModule, mockLogin) {
     jest.mock(mockModule, () => ({
       supports: jest.requireActual(mockModule).supports,
-      imsLogin: mockLogin
+      imsLogin: mockLogin,
+      ...(mockModule === '@adobe/aio-lib-ims-jwt' && { verifyJwt: mockVerifyJwt })
     }))
   }(IMS_PLUGINS[key].module, IMS_PLUGINS[key].imsLogin))
 }
@@ -102,13 +103,23 @@ test('exports', async () => {
 test('getTokenIfValid', async () => {
   // invalid token
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
+  expect(mockVerifyJwt).not.toHaveBeenCalled()
 
   // valid token
-  const token = {
+  let token = {
     token: 'abcdefghijklmnop',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
   }
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
+  expect(mockVerifyJwt).toHaveBeenCalledWith(token.token)
+
+  // valid token verify
+  token = {
+    token: 'abcdefghijklmnop',
+    expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
+  }
+  await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
+  expect(mockVerifyJwt).toHaveBeenCalledWith(token.token)
 })
 
 test('getToken - string (jwt)', async () => {

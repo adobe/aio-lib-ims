@@ -10,6 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const mockVerifyJwt = jest.fn()
 const mockExponentialBackoff = jest.fn()
 const mockHttpExponentialBackoff = jest.fn()
 jest.mock('@adobe/aio-lib-env')
@@ -37,7 +38,8 @@ for (const key in IMS_PLUGINS) {
     jest.mock(mockModule, () => ({
       canSupport: jest.requireActual(mockModule).canSupport,
       supports: jest.requireActual(mockModule).supports,
-      imsLogin: mockLogin
+      imsLogin: mockLogin,
+      ...(mockModule === '@adobe/aio-lib-ims-jwt' && { verifyJwt: mockVerifyJwt })
     }))
   }(IMS_PLUGINS[key].module, IMS_PLUGINS[key].imsLogin))
 }
@@ -101,6 +103,7 @@ test('exports', async () => {
 test('getTokenIfValid', async () => {
   // invalid token
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
+  await expect(mockVerifyJwt).not.toHaveBeenCalled()
 
   // valid token
   let token = {
@@ -108,6 +111,7 @@ test('getTokenIfValid', async () => {
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
   }
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
+  await expect(mockVerifyJwt).toHaveBeenCalledWith(token.token)
 
   // expiry as string
   token = {
@@ -115,6 +119,7 @@ test('getTokenIfValid', async () => {
     expiry: (Date.now() + 20 * 60 * 1000).toString()
   }
   await expect(IMS_TOKEN_MANAGER.getTokenIfValid(token)).resolves.toEqual(token.token)
+  await expect(mockVerifyJwt).toHaveBeenLastCalledWith(token.token)
 })
 
 test('getToken - string (jwt)', async () => {
