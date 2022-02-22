@@ -10,10 +10,12 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const rp = require('request-promise-native')
+const FormData = require('form-data')
+const { HttpExponentialBackoff } = require('@adobe/aio-lib-core-networking')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ims', { provider: 'debug' })
 const url = require('url')
 const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
+const { codes: errors } = require('./errors')
 
 const IMS_ENDPOINTS = {
   stage: 'https://ims-na1-stg1.adobelogin.com',
@@ -43,34 +45,56 @@ const SCOPE = 'scope'
  *
  * @private
  * @param {string} method the http method
- * @param {string} url the url endppoint
+ * @param {string} url the url endpoint
  * @param {string} token the access token authorization
  * @param {object} data the data to send
  * @returns {Promise} Promise that resolves with the request data
  */
 async function _sendRequest (method, url, token, data) {
-  const options = {
-    uri: url,
+  const requestOptions = {
     method: method,
     headers: {
       'User-Agent': 'aio-cli-ims'
-    },
-    json: true
-  }
-
-  if (data) {
-    if (method === 'GET') {
-      options.qs = data
-    } else {
-      options.form = data
     }
   }
 
-  if (token) {
-    options.auth = { bearer: token }
+  if (method === 'POST') {
+    let formData = data
+    if (!(formData instanceof FormData)) {
+      formData = Object.keys(data).reduce((formData, key) => {
+        formData.append(key, data[key])
+        return formData
+      }, new FormData())
+    }
+    requestOptions.body = formData
   }
 
-  return rp(options)
+  if (token) {
+    requestOptions.headers.Authorization = `Bearer ${token}`
+  }
+
+  const retryOptions = { maxRetries: 3, initialDelayInMillis: 500 }
+
+  const validateResponse = (res) => {
+    if (res.status === 200) {
+      return res
+    }
+    throw (new Error(`${res.status} (${res.statusText})`))
+  }
+
+  const handleTextResponse = (text) => {
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      return text
+    }
+  }
+
+  const fetchRetry = new HttpExponentialBackoff()
+  return fetchRetry.exponentialBackoff(url, requestOptions, retryOptions)
+    .then(validateResponse)
+    .then((res) => res.text())
+    .then(handleTextResponse)
 }
 
 /**
@@ -174,7 +198,6 @@ async function _toTokenResult (apiResponse) {
  * Returns the decoded token value as JavaScript object.
  *
  * @param {string} token The token to decode and extract the token value from
- *
  * @returns {object} The decoded token payload data without header and signature
  */
 function getTokenData (token) {
@@ -207,7 +230,6 @@ class Ims {
    * to the path.
    *
    * @param {string} api The API (path) for which to return the URL
-   *
    * @returns {string} The absolute URI for the IMS API
    */
   getApiUrl (api) {
@@ -223,7 +245,6 @@ class Ims {
    * @param {string} scopes The list of scopes to request as a blank separated list
    * @param {string} callbackUrl The callback URL after the user signed in
    * @param {string} state Any state value which is passed back from sign in
-   *
    * @returns {string} the OAuth2 login URL
    */
   getSusiUrl (clientId, scopes, callbackUrl, state) {
@@ -245,7 +266,6 @@ class Ims {
    * @param {string} api The IMS API to `GET` from, e.g. `/ims/profile/v1`
    * @param {string} token The IMS access token to call the API
    * @param {Map} parameters A map of request parameters
-   *
    * @returns {Promise} a promise resolving to the result of the request
    */
   async get (api, token, parameters) {
@@ -261,7 +281,6 @@ class Ims {
    * @param {string} api The IMS API to `POST` to, e.g. `/ims/profile/v1`
    * @param {string} token The IMS access token to call the API
    * @param {Map} parameters A map of request parameters
-   *
    * @returns {Promise} a promise resolving to the result of the request
    */
   async post (api, token, parameters) {
@@ -297,7 +316,6 @@ class Ims {
    * @param {string} clientId The Client ID
    * @param {string} clientSecret The Client Secrete proving client ID ownership
    * @param {string} scopes The list of scopes to request as a blank separated list
-   *
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
@@ -323,11 +341,11 @@ class Ims {
       postData.grant_type = REFRESH_TOKEN
       postData.refresh_token = authCode
     } else {
-      return Promise.reject(new Error(`Unknown type of authCode: ${tokenType}`))
+      return Promise.reject(new errors.UNKNOWN_AUTHCODE_TYPE({ messageValues: tokenType }))
     }
 
     return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
-      .then(response => _toTokenResult(response))
+      .then(_toTokenResult)
   }
 
   /**
@@ -347,7 +365,7 @@ class Ims {
    * }
    * ```
    *
-   * Note that there is no `refresh_token` in a JWT tokan exchange.
+   * Note that there is no `refresh_token` in a JWT token exchange.
    *
    * @param {string} clientId The client ID of the owning application
    * @param {string} clientSecret The client's secret
@@ -363,8 +381,9 @@ class Ims {
       jwt_token: signedJwtToken
     }
 
-    return _sendPost(this.getApiUrl('/ims/exchange/jwt'), undefined, postData)
-      .then(response => _toTokenResult(response))
+    const postURL = this.getApiUrl('/ims/exchange/jwt')
+
+    return _sendPost(postURL, undefined, postData).then(_toTokenResult)
   }
 
   /**
@@ -379,7 +398,6 @@ class Ims {
    */
   async invalidateToken (token, clientId, clientSecret) {
     aioLogger.debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
-
     if (clientId && clientSecret) {
       const postData = {
         token_type: _getTokenType(token),
@@ -426,12 +444,7 @@ class Ims {
       client_id: clientId
     }
 
-    const res = await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
-    try {
-      return JSON.parse(res)
-    } catch (e) {
-      return res
-    }
+    return await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
   }
 
   /**
@@ -443,12 +456,7 @@ class Ims {
   async getOrganizations (token) {
     aioLogger.debug('getOrganizations(%s)', token)
 
-    const res = await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
-    try {
-      return JSON.parse(res)
-    } catch (e) {
-      return res
-    }
+    return await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
   }
 
   /**
@@ -467,7 +475,6 @@ class Ims {
    * since the epoch.
    *
    * @param {string} token The access token to wrap into a token result
-   *
    * @returns {Promise} a `Promise` resolving to an object as described.
    */
   async toTokenResult (token) {
@@ -481,7 +488,6 @@ class Ims {
  *
  * @param {string} token The access token from which to extract the
  *      environment to setup the `Ims` instancee.
- *
  * @returns {Promise} A `Promise` resolving to the `Ims` instance.
  */
 Ims.fromToken = async token => {
@@ -496,7 +502,7 @@ Ims.fromToken = async token => {
       }
     }
   }
-  return Promise.reject(new Error('Cannot resolve to IMS environment from token'))
+  return Promise.reject(new errors.CANNOT_RESOLVE_ENVIRONMENT())
 }
 
 module.exports = {

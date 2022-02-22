@@ -11,7 +11,13 @@ governing permissions and limitations under the License.
 */
 
 global.WEBPACK_ACTION_BUILD = true
-jest.mock('request-promise-native')
+
+const mockExponentialBackoff = jest.fn()
+const mockHttpExponentialBackoff = jest.fn()
+jest.mock('@adobe/aio-lib-env')
+jest.mock('@adobe/aio-lib-core-networking', () => ({
+  HttpExponentialBackoff: mockHttpExponentialBackoff
+}))
 
 const IMS_PLUGINS = {
   cli: {
@@ -52,6 +58,10 @@ const config = require('@adobe/aio-lib-core-config')
 // ////////////////////////////////////////////
 
 beforeEach(() => {
+  mockHttpExponentialBackoff.mockReturnValue({
+    exponentialBackoff: mockExponentialBackoff
+  })
+
   for (const key in IMS_PLUGINS) {
     const { imsLogin } = IMS_PLUGINS[key]
     imsLogin.mockRestore()
@@ -91,7 +101,7 @@ test('exports', async () => {
 
 test('getTokenIfValid', async () => {
   // invalid token
-  await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toEqual(new Error('Token missing or expired'))
+  await expect(IMS_TOKEN_MANAGER.getTokenIfValid({})).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
 
   // valid token
   const token = {
@@ -299,6 +309,13 @@ test('invalidateToken - has access and refresh token', async () => {
     }
   }
 
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(true)
+  }
+
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
+
   setImsPluginMock('jwt', {})
   config.get.mockImplementation(
     createHandlerForContext(context)
@@ -321,9 +338,9 @@ test('invalidateToken - unknown context', async () => {
   )
 
   // no force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error(`IMS context '${contextName}' is not configured`))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toThrow(`[IMSSDK:CONTEXT_NOT_CONFIGURED] IMS context '${contextName}' is not configured`)
   // force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error(`IMS context '${contextName}' is not configured`))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toThrow(`[IMSSDK:CONTEXT_NOT_CONFIGURED] IMS context '${contextName}' is not configured`)
 })
 
 test('invalidateToken - token missing or expired', async () => {
@@ -345,9 +362,9 @@ test('invalidateToken - token missing or expired', async () => {
   )
 
   // no force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toEqual(new Error('Token missing or expired'))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, false)).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
   // force
-  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, true)).rejects.toEqual(new Error('Token missing or expired'))
+  await expect(IMS_TOKEN_MANAGER.invalidateToken(contextName, true)).rejects.toThrow('[IMSSDK:INVALID_TOKEN] Token missing or expired')
 })
 
 test('getToken - unknown plugin', async () => {

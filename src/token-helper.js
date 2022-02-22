@@ -14,6 +14,7 @@ const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:token-helper', { provider: 'debug' })
 const { getContext } = require('./context')
 const imsJwtPlugin = '@adobe/aio-lib-ims-jwt'
+const { codes: errors } = require('./errors')
 
 /**
  * This is the default list of NPM packages used as plugins to create tokens
@@ -92,11 +93,11 @@ function loadPlugin (name, location) {
 }
 
 const IMS_TOKEN_MANAGER = {
-  async getToken (contextName) {
-    aioLogger.debug('getToken(%s, %s)', contextName)
+  async getToken (contextName, options) {
+    aioLogger.debug('getToken(%s, %o)', contextName, options)
 
     return this._resolveContext(contextName)
-      .then(context => { return { ...context, result: this._getOrCreateToken(context.data) } })
+      .then(context => { return { ...context, result: this._getOrCreateToken(context.data, options) } })
       .then(result => this._persistTokens(result.name, result.data, result.result))
   },
 
@@ -135,16 +136,16 @@ const IMS_TOKEN_MANAGER = {
     if (context.data) {
       return Promise.resolve(context)
     } else {
-      return Promise.reject(new Error(`IMS context '${context.name}' is not configured`))
+      return Promise.reject(new errors.CONTEXT_NOT_CONFIGURED({ messageValues: contextName }))
     }
   },
 
-  async _getOrCreateToken (config) {
-    aioLogger.debug('_getOrCreateToken(config=%o)', config)
+  async _getOrCreateToken (config, options) {
+    aioLogger.debug('_getOrCreateToken(config=%o, options=%o)', config, options)
     const ims = new Ims(config.env)
     return this.getTokenIfValid(config.access_token)
       .catch(() => this._fromRefreshToken(ims, config.refresh_token, config))
-      .catch(reason => this._generateToken(ims, config, reason))
+      .catch(reason => this._generateToken(ims, config, reason, options))
   },
 
   async _fromRefreshToken (ims, token, config) {
@@ -153,7 +154,7 @@ const IMS_TOKEN_MANAGER = {
       .then(refreshToken => ims.getAccessToken(refreshToken, config.client_id, config.client_secret, config.scope))
   },
 
-  async _generateToken (ims, config, reason) {
+  async _generateToken (ims, config, reason, options) {
     aioLogger.debug('_generateToken(reason=%s)', reason)
 
     const imsLoginPlugins = await getMergedPlugins(this._context)
@@ -166,7 +167,8 @@ const IMS_TOKEN_MANAGER = {
         const { canSupport, supports, imsLogin } = await loadPlugin(name, imsLoginPlugins[name])
         aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
-          const result = imsLogin(ims, config)
+          const loginConfig = (typeof options === 'object') ? { ...config, ...options } : config
+          const result = imsLogin(ims, loginConfig)
           aioLogger.debug('  > result: %o', result)
           return result
         }
@@ -184,7 +186,7 @@ const IMS_TOKEN_MANAGER = {
       }
     }
 
-    return Promise.reject(new Error(pluginErrors.join('\n')))
+    return Promise.reject(new errors.CANNOT_GENERATE_TOKEN({ messageValues: pluginErrors.join('\n') }))
   },
 
   /**
@@ -227,18 +229,20 @@ const IMS_TOKEN_MANAGER = {
    * returned.
    *
    * @param {*} token The token hash
-   *
    * @returns {Promise<string>} the token if existing and not expired, else a rejected Promise
    */
   async getTokenIfValid (token) {
     aioLogger.debug('getTokenIfValid(token=%o)', token)
     const minExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes from now
-    if (token && typeof (token.expiry) === 'number' && token.expiry > minExpiry && typeof (token.token) === 'string') {
-      aioLogger.debug('  => %o', token.token)
-      return token.token
+    if (token && token.expiry) {
+      const tokenExpiry = Number(token.expiry)
+      if (typeof (tokenExpiry) === 'number' && tokenExpiry > minExpiry && typeof (token.token) === 'string') {
+        aioLogger.debug('  => %o', token.token)
+        return token.token
+      }
     }
 
-    return Promise.reject(new Error('Token missing or expired'))
+    return Promise.reject(new errors.INVALID_TOKEN())
   }
 }
 

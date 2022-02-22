@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ConfigCliContext', { provider: 'debug' })
 const Context = require('./Context')
+const { codes: errors } = require('../errors')
 
 /**
  * The `ConfigCliContext` class stores IMS `contexts` for the Adobe I/O CLI in the local file
@@ -47,7 +48,7 @@ class ConfigCliContext extends Context {
 
     const dataIsObject = (typeof contextData === 'object' && contextData !== null)
     if (!dataIsObject) {
-      throw new Error('contextData must be an object')
+      throw new errors.INVALID_CONTEXT_DATA()
     }
 
     // make sure to not merge any global config into local and vice versa
