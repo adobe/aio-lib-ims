@@ -10,6 +10,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+/* eslint-disable camelcase */
+
 global.WEBPACK_ACTION_BUILD = true
 
 const mockExponentialBackoff = jest.fn()
@@ -204,12 +206,10 @@ test('getToken - object', async () => {
 test('getToken - object (refresh token expired, coverage)', async () => {
   const contextName = 'known-context'
 
-  // eslint-disable-next-line camelcase
   const access_token = {
     token: 'tabcd123',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
   }
-  // eslint-disable-next-line camelcase
   const refresh_token = {
     token: 'wxyz123',
     expiry: Date.now() - 20 * 60 * 1000 // 20 minutes back
@@ -245,12 +245,10 @@ test('getToken - object (refresh token expired, coverage)', async () => {
 test('getToken - object (refresh token ok, coverage)', async () => {
   const contextName = 'known-context'
 
-  // eslint-disable-next-line camelcase
   const access_token = {
     token: 'tabcd123',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
   }
-  // eslint-disable-next-line camelcase
   const refresh_token = {
     token: 'rwxyz123',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
@@ -285,12 +283,10 @@ test('getToken - object (refresh token ok, coverage)', async () => {
 
 test('invalidateToken - has access and refresh token', async () => {
   const contextName = 'known-context'
-  // eslint-disable-next-line camelcase
   const access_token = {
     token: 'tabcd123.ewogInR5cGUiOiAiYWNjZXNzIHRva2VuIiwKICJ0b2tlbiI6ICJhYmMxMjMiCn0=.123',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
   }
-  // eslint-disable-next-line camelcase
   const refresh_token = {
     token: 'wxyz123.ewogInR5cGUiOiAicmVmcmVzaCB0b2tlbiIsCiAidG9rZW4iOiAiYWJjMTIzIgp9.123',
     expiry: Date.now() + 20 * 60 * 1000 // 20 minutes from now
