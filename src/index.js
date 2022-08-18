@@ -32,7 +32,7 @@ const {
  * 2. Creating and invalidating tokens
  * 3. Providing low level access to IMS API
  *
- * @exports @adobe/aio-lib-ims
+ * @exports aio-lib-ims
  */
 module.exports = {
   /** @see [`getTokenData`](#gettokendata) */

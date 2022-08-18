@@ -52,7 +52,7 @@ const SCOPE = 'scope'
  */
 async function _sendRequest (method, url, token, data) {
   const requestOptions = {
-    method: method,
+    method,
     headers: {
       'User-Agent': 'aio-cli-ims'
     }
@@ -183,7 +183,7 @@ async function _toTokenResult (apiResponse) {
     aioLogger.debug(' > %o', token)
     if (token) {
       result[label] = {
-        token: token,
+        token,
         expiry: _calculateExpiry(token)
       }
       aioLogger.debug(' > %o', result[label])
