@@ -113,6 +113,41 @@ class Context {
     return this.contextKeys()
   }
 
+  /**
+   * Gets the list of configured token creation plugins. This base
+   * implementation returns an empty array. Extensions supporting
+   * token creation plugins must override to return the list of
+   * plugins which can be require-d.
+   *
+   * @returns {Promise<string[]>} empty list of token creation plugins
+   */
+  async getPlugins () {
+    aioLogger.debug('getPlugins() (none)')
+    return []
+  }
+
+  /**
+   * Sets the list of configured token creation plugins. This base
+   * implementation throws an Error as plugins are not supported.
+   * Extensions supporting token creation plugins must override to
+   * check and persist the list of plugins which can be require-d.
+   *
+   * If the plugins parameter is an empty array or null, the current
+   * plugins configuration is removed. Otherwise the current
+   * configuration is replaced by the new list of plugins.
+   *
+   * Note, that implementations are only required to validate that
+   * the plugins parameter is a possibly empty array of strings or
+   * null. Actually provided string values need not be validated.
+   *
+   * @param {string[]} plugins An array of plugins to configure
+   * @param {boolean} [local=false] set to true to save to local config, false for global config
+   */
+  async setPlugins (plugins, local = false) {
+    aioLogger.debug('setPlugins(%o, %b)', plugins, !!local)
+    throwNotImplemented()
+  }
+
   /* To be implemented */
 
   /**

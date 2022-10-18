@@ -20,7 +20,8 @@ const keyNames = {
   CONFIG: 'b',
   CONTEXTS: 'c',
   CURRENT: 'd',
-  CLI: 'd'
+  CLI: 'd',
+  PLUGINS: 'e'
 }
 
 let context
@@ -125,5 +126,59 @@ describe('contextKeys', () => {
     aioConfig.get.mockReturnValue({ the: 'a', dude: 'b', ethan: 'coen', joel: 'coen' })
     await expect(context.contextKeys()).resolves.toEqual(['the', 'dude', 'ethan', 'joel'])
     expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}`)
+  })
+})
+
+describe('getPlugins', () => {
+  test('(<no args>), plugins=undefined', async () => {
+    context.getConfigValue = jest.fn().mockResolvedValue(undefined)
+    const ret = await context.getPlugins()
+    expect(ret).toEqual(undefined)
+    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.PLUGINS)
+  })
+  test('(<no args>), plugins=[]', async () => {
+    context.getConfigValue = jest.fn().mockResolvedValue([])
+    const ret = await context.getPlugins()
+    expect(ret).toEqual([])
+    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.PLUGINS)
+  })
+  test('(<no args>), plugins=45', async () => {
+    context.getConfigValue = jest.fn().mockResolvedValue(45)
+    const ret = await context.getPlugins()
+    expect(ret).toEqual(45)
+    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.PLUGINS)
+  })
+  test('(<no args>), plugins=[\'@adobe/internal_plugin\']', async () => {
+    context.getConfigValue = jest.fn().mockResolvedValue(['@adobe/internal_plugin'])
+    const ret = await context.getPlugins()
+    expect(ret).toEqual(['@adobe/internal_plugin'])
+    expect(context.getConfigValue).toHaveBeenCalledWith(keyNames.PLUGINS)
+  })
+})
+
+describe('setPlugins', () => {
+  test('(undefined, false)', async () => {
+    await expect(context.setPlugins()).resolves.toEqual(undefined)
+    expect(aioConfig.set).toHaveBeenCalledTimes(0)
+  })
+  test('([], false)', async () => {
+    await expect(context.setPlugins([])).resolves.toEqual(undefined)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONFIG}.${keyNames.PLUGINS}`, [], false)
+  })
+  test('([\'@adobe/internal_plugin\'], false)', async () => {
+    await expect(context.setPlugins(['@adobe/internal_plugin'])).resolves.toEqual(undefined)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONFIG}.${keyNames.PLUGINS}`, ['@adobe/internal_plugin'], false)
+  })
+  test('(undefined, true)', async () => {
+    await expect(context.setPlugins(undefined, true)).resolves.toEqual(undefined)
+    expect(aioConfig.set).toHaveBeenCalledTimes(0)
+  })
+  test('([], true)', async () => {
+    await expect(context.setPlugins([], true)).resolves.toEqual(undefined)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONFIG}.${keyNames.PLUGINS}`, [], true)
+  })
+  test('([\'@adobe/internal_plugin\'], true)', async () => {
+    await expect(context.setPlugins(['@adobe/internal_plugin'], true)).resolves.toEqual(undefined)
+    expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONFIG}.${keyNames.PLUGINS}`, ['@adobe/internal_plugin'], true)
   })
 })

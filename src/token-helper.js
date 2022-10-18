@@ -13,7 +13,7 @@ governing permissions and limitations under the License.
 const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:token-helper', { provider: 'debug' })
 const { getContext } = require('./context')
-const imsJwtPlugin = require('@adobe/aio-lib-ims-jwt')
+const imsJwtPlugin = '@adobe/aio-lib-ims-jwt'
 const { codes: errors } = require('./errors')
 
 /**
@@ -32,8 +32,8 @@ by aio-lib-runtime */
 const ACTION_BUILD = (typeof WEBPACK_ACTION_BUILD === 'undefined') ? false : WEBPACK_ACTION_BUILD
 if (!ACTION_BUILD) {
   // use OAuth and CLI imports only when WEBPACK_ACTION_BUILD global is not set
-  const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
-  const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
+  const imsCliPlugin = '@adobe/aio-lib-ims-oauth/src/ims-cli'
+  const imsOAuthPlugin = '@adobe/aio-lib-ims-oauth'
 
   DEFAULT_CREATE_TOKEN_PLUGINS = {
     cli: imsCliPlugin,
@@ -42,8 +42,57 @@ if (!ACTION_BUILD) {
   }
 }
 
-const IMS_TOKEN_MANAGER = {
+/**
+ * Returns a consolidated list of login plugins to try for acquiring the token.
+ *
+ * @param {object} context The configuration context providing additional plugins
+ * @returns {Promise<string[]>} The list of login plugins to try
+ */
+async function getMergedPlugins (context) {
+  aioLogger.debug('getMergedPlugins(%o)', context)
 
+  return context.getPlugins()
+    .then((plugins) => {
+      if (plugins instanceof Array && plugins.length > 0) {
+        aioLogger.debug('  > adding configured plugins: %o', plugins)
+        const configPluginMap = Object.fromEntries(plugins.map(element => [element, element]))
+        return Object.assign(configPluginMap, DEFAULT_CREATE_TOKEN_PLUGINS)
+      } else if (plugins !== undefined) {
+        aioLogger.debug('Ignored configured plugins: Expected string[], got: \'%o\'', plugins)
+      }
+
+      aioLogger.debug('  > using default plugins only')
+      return DEFAULT_CREATE_TOKEN_PLUGINS
+    }
+    )
+}
+
+/**
+ * Loads the requested plugin and returns it or a dummy pluggin in case
+ * of a load failure. The dummy plugin returns "false" for the supports()
+ * function and will reject the canSupport() function regardless of supplied
+ * parameters.
+ *
+ * @param {string} name The name of the plugin to try to load
+ * @param {string} location The location from where to load the plugin
+ * @returns {object} The loaded plugin or a dummy in case of failure to load
+ */
+function loadPlugin (name, location) {
+  aioLogger.debug('loadPlugin(%s, %s)', name, location)
+
+  try {
+    return require(location)
+  } catch (error) {
+    aioLogger.debug('Ignoring plugin %s due to load failure from %s', name, location)
+    aioLogger.debug('Error: %o', error)
+    return {
+      supports: () => false,
+      canSupport: async () => Promise.reject(new Error(`Plugin not loaded: ${JSON.stringify(error)}`))
+    }
+  }
+}
+
+const IMS_TOKEN_MANAGER = {
   async getToken (contextName, options) {
     aioLogger.debug('getToken(%s, %o)', contextName, options)
 
@@ -108,13 +157,14 @@ const IMS_TOKEN_MANAGER = {
   async _generateToken (ims, config, reason, options) {
     aioLogger.debug('_generateToken(reason=%s)', reason)
 
-    const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
-    const pluginErrors = []
+    const imsLoginPlugins = await getMergedPlugins(this._context)
+    aioLogger.debug('  > Got imsLoginPlugins: %o', imsLoginPlugins)
+    let pluginErrors = ['Cannot generate token because no plugin supports configuration:'] // eslint-disable-line prefer-const
 
     for (const name of Object.keys(imsLoginPlugins)) {
       aioLogger.debug('  > Trying: %s', name)
       try {
-        const { canSupport, supports, imsLogin } = imsLoginPlugins[name]
+        const { canSupport, supports, imsLogin } = await loadPlugin(name, imsLoginPlugins[name])
         aioLogger.debug('  > supports(%o): %s', config, supports(config))
         if (typeof supports === 'function' && supports(config) && typeof imsLogin === 'function') {
           const loginConfig = (typeof options === 'object') ? { ...config, ...options } : config
