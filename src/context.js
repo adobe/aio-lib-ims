@@ -14,6 +14,10 @@ const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:con
 const ActionContext = require('./ctx/StateActionContext')
 const CliContext = require('./ctx/ConfigCliContext')
 
+// Are TYPE_ACTION and TYPE_CLI still needed? They were used internally in a
+// private helper function, but that function was removed.
+// Since they are exported, I'm leaving them here for now. -jm
+
 /** Name of context type action */
 const TYPE_ACTION = 'action'
 
@@ -30,28 +34,20 @@ const CONTEXTS = 'contexts'
 const CONFIG = 'config'
 
 /** Property holding the cli context name */
-const CLI = 'cli'
+const CLI = process.env.AIO_CLI_CONTEXT || 'cli'
 
 /** Property holding the current context name */
 const CURRENT = 'current'
-
-/** @private */
-function guessContextType () {
-  if (process.env.__OW_ACTION_NAME) {
-    aioLogger.debug(`guessing context type: ${TYPE_ACTION}`)
-    return TYPE_ACTION
-  }
-  aioLogger.debug(`guessing context type: ${TYPE_CLI}`)
-  return TYPE_CLI
-}
 
 let context = null
 /** @private */
 function getContext () {
   if (!context) {
-    if (guessContextType() === TYPE_ACTION) {
+    if (process.env.__OW_ACTION_NAME) {
+      aioLogger.debug('guessing context type: action')
       context = new ActionContext({ IMS, CONTEXTS, CONFIG, CURRENT })
     } else {
+      aioLogger.debug('guessing context type: cli')
       context = new CliContext({ IMS, CONTEXTS, CONFIG, CURRENT, CLI })
     }
   }
