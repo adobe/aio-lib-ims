@@ -310,7 +310,7 @@ class Ims {
    * }
    * ```
    *
-   * @param {string} authCode The authorization code received from the OAuth2
+   * @param {string} authCodeOrToken The authorization code received from the OAuth2
    *      sign in page or by some other means. This may also be a refresh
    *      token which may be traded for a new access token.
    * @param {string} clientId The Client ID
@@ -319,8 +319,8 @@ class Ims {
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
-  async getAccessToken (authCode, clientId, clientSecret, scopes) {
-    aioLogger.debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
+  async getAccessToken (authCodeOrToken, clientId, clientSecret, scopes) {
+    aioLogger.debug('getAccessToken(%s, %s, %s, %o)', authCodeOrToken, clientId, clientSecret, scopes)
 
     // prepare the data with common data
     const postData = {
@@ -329,17 +329,17 @@ class Ims {
       scope: scopes
     }
 
-    // complete data with authCode specific grant type and property
-    const tokenType = _getTokenType(authCode)
+    // complete data with authCodeOrToken specific grant type and property
+    const tokenType = _getTokenType(authCodeOrToken)
     if (tokenType === AUTHORIZATION_CODE) {
-      // for service tokens this is the static authCode
-      // for OAuth Tokerns this is the code received from the redirect
+      // for service tokens this is the static authCodeOrToken
+      // for OAuth Tokens this is the code received from the redirect
       postData.grant_type = AUTHORIZATION_CODE
-      postData.code = authCode
+      postData.code = authCodeOrToken
     } else if (tokenType === REFRESH_TOKEN) {
       // for refresh tokens
       postData.grant_type = REFRESH_TOKEN
-      postData.refresh_token = authCode
+      postData.refresh_token = authCodeOrToken
     } else {
       return Promise.reject(new errors.UNKNOWN_AUTHCODE_TYPE({ messageValues: tokenType }))
     }
