@@ -253,8 +253,12 @@ class Ims {
     const app = new url.URL(this.getApiUrl('/ims/authorize/v1'))
     app.searchParams.set('response_type', 'code')
     app.searchParams.set(CLIENT_ID, clientId)
-    app.searchParams.set(SCOPE, scopes)
-    app.searchParams.set('redirect_uri', callbackUrl)
+    if (scopes) {
+      app.searchParams.set(SCOPE, scopes)
+    }
+    if (callbackUrl) {
+      app.searchParams.set('redirect_uri', callbackUrl)
+    }
     app.searchParams.set('state', state)
     return app.toString()
   }
