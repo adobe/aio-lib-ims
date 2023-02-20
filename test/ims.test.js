@@ -491,3 +491,31 @@ test('Ims.getSusiUrl', () => {
       'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&scope=some%2C+scopes&redirect_uri=https%3A%2F%2Fsome-server.com%2Flogin-callback&state=some-state'
     )
 })
+
+test('Ims.getSusiUrl - scopes null', () => {
+  const ims = new Ims('prod')
+
+  const clientId = 'some-client-id'
+  const scopes = null
+  const callbackUrl = 'https://some-server.com/login-callback'
+  const state = 'some-state'
+
+  expect(ims.getSusiUrl(clientId, scopes, callbackUrl, state))
+    .toEqual(
+      'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&redirect_uri=https%3A%2F%2Fsome-server.com%2Flogin-callback&state=some-state'
+    )
+})
+
+test('Ims.getSusiUrl - callbackUrl null', () => {
+  const ims = new Ims('prod')
+
+  const clientId = 'some-client-id'
+  const scopes = 'some, scopes'
+  const callbackUrl = null
+  const state = 'some-state'
+
+  expect(ims.getSusiUrl(clientId, scopes, callbackUrl, state))
+    .toEqual(
+      'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&scope=some%2C+scopes&state=some-state'
+    )
+})
