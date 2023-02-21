@@ -31,7 +31,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6",
     "eslint-plugin-standard": "^4.0.1",
-    "jest": "^27",
+    "jest": "^28",
     "jest-junit": "^10.0.0",
     "jsdoc-to-markdown": "^5.0.3",
     "stdout-stderr": "^0.1.9",
