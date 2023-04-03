@@ -356,12 +356,12 @@ class Ims {
   }
 
   /**
-   * Request an access token of the Client Credentials Grant Type. 
+   * Request an access token of the Client Credentials Grant Type.
    *
    * @param {string} clientId The Client ID
    * @param {string} clientSecret The Client Secret proving client ID ownership
    * @param {string} orgId the IMS org Id
-   * @param {array<string>} scopes The list of scopes to request as a blank separated list
+   * @param {Array<string>} scopes The list of scopes to request as a blank separated list
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
