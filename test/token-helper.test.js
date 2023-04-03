@@ -31,6 +31,10 @@ const IMS_PLUGINS = {
   oauth: {
     module: '@adobe/aio-lib-ims-oauth',
     imsLogin: jest.fn()
+  },
+  oauthSTS: {
+    module: '@adobe/aio-lib-ims-oauth/src/ims-oauth_server_to_server',
+    imsLogin: jest.fn()
   }
 }
 
