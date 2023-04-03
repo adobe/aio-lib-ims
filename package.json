@@ -11,7 +11,7 @@
     "@adobe/aio-lib-core-networking": "^3.0.0",
     "@adobe/aio-lib-env": "^2.0.0",
     "@adobe/aio-lib-ims-jwt": "^4.0.0",
-    "@adobe/aio-lib-ims-oauth": "^5.0.0",
+    "@adobe/aio-lib-ims-oauth": "github:adobe/aio-lib-ims-oauth#story/ACNA-1854",
     "@adobe/aio-lib-state": "^2.0.1",
     "form-data": "^4.0.0",
     "lodash.clonedeep": "^4.5.0"
