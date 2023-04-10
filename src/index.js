@@ -25,6 +25,8 @@ const {
   SCOPE
 } = require('./ims')
 
+const ValidationCache = require('./ValidationCache')
+
 /**
  * The `@adobe/aio-lib-ims` module offers three kinds of elements:
  *
@@ -40,6 +42,9 @@ module.exports = {
 
   /** @see [`Ims`](#ims) */
   Ims,
+
+  /** @see [`ValidationCache`](#ValidationCache) */
+  ValidationCache,
 
   /** @see [`ACCESS_TOKEN`](#access_token) */
   ACCESS_TOKEN,
