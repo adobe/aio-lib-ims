@@ -213,13 +213,13 @@ const ims = new Ims('prod', cache)
 const token = params.theToken // May be passed via header, parameter, or other input
 const imsValidation = await ims.validateToken(token)
 if (!imsValidation.valid) {
-  return new Error('Forbidden: This is not a valid IMS token!') // Next time validateToken() is called with this token, a call to IMS will not be made while the cache has not expired
+  return new Error('Forbidden: This is not a valid IMS token!') // Next time validateToken() is called with this token, a call to IMS will not be made while the cache is still fresh
 }
 ```
 
 ### Allow List
 
-You can validate a token against an allow-list of IMS clients. To use an allow-list, your token and an array of IMS clients to `validateTokenAllowList()`: 
+You can validate a token against an allow-list of IMS clients. To use an allow-list, pass your token and an array of IMS clients to `validateTokenAllowList()`: 
 ```js
 const { Ims } = require('@adobe/aio-lib-ims')
 const ims = new Ims()
