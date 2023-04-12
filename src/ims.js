@@ -432,8 +432,8 @@ class Ims {
    * Note: The cache uses the returned status key to determine if the result should be cached. This is not returned
    *       to the user.
    *
-   * @param {*} token the token to validate
-   * @param {*} allowList the allow list to validate against
+   * @param {string} token the token to validate
+   * @param {Array<string>} allowList the allow list to validate against
    * @returns {Promise} Promise that resolves with the ims validation result
    */
   async validateTokenAllowList (token, allowList) {
