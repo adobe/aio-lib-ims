@@ -17,6 +17,8 @@ const url = require('url')
 const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
 const { codes: errors } = require('./errors')
 
+const ValidationCache = require('./ValidationCache')
+
 const IMS_ENDPOINTS = {
   stage: 'https://ims-na1-stg1.adobelogin.com',
   prod: 'https://ims-na1.adobelogin.com'
@@ -217,9 +219,13 @@ class Ims {
    *      other than `prod` or `stage` it is assumed to be the default
    *      value of `prod`. If not set, it will get the global cli env value. See https://github.com/adobe/aio-lib-env
    *      (which defaults to `prod` as well if not set)
+   * @param {ValidationCache} cache The cache instance to use.
    */
-  constructor (env = getCliEnv()) {
+  constructor (env = getCliEnv(), cache) {
     this.endpoint = IMS_ENDPOINTS[env] || IMS_ENDPOINTS[DEFAULT_ENV]
+    if (cache) {
+      this.cache = cache
+    }
   }
 
   /**
@@ -419,7 +425,49 @@ class Ims {
   }
 
   /**
-   * Verifies a given token.
+   * Validates the given token against an allow list.
+   *
+   * Optional: If a cache is provided, the token will be validated against the cache first.
+   *
+   * Note: The cache uses the returned status key to determine if the result should be cached. This is not returned
+   *       to the user.
+   *
+   * @param {string} token the token to validate
+   * @param {Array<string>} allowList the allow list to validate against
+   * @returns {Promise} Promise that resolves with the ims validation result
+   */
+  async validateTokenAllowList (token, allowList) {
+    aioLogger.debug('validateTokenAllowList (token): (%s)', token)
+
+    const validateAllowList = async (token, allowList) => {
+      // Validate the token
+      let validationResponse = await this._validateToken(token)
+
+      // Validate token against the allow list
+      const tokenData = getTokenData(token)
+      const clientId = tokenData.client_id
+      if (allowList) {
+        aioLogger.debug('validateTokenAllowList (allowList): (%s)', allowList.join(', '))
+        if (allowList.indexOf(clientId) === -1) {
+          validationResponse = {
+            status: 403,
+            imsValidation: {
+              valid: false,
+              reason: 'Token is not valid, reason: IMS client is not authorized to call this endpoint. ' +
+              'Please use a JWT from an IMS client on the allow list.'
+            }
+          }
+        }
+      }
+      return validationResponse
+    }
+
+    const { imsValidation } = this.cache ? await this.cache.validateWithCache(validateAllowList, token, allowList) : await validateAllowList(token, allowList)
+    return imsValidation
+  }
+
+  /**
+   * Validates the given token.
    *
    * @param {string} token the access token
    * @param {string} [clientId] the client id, optional
@@ -427,14 +475,30 @@ class Ims {
    */
   async validateToken (token, clientId) {
     aioLogger.debug('validateToken(%s, %s)', token, clientId)
+    const { imsValidation } = this.cache ? await this.cache.validateWithCache(this._validateToken, token, clientId) : await this._validateToken(token, clientId)
+    return imsValidation
+  }
+
+  /**
+   * Verifies a given token, returns a status which can be used to determine cache status if this function is passed to the validation cache.
+   *
+   * @param {string} token the access token
+   * @param {string} [clientId] the client id, optional
+   * @returns {object} Status code and the server response
+   */
+  async _validateToken (token, clientId) {
+    aioLogger.debug('_validateToken(%s, %s)', token, clientId)
 
     let tokenData
     try {
       tokenData = getTokenData(token)
     } catch (e) {
       return {
-        valid: false,
-        reason: 'bad payload'
+        status: 401,
+        imsValidation: {
+          valid: false,
+          reason: 'bad payload'
+        }
       }
     }
 
@@ -448,7 +512,14 @@ class Ims {
       client_id: clientId
     }
 
-    return await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
+    const imsValidation = await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
+    if (!imsValidation.valid) {
+      return {
+        status: 401,
+        imsValidation
+      }
+    }
+    return { status: 200, imsValidation }
   }
 
   /**
