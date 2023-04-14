@@ -56,7 +56,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  jest.restoreAllMocks()
+  jest.clearAllMocks()
   libEnv.getCliEnv.mockReturnValue(PROD_ENV) // default
   mockExponentialBackoff.mockClear()
 })
