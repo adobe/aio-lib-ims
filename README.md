@@ -196,6 +196,41 @@ OAuth2 configuration requires the following properties:
 | redirect_uri | The _Default redirect URI_ from the integration overview screen in the I/O Console. Alternatively, any URI matching one of the _Redirect URI patterns_ may be used. |
 | scope | Scopes to assign to the tokens. This is a string of space separated scope names which depends on the services this integration is subscribed to. Adobe I/O Console does not currently expose the list of scopes defined for OAuth2 integrations, a good list of scopes by service can be found in [OAuth 2.0 Scopes](https://www.adobe.io/authentication/auth-methods.html#!AdobeDocs/adobeio-auth/master/OAuth/Scopes.md). At the very least you may want to enter `openid`. |
 
+## Token Validation
+
+### Caching 
+
+Validations and invalidations can be cached to improve performance. To use caching, configure a new cache and pass it to the library during initialization: 
+```js
+const { Ims, ValidationCache, getToken} = require('@adobe/aio-lib-ims')
+
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
+const VALID_CACHE_ENTRIES = 10000
+const INVALID_CACHE_ENTRIES = 20000
+const cache = new ValidationCache(CACHE_MAX_AGE_MS, VALID_CACHE_ENTRIES, INVALID_CACHE_ENTRIES)
+const ims = new Ims('prod', cache)
+
+const token = params.theToken // May be passed via header, parameter, or other input
+const imsValidation = await ims.validateToken(token)
+if (!imsValidation.valid) {
+  return new Error('Forbidden: This is not a valid IMS token!') // Next time validateToken() is called with this token, a call to IMS will not be made while the cache is still fresh
+}
+```
+
+### Allow List
+
+You can validate a token against an allow-list of IMS clients. To use an allow-list, pass your token and an array of IMS clients to `validateTokenAllowList()`: 
+```js
+const { Ims } = require('@adobe/aio-lib-ims')
+const ims = new Ims()
+
+const token = params.theToken // May be passed via header, parameter, or other input
+const allowList = ['ironmaiden', 'metallica', 'gunsandroses']
+const imsValidation = await ims.validateTokenAllowList(token, allowList)
+if (!imsValidation.valid) {
+  return new Error('Forbidden: This client is not allowed!')
+}
+```
 # Contributing
 Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for more information.
 
