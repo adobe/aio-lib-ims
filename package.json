@@ -15,7 +15,7 @@
     "@adobe/aio-lib-state": "^2.0.1",
     "form-data": "^4.0.0",
     "lodash.clonedeep": "^4.5.0",
-    "lru-cache": "^5.1.1"
+    "lru-cache": "^9.0.3"
   },
   "devDependencies": {
     "@adobe/aio-lib-test-proxy": "^1.0.0",
