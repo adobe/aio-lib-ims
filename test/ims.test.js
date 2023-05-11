@@ -740,8 +740,7 @@ test('Ims.getAccessTokenByClientCredentials', async () => {
   const scopes = ['some', 'things']
 
   const serverResponsePayload = {
-    access_token: '',
-    refresh_token: ''
+    access_token: ''
   }
 
   const res = {
