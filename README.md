@@ -20,7 +20,7 @@ npm install @adobe/aio-lib-ims --save
 
 ## Quickstart
 
-Before using the AIO IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
+Before using the AIO IMS Library you need to create an integration on Adobe Developer Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
 ```js
 const { context, getToken, getTokenData } = require('@adobe/aio-lib-ims')
@@ -147,25 +147,27 @@ const token = await getToken() // generate a token for the config in the 'contex
 This will break `aio` commands that run from the same directory.**
 You can revert to the original behaviour by executing `aio config delete ims.config.current` from that directory.
 
-## JWT Configuration
+## JWT Configuration (Deprecated)
+
+The JWT configuration has been deprecated in favor of the OAuth Server-to-Server Configuration.
 
 JWT (service to service integration) configuration requires the following properties:
 
 | Property | Description |
 |--|--|
-| client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe I/O Console. |
+| client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe Developer Console. |
 | client_secret | The IMS (OAUth2) Client Secret |
-| technical_account_id | The _Technical Account ID_ from the integration overview screen in the I/O Console
-| meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the **meta_scopes** property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`.
-| ims_org_id | The _Organization ID_ from the integration overview screen in the I/O Console. |
+| technical_account_id | The _Technical Account ID_ from the integration overview screen in the Adobe Developer Console
+| meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the Adobe Developer Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the **meta_scopes** property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`.
+| ims_org_id | The _Organization ID_ from the integration overview screen in the Adobe Developer Console. |
 | private_key | The private key matching any one of the _Public Keys_ of the integration. This can be the private key all in one line as a string, or an array of strings (each element is a line from the key file) See the [Setting the Private Key](#setting-the-private-key) section. |
 | passphrase | (_Optional_). The passphrase of the private key. |
 
-## Setting the Private Key
+### Setting the Private Key
 
-For a JWT configuration, your private key is generated in Adobe I/O Console, and is downloaded to your computer when you generate it.
+For a JWT configuration, your private key is generated in Adobe Developer Console, and is downloaded to your computer when you generate it.
 
-Adobe I/O Console does not keep the private key (only your corresponding public key) so you will have to set the private key that was downloaded manually in your IMS context configuration.
+Adobe Developer Console does not keep the private key (only your corresponding public key) so you will have to set the private key that was downloaded manually in your IMS context configuration.
 
 You can set your private key in the config via two ways:
 
@@ -187,10 +189,23 @@ OAuth2 configuration requires the following properties:
 
 | Property | Description |
 |--|--|
-| client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe I/O Console. |
+| client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe Developer Console. |
 | client_secret | The IMS (OAUth2) Client Secret |
-| redirect_uri | The _Default redirect URI_ from the integration overview screen in the I/O Console. Alternatively, any URI matching one of the _Redirect URI patterns_ may be used. |
-| scope | Scopes to assign to the tokens. This is a string of space separated scope names which depends on the services this integration is subscribed to. Adobe I/O Console does not currently expose the list of scopes defined for OAuth2 integrations, a good list of scopes by service can be found in [OAuth 2.0 Scopes](https://www.adobe.io/authentication/auth-methods.html#!AdobeDocs/adobeio-auth/master/OAuth/Scopes.md). At the very least you may want to enter `openid`. |
+| redirect_uri | The _Default redirect URI_ from the integration overview screen in the Adobe Developer Console. Alternatively, any URI matching one of the _Redirect URI patterns_ may be used. |
+| scope | Scopes to assign to the tokens. This is a string of comma separated scope names which depends on the services this integration is subscribed to. Adobe Developer Console does not currently expose the list of scopes defined for OAuth2 integrations, a good list of scopes by service can be found in [OAuth 2.0 Scopes](https://www.adobe.io/authentication/auth-methods.html#!AdobeDocs/adobeio-auth/master/OAuth/Scopes.md). At the very least you may want to enter `openid`. |
+
+## OAuth Server-to-Server Configuration
+
+This configuration is to replace the JWT Configuration.
+
+OAuth Server-to-Server (client credentials grant type) configuration requires the following properties:
+
+| Property | Description |
+|--|--|
+| client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe Developer Console. |
+| client_secret | The IMS (OAUth2) Client Secret |
+| org_id | The _Organization ID_ from the integration overview screen in the Adobe Developer Console. |
+| scope | Scopes to assign to the tokens. This is a string of comma separated scope names which depends on the services this integration is subscribed to. The list of scopes defined for the OAuth2 Server-to-Server credential is listed under the `Scopes` tab for the credential in Adobe Developer Console. |
 
 ## Token Validation
 
