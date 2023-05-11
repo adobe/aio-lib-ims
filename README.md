@@ -1,25 +1,24 @@
+# Adobe I/O IMS Library
+
 [![Version](https://img.shields.io/npm/v/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
 [![Downloads/week](https://img.shields.io/npm/dw/@adobe/aio-lib-ims.svg)](https://npmjs.org/package/@adobe/aio-lib-ims)
 [![Node.js CI](https://github.com/adobe/aio-lib-ims/actions/workflows/node.js.yml/badge.svg)](https://github.com/adobe/aio-lib-ims/actions/workflows/node.js.yml)[![License](https://img.shields.io/npm/l/@adobe/aio-lib-ims.svg)](https://github.com/adobe/aio-lib-ims/blob/master/package.json)
-[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/) 
-
-
-# Adobe I/O IMS Library
+[![Codecov Coverage](https://img.shields.io/codecov/c/github/adobe/aio-lib-ims/master.svg?style=flat-square)](https://codecov.io/gh/adobe/aio-lib-ims/)
 
 The Adobe I/O IMS Library helps interacting with the IMS API as well as creating and invalidating tokens.
 To support multiple use cases and environments, there is not a single configuration managed by this library but multiple configurations called _IMS configuration contexts_.
 Each configuration context holds configuration data needed to create tokens.
 See the _Configuration_ section below.
 
-# Installation
+## Installation
 
-To install the Adobe I/O IMS Library, simple use `npm`:
+To install the Adobe I/O IMS Library, simply use `npm`:
 
 ```sh
-$ npm install @adobe/aio-lib-ims --save
+npm install @adobe/aio-lib-ims --save
 ```
 
-# Quickstart
+## Quickstart
 
 Before using the AIO IMS Library you need to create an integration on Adobe I/O Console from where you can the grab the integration details to setup a first configuration context. Let's use an OAuth2 integration as an example:
 
@@ -40,7 +39,7 @@ const tokenDecoded = getTokenData(token)
 
 See the [API Documentation](api.md) for full details.
 
-# Configuration
+## Configuration
 
 The AIO IMS Library transparently maintains the login configuration and keep
 access and refresh tokens for reuse before they expire.
@@ -125,7 +124,7 @@ In general, you do not need to deal with this property.
 
 ## Set Current Context (Advanced)
 
-The default context can be set locally with `await context.setCurrent('contextname')`. 
+The default context can be set locally with `await context.setCurrent('contextname')`.
 This will write the following configuration to the `ims` key in the `.aio` file of the current working directory:
 
 ```js
@@ -157,30 +156,27 @@ JWT (service to service integration) configuration requires the following proper
 | client_id | The IMS (Oauth2) Client ID. This is the _API Key_ in the integration overview of the Adobe I/O Console. |
 | client_secret | The IMS (OAUth2) Client Secret |
 | technical_account_id | The _Technical Account ID_ from the integration overview screen in the I/O Console
-| meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the *meta_scopes* property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`. |
+| meta_scopes | An array of meta scope names. These are the labels of one ore more special properties in the sample _JWT payload_. They can be found in the _JWT_ tab of the I/O Console integration in the _JWT payload_ properties of the form `"https://<ims-host>/s/ent_dataservices_sdk": true,`. There may be one or more of depending on the services to which the integration is subscribed. The values to list in the **meta_scopes** property are the last segment of the URL. In the example case, this would be `ent_dataservices_sdk`.
 | ims_org_id | The _Organization ID_ from the integration overview screen in the I/O Console. |
 | private_key | The private key matching any one of the _Public Keys_ of the integration. This can be the private key all in one line as a string, or an array of strings (each element is a line from the key file) See the [Setting the Private Key](#setting-the-private-key) section. |
 | passphrase | (_Optional_). The passphrase of the private key. |
 
-
 ## Setting the Private Key
 
-For a JWT configuration, your private key is generated in Adobe I/O Console, and is downloaded to your computer when you generate it. 
+For a JWT configuration, your private key is generated in Adobe I/O Console, and is downloaded to your computer when you generate it.
 
 Adobe I/O Console does not keep the private key (only your corresponding public key) so you will have to set the private key that was downloaded manually in your IMS context configuration.
 
 You can set your private key in the config via two ways:
+
 1. Import the private key as a string
 2. Set a file reference to the private key
 
 The instructions below assume a private key file called `private.key` and `CONTEXT_NAME` is the name of your JWT context.
 
 1. To import your private key as a string:
-
 `aio config:set ims.contexts.CONTEXT_NAME.private_key path/to/your/private.key --file`
-
 2. To set a file reference to the private key instead:
-
 `aio config:set ims.contexts.CONTEXT_NAME.private_key path/to/your/private.key`
 
 Note that the path to your private key, if it is a relative path, will be resolved relative to the current working directory.
@@ -198,9 +194,10 @@ OAuth2 configuration requires the following properties:
 
 ## Token Validation
 
-### Caching 
+### Caching
 
-Validations and invalidations can be cached to improve performance. To use caching, configure a new cache and pass it to the library during initialization: 
+Validations and invalidations can be cached to improve performance. To use caching, configure a new cache and pass it to the library during initialization:
+
 ```js
 const { Ims, ValidationCache, getToken} = require('@adobe/aio-lib-ims')
 
@@ -219,7 +216,8 @@ if (!imsValidation.valid) {
 
 ### Allow List
 
-You can validate a token against an allow-list of IMS clients. To use an allow-list, pass your token and an array of IMS clients to `validateTokenAllowList()`: 
+You can validate a token against an allow-list of IMS clients. To use an allow-list, pass your token and an array of IMS clients to `validateTokenAllowList()`:
+
 ```js
 const { Ims } = require('@adobe/aio-lib-ims')
 const ims = new Ims()
@@ -231,10 +229,11 @@ if (!imsValidation.valid) {
   return new Error('Forbidden: This client is not allowed!')
 }
 ```
-# Contributing
+
+## Contributing
+
 Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for more information.
 
-
-# Licensing
+## Licensing
 
 This project is licensed under the Apache V2 License. See [LICENSE](LICENSE) for more information.
