@@ -33,6 +33,9 @@ const REFRESH_TOKEN = 'refresh_token'
 /** The constant string `authorization_code`.  */
 const AUTHORIZATION_CODE = 'authorization_code'
 
+/** The constant string `client_credentials`.  */
+const CLIENT_CREDENTIALS = 'client_credentials'
+
 /** The constant string `client_id`.  */
 const CLIENT_ID = 'client_id'
 
@@ -355,6 +358,32 @@ class Ims {
     }
 
     return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
+      .then(_toTokenResult)
+  }
+
+  /**
+   * Request an access token of the Client Credentials Grant Type.
+   *
+   * @param {string} clientId The Client ID
+   * @param {string} clientSecret The Client Secret proving client ID ownership
+   * @param {string} orgId the IMS org Id
+   * @param {Array<string>} scopes The list of scopes to request as a blank separated list
+   * @returns {Promise} a promise resolving to a tokens object as described in the
+   *      {@link toTokenResult} or rejects to an error message.
+   */
+  async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes) {
+    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes = [])
+
+    // prepare the data with common data
+    const postData = {
+      grant_type: CLIENT_CREDENTIALS,
+      client_id: clientId,
+      client_secret: clientSecret,
+      org_id: orgId,
+      scope: scopes.join(',')
+    }
+
+    return _sendPost(this.getApiUrl('/ims/token/v2'), undefined, postData)
       .then(_toTokenResult)
   }
 

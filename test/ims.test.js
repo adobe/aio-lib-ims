@@ -730,3 +730,27 @@ test('Ims.getSusiUrl - callbackUrl null', () => {
       'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&scope=some%2C+scopes&state=some-state'
     )
 })
+
+test('Ims.getAccessTokenByClientCredentials', async () => {
+  const ims = new Ims()
+
+  const clientId = 'some-client-id'
+  const clientSecret = 'some-client-secret'
+  const orgId = 'some-org-id'
+  const scopes = ['some', 'things']
+
+  const serverResponsePayload = {
+    access_token: ''
+  }
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(serverResponsePayload)
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
+
+  await expect(ims.getAccessTokenByClientCredentials(clientId, clientSecret, orgId, scopes))
+    .resolves.toEqual({ payload: serverResponsePayload })
+})
