@@ -21,7 +21,7 @@
     "@adobe/aio-lib-test-proxy": "^1.0.0",
     "@adobe/eslint-config-aio-lib-config": "^2",
     "@types/jest": "^29.5.0",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.0.3",
     "eslint": "^8",
     "eslint-config-oclif": "^4.0.0",
     "eslint-config-standard": "^17",
