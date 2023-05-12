@@ -8,7 +8,7 @@
     "@adobe/aio-lib-core-config": "^3.0.0",
     "@adobe/aio-lib-core-errors": "^3.1.0",
     "@adobe/aio-lib-core-logging": "^2.0.0",
-    "@adobe/aio-lib-core-networking": "^3.0.0",
+    "@adobe/aio-lib-core-networking": "^4.1.0",
     "@adobe/aio-lib-env": "^2.0.0",
     "@adobe/aio-lib-ims-jwt": "^4.0.0",
     "@adobe/aio-lib-ims-oauth": "github:adobe/aio-lib-ims-oauth#story/ACNA-1854",
