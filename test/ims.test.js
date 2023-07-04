@@ -754,3 +754,27 @@ test('Ims.getAccessTokenByClientCredentials', async () => {
   await expect(ims.getAccessTokenByClientCredentials(clientId, clientSecret, orgId, scopes))
     .resolves.toEqual({ payload: serverResponsePayload })
 })
+
+test('Ims.getAccessTokenByClientCredentials - empty scopes', async () => {
+  const ims = new Ims()
+
+  const clientId = 'some-client-id'
+  const clientSecret = 'some-client-secret'
+  const orgId = 'some-org-id'
+  const scopes = undefined
+
+  const serverResponsePayload = {
+    access_token: ''
+  }
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(serverResponsePayload)
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
+
+  await expect(ims.getAccessTokenByClientCredentials(clientId, clientSecret, orgId, scopes))
+    .resolves.toEqual({ payload: serverResponsePayload })
+})

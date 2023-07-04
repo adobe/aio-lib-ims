@@ -371,8 +371,8 @@ class Ims {
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
-  async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes) {
-    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes = [])
+  async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes = []) {
+    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes)
 
     // prepare the data with common data
     const postData = {
