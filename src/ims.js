@@ -225,6 +225,7 @@ class Ims {
    * @param {ValidationCache} cache The cache instance to use.
    */
   constructor (env = getCliEnv(), cache) {
+    this.env = env
     this.endpoint = IMS_ENDPOINTS[env] || IMS_ENDPOINTS[DEFAULT_ENV]
     if (cache) {
       this.cache = cache
@@ -371,8 +372,8 @@ class Ims {
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
-  async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes) {
-    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes = [])
+  async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes = []) {
+    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes)
 
     // prepare the data with common data
     const postData = {
@@ -491,7 +492,7 @@ class Ims {
       return validationResponse
     }
 
-    const { imsValidation } = this.cache ? await this.cache.validateWithCache(validateAllowList, token, allowList) : await validateAllowList(token, allowList)
+    const { imsValidation } = this.cache ? await this.cache.validateWithCache(validateAllowList, token, allowList, this.env) : await validateAllowList(token, allowList)
     return imsValidation
   }
 
@@ -504,7 +505,7 @@ class Ims {
    */
   async validateToken (token, clientId) {
     aioLogger.debug('validateToken(%s, %s)', token, clientId)
-    const { imsValidation } = this.cache ? await this.cache.validateWithCache(this._validateToken, token, clientId) : await this._validateToken(token, clientId)
+    const { imsValidation } = this.cache ? await this.cache.validateWithCache(this._validateToken, token, clientId, this.env) : await this._validateToken(token, clientId)
     return imsValidation
   }
 
