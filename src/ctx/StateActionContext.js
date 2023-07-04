@@ -10,10 +10,11 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const debug = require('debug')('@adobe/aio-lib-ims/ctx/StateActionContext')
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:StateActionContext', { provider: 'debug' })
 const cloneDeep = require('lodash.clonedeep')
 const Context = require('./Context')
 const State = require('@adobe/aio-lib-state')
+const { codes: errors } = require('../errors')
 
 /**
  * The `StateActionContext` class stores IMS `contexts` for Adobe I/O Runtime Actions in the
@@ -33,7 +34,7 @@ class StateActionContext extends Context {
         }
       })
       if (missing.length > 0) {
-        throw new Error(`missing environment variable(s) '${missing}', are you actually in an action's runtime?`)
+        throw new errors.MISSING_ENVIRONMENT_VARIABLE({ messageValues: missing.join(',') })
       }
     }
 
@@ -54,7 +55,7 @@ class StateActionContext extends Context {
    * @ignore
    */
   async getContextValue (key) {
-    debug('getContextValue(%s)', key)
+    aioLogger.debug('getContextValue(%s)', key)
     // on first run load the tokens from the cloud State
     await this.loadTokensOnce()
     return cloneDeep(this.data[this.keyNames.CONTEXTS][key])
@@ -66,7 +67,7 @@ class StateActionContext extends Context {
    * @ignore
    */
   async getConfigValue (key) {
-    debug('getConfigValue(%s)', key)
+    aioLogger.debug('getConfigValue(%s)', key)
     return cloneDeep(this.data[this.keyNames.CONFIG][key])
   }
 
@@ -76,7 +77,7 @@ class StateActionContext extends Context {
    * @ignore
    */
   async setContextValue (key, value, isLocal) {
-    debug('setContextValue(%s, %o, isLocal=%s)', key, value, isLocal)
+    aioLogger.debug('setContextValue(%s, %o, isLocal=%s)', key, value, isLocal)
 
     if (!isLocal) {
       if (this.hasToken(value)) {
@@ -99,7 +100,7 @@ class StateActionContext extends Context {
    * @ignore
    */
   async setConfigValue (key, value) {
-    debug('setConfigValue(%s, %o, isLocal=true)', key, value)
+    aioLogger.debug('setConfigValue(%s, %o, isLocal=true)', key, value)
     // we only write into local memory for now (no global/cloud config)
     this.data[this.keyNames.CONFIG][key] = cloneDeep(value)
   }

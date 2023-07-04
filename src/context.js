@@ -10,8 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const debug = require('debug')('@adobe/aio-lib-ims/context')
-
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:context', { provider: 'debug' })
 const ActionContext = require('./ctx/StateActionContext')
 const CliContext = require('./ctx/ConfigCliContext')
 
@@ -39,10 +38,10 @@ const CURRENT = 'current'
 /** @private */
 function guessContextType () {
   if (process.env.__OW_ACTION_NAME) {
-    debug(`guessing context type: ${TYPE_ACTION}`)
+    aioLogger.debug(`guessing context type: ${TYPE_ACTION}`)
     return TYPE_ACTION
   }
-  debug(`guessing context type: ${TYPE_CLI}`)
+  aioLogger.debug(`guessing context type: ${TYPE_CLI}`)
   return TYPE_CLI
 }
 

@@ -10,8 +10,9 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const debug = require('debug')('@adobe/aio-lib-ims/ctx/ConfigCliContext')
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ConfigCliContext', { provider: 'debug' })
 const Context = require('./Context')
+const { codes: errors } = require('../errors')
 
 /**
  * The `ConfigCliContext` class stores IMS `contexts` for the Adobe I/O CLI in the local file
@@ -31,7 +32,7 @@ class ConfigCliContext extends Context {
    * @returns {Promise<any>} the cli context data
    */
   async getCli () {
-    debug('get cli')
+    aioLogger.debug('get cli')
     return this.getContextValue(this.keyNames.CLI)
   }
 
@@ -43,11 +44,11 @@ class ConfigCliContext extends Context {
    * @param {boolean} [merge=true] set to true to merge existing data with the new data
    */
   async setCli (contextData, local = false, merge = true) {
-    debug(`set cli=${JSON.stringify(contextData)} local:${!!local} merge:${!!merge}`)
+    aioLogger.debug(`set cli=${JSON.stringify(contextData)} local:${!!local} merge:${!!merge}`)
 
     const dataIsObject = (typeof contextData === 'object' && contextData !== null)
     if (!dataIsObject) {
-      throw new Error('contextData must be an object')
+      throw new errors.INVALID_CONTEXT_DATA()
     }
 
     // make sure to not merge any global config into local and vice versa
@@ -62,7 +63,7 @@ class ConfigCliContext extends Context {
    * @ignore
    */
   async getContextValue (key) {
-    debug('getContextValue(%s)', key)
+    aioLogger.debug('getContextValue(%s)', key)
     // no source option -> always get it from all sources
     return this.getContextValueFromOptionalSource(key)
   }
@@ -73,7 +74,7 @@ class ConfigCliContext extends Context {
    * @ignore
    */
   async getConfigValue (key) {
-    debug('getConfigValue(%s)', key)
+    aioLogger.debug('getConfigValue(%s)', key)
     return this.aioConfig.get(`${this.keyNames.IMS}.${this.keyNames.CONFIG}.${key}`)
   }
 
@@ -83,7 +84,7 @@ class ConfigCliContext extends Context {
    * @ignore
    */
   async setContextValue (key, value, isLocal) {
-    debug('setContextValue(%s, %o, isLocal=%s)', key, value, isLocal)
+    aioLogger.debug('setContextValue(%s, %o, isLocal=%s)', key, value, isLocal)
     this.aioConfig.set(`${this.keyNames.IMS}.${this.keyNames.CONTEXTS}.${key}`, value, isLocal)
   }
 
@@ -93,7 +94,7 @@ class ConfigCliContext extends Context {
    * @ignore
    */
   async setConfigValue (key, value, isLocal) {
-    debug('setConfigValue(%s, %o, isLocal=%s)', key, value, isLocal)
+    aioLogger.debug('setConfigValue(%s, %o, isLocal=%s)', key, value, isLocal)
     this.aioConfig.set(`${this.keyNames.IMS}.${this.keyNames.CONFIG}.${key}`, value, isLocal)
   }
 

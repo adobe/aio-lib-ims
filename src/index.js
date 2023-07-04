@@ -25,6 +25,8 @@ const {
   SCOPE
 } = require('./ims')
 
+const ValidationCache = require('./ValidationCache')
+
 /**
  * The `@adobe/aio-lib-ims` module offers three kinds of elements:
  *
@@ -32,7 +34,7 @@ const {
  * 2. Creating and invalidating tokens
  * 3. Providing low level access to IMS API
  *
- * @exports @adobe/aio-lib-ims
+ * @exports aio-lib-ims
  */
 module.exports = {
   /** @see [`getTokenData`](#gettokendata) */
@@ -40,6 +42,9 @@ module.exports = {
 
   /** @see [`Ims`](#ims) */
   Ims,
+
+  /** @see [`ValidationCache`](#ValidationCache) */
+  ValidationCache,
 
   /** @see [`ACCESS_TOKEN`](#access_token) */
   ACCESS_TOKEN,
@@ -71,13 +76,10 @@ module.exports = {
    * @param {string} contextName The name of the IMS context for which to return the
    *              access token. If this is empty, the token(s) of the current IMS context
    *              are invalidated.
-   * @param {boolean} [force] Forces a login in the selected plugin's `imslogin` function.
-   *              See [Forced `imsLogin`](README.md#forced-imslogin) for more information
-   *              on this flag. The default value is `false`.
-   *
+   * @param {object} options A set of arbitrary options which will be passed to the underlying login plugin.
    * @returns {Promise} Resolving to an access token (string)
    */
-  getToken: async (contextName, force) => IMS_TOKEN_MANAGER.getToken(contextName, !!force),
+  getToken: async (contextName, options) => IMS_TOKEN_MANAGER.getToken(contextName, options),
 
   /**
    * Invalidates the access and optionally refresh of an IMS context.

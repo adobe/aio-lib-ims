@@ -10,8 +10,31 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const rp = require('request-promise-native')
-jest.mock('request-promise-native')
+const FormData = require('form-data')
+const libEnv = require('@adobe/aio-lib-env')
+const { STAGE_ENV, PROD_ENV } = jest.requireActual('@adobe/aio-lib-env')
+
+const mockExponentialBackoff = jest.fn()
+const mockHttpExponentialBackoff = jest.fn()
+jest.mock('@adobe/aio-lib-env')
+jest.mock('@adobe/aio-lib-core-networking', () => ({
+  HttpExponentialBackoff: mockHttpExponentialBackoff
+}))
+
+const mockValidationCacheInstance = {
+  validateWithCache: jest.fn().mockImplementation(async (func, ...params) => { return func(...params) })
+}
+
+jest.mock('../src/ValidationCache', () => {
+  const ActualValidationCache = jest.requireActual('../src/ValidationCache')
+
+  return jest.fn().mockImplementation(() => {
+    const validationCache = Object.create(ActualValidationCache.prototype)
+    return Object.assign(validationCache, mockValidationCacheInstance)
+  })
+})
+
+const ValidationCache = require('../src/ValidationCache')
 
 const {
   getTokenData,
@@ -24,9 +47,18 @@ const {
   SCOPE
 } = require('../src/ims')
 
+beforeEach(() => {
+  mockHttpExponentialBackoff.mockReturnValue({
+    exponentialBackoff: mockExponentialBackoff
+  })
+  ValidationCache.mockClear()
+  mockValidationCacheInstance.validateWithCache.mockClear()
+})
+
 afterEach(() => {
-  jest.restoreAllMocks()
-  rp.mockRestore()
+  jest.clearAllMocks()
+  libEnv.getCliEnv.mockReturnValue(PROD_ENV) // default
+  mockExponentialBackoff.mockClear()
 })
 
 /** @private */
@@ -44,6 +76,50 @@ test('exports', async () => {
   expect(typeof CLIENT_ID).toEqual('string')
   expect(typeof CLIENT_SECRET).toEqual('string')
   expect(typeof SCOPE).toEqual('string')
+})
+
+test('constructor', () => {
+  const endpoints = {
+    PROD_ENV: 'https://ims-na1.adobelogin.com',
+    STAGE_ENV: 'https://ims-na1-stg1.adobelogin.com'
+  }
+  let ims
+
+  // default, should use PROD endpoint (default for global cli env is PROD)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // if constructor parameter is set to STAGE, should use STAGE endpoint (overrides global env)
+  ims = new Ims(STAGE_ENV)
+  expect(ims.endpoint).toEqual(endpoints.STAGE_ENV)
+
+  // if constructor parameter is set to an unknown string, should use PROD endpoint (default env)
+  ims = new Ims('gibberish')
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // if constructor parameter is set to null, should use PROD endpoint (default env)
+  ims = new Ims(null)
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // if global cli env is set to STAGE, should use it
+  libEnv.getCliEnv.mockReturnValue(STAGE_ENV)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.STAGE_ENV)
+
+  // if global cli env is set to PROD, should use it
+  libEnv.getCliEnv.mockReturnValue(PROD_ENV)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // default, should use PROD endpoint (global cli env is not set)
+  libEnv.getCliEnv.mockReturnValue(null)
+  ims = new Ims()
+  expect(ims.endpoint).toEqual(endpoints.PROD_ENV)
+
+  // custom cache
+  const cache = new ValidationCache(1, 2, 3)
+  ims = new Ims('stage', cache)
+  expect(ims.cache).toEqual(cache)
 })
 
 test('getTokenData', () => {
@@ -65,7 +141,7 @@ test('Ims.fromToken - bad payload', async () => {
   const badPayloadBase64 = Buffer.from(JSON.stringify(badPayload)).toString('base64')
   const token = `header.${badPayloadBase64}.signature`
 
-  return expect(Ims.fromToken(token)).rejects.toEqual(new Error('Cannot resolve to IMS environment from token'))
+  return expect(Ims.fromToken(token)).rejects.toThrow('[IMSSDK:CANNOT_RESOLVE_ENVIRONMENT] Cannot resolve to IMS environment from token')
 })
 
 test('Ims.fromToken - ok payload', async () => {
@@ -115,8 +191,14 @@ test('Ims.invalidateToken', async () => {
   const ims = new Ims()
 
   // have some return value from request module
-  const retVal = 'some return value'
-  rp.mockImplementation(() => retVal)
+
+  const serverResponsePayload = 'some return value'
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
 
   // no client_id and no_client_secret, shouldn't fail
   await expect(ims.invalidateToken(token)).resolves.toBeTruthy()
@@ -124,7 +206,7 @@ test('Ims.invalidateToken', async () => {
   const clientId = 'some-client-id'
   const clientSecret = 'some-client-secret'
 
-  return expect(ims.invalidateToken(token, clientId, clientSecret)).resolves.toEqual(retVal)
+  return expect(ims.invalidateToken(token, clientId, clientSecret)).resolves.toEqual(serverResponsePayload)
 })
 
 test('Ims.validateToken(token, clientId)', async () => {
@@ -143,8 +225,13 @@ test('Ims.validateToken(token, clientId)', async () => {
     }
   }
 
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
   // have some return value from request module
-  rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
 
   const clientId = 'some-client-id-2'
   const token = createTokenFromPayload(serverResponsePayload.token)
@@ -152,14 +239,7 @@ test('Ims.validateToken(token, clientId)', async () => {
   await expect(ims.validateToken(token, clientId))
     .resolves.toEqual(serverResponsePayload)
 
-  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
-    uri: expect.stringContaining('/ims/validate_token/v1'),
-    form: {
-      client_id: 'some-client-id-2',
-      type: 'access token'
-    },
-    auth: { bearer: token }
-  }))
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
 })
 
 test('Ims.validateToken(token), extracts client id from token', async () => {
@@ -178,22 +258,20 @@ test('Ims.validateToken(token), extracts client id from token', async () => {
     }
   }
 
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
   // have some return value from request module
-  rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
 
   const token = createTokenFromPayload(serverResponsePayload.token)
 
   await expect(ims.validateToken(token))
     .resolves.toEqual(serverResponsePayload)
 
-  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
-    uri: expect.stringContaining('/ims/validate_token/v1'),
-    form: {
-      client_id: 'some-client-id',
-      type: 'access token'
-    },
-    auth: { bearer: token }
-  }))
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
 })
 
 test('Ims.validateToken response is non parseable', async () => {
@@ -208,16 +286,22 @@ test('Ims.validateToken response is non parseable', async () => {
     type: 'access token'
   }
 
+  const serverResponsePayload = 'hello hello'
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
   // have some return value from request module
-  rp.mockImplementation(() => 'hello hello')
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
 
   const clientId = 'some-client-id'
   const token = createTokenFromPayload(payload)
 
   await expect(ims.validateToken(token, clientId))
-    .resolves.toEqual('hello hello')
+    .resolves.toEqual(serverResponsePayload)
 
-  expect(rp).toHaveBeenCalledWith(expect.objectContaining({ uri: expect.stringContaining('/ims/validate_token/v1') }))
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
 })
 
 test('Ims.validateToken bad token', async () => {
@@ -232,11 +316,203 @@ test('Ims.validateToken bad token', async () => {
     })
 })
 
+test('Ims.validateToken bad token, with cache', async () => {
+  const cache = new ValidationCache(1, 2, 3)
+  const ims = new Ims('stage', cache)
+
+  const clientId = 'some-client-id'
+
+  await expect(ims.validateToken('BADTOKEN', clientId))
+    .resolves.toEqual({
+      valid: false,
+      reason: 'bad payload'
+    })
+})
+
+test('Ims._validateToken(token)', async () => {
+  const ims = new Ims()
+
+  const serverResponsePayload = {
+    valid: true,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token',
+      client_id: 'some-client-id-1'
+    }
+  }
+
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+
+  const clientId = 'some-client-id-2'
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims._validateToken(token, clientId))
+    .resolves.toEqual({
+      status: 200,
+      imsValidation: serverResponsePayload
+    })
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
+})
+
+test('Ims.validateTokenAllowList(token, allowList)', async () => {
+  const ims = new Ims()
+
+  const serverResponsePayload = {
+    valid: true,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token',
+      client_id: 'some-client-id-2'
+    }
+  }
+
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+
+  const clientId = 'some-client-id-2'
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims.validateTokenAllowList(token, [clientId]))
+    .resolves.toEqual(serverResponsePayload)
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
+})
+
+test('Ims.validateTokenAllowList(token, allowList) clientId not in allow list', async () => {
+  const ims = new Ims()
+
+  const serverResponsePayload = {
+    valid: true,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token',
+      client_id: 'some-client-id-1'
+    }
+  }
+
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+
+  const clientId = 'some-client-id-2'
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims.validateTokenAllowList(token, [clientId]))
+    .resolves.toEqual({
+      valid: false,
+      reason: 'Token is not valid, reason: IMS client is not authorized to call this endpoint. ' +
+      'Please use a JWT from an IMS client on the allow list.'
+    })
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
+})
+
+test('Ims.validateTokenAllowList(token, allowList) clientId not in allow list, with cache', async () => {
+  const cache = new ValidationCache(1, 2, 3)
+  const ims = new Ims('stage', cache)
+
+  const serverResponsePayload = {
+    valid: true,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token',
+      client_id: 'some-client-id-1'
+    }
+  }
+
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+
+  const clientId = 'some-client-id-2'
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims.validateTokenAllowList(token, [clientId]))
+    .resolves.toEqual({
+      valid: false,
+      reason: 'Token is not valid, reason: IMS client is not authorized to call this endpoint. ' +
+      'Please use a JWT from an IMS client on the allow list.'
+    })
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
+})
+
+test('Ims.validateTokenAllowList(token, allowList) clientId not in allow list, with cache, empty allow list', async () => {
+  const cache = new ValidationCache(1, 2, 3)
+  const ims = new Ims('stage', cache)
+
+  const serverResponsePayload = {
+    valid: true,
+    token: {
+      as: 'ims-na1',
+      created_at: 100,
+      expires_in: 300,
+      access_token: 'my-access-token',
+      refresh_token: 'my-refresh-token',
+      type: 'access token',
+      client_id: 'some-client-id-1'
+    }
+  }
+
+  const serverResponse = {
+    status: 200,
+    text: () => serverResponsePayload
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+  const token = createTokenFromPayload(serverResponsePayload.token)
+
+  await expect(ims.validateTokenAllowList(token))
+    .resolves.toEqual(serverResponsePayload)
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
+})
+
 test('Ims.getOrganizations(token)', async () => {
   const ims = new Ims()
 
+  const responsePayload = 'response'
+
   const serverResponse = {
-    fake: 'response'
+    status: 200,
+    text: () => responsePayload
   }
 
   const payload = {
@@ -249,23 +525,23 @@ test('Ims.getOrganizations(token)', async () => {
   }
 
   // have some return value from request module
-  rp.mockImplementation(() => JSON.stringify(serverResponse))
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
 
   const token = createTokenFromPayload(payload)
 
   await expect(ims.getOrganizations(token))
-    .resolves.toEqual(serverResponse)
-
-  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
-    uri: expect.stringContaining('/ims/organizations/v6'),
-    auth: { bearer: token }
-  }))
+    .resolves.toEqual(responsePayload)
 })
 
 test('Ims.getOrganizations(token) returns not JSON', async () => {
   const ims = new Ims()
 
-  const serverResponse = 'noteverythingisJSON'
+  const responsePayload = 'noteverythingisJSON'
+
+  const serverResponse = {
+    status: 200,
+    text: () => 'noteverythingisJSON'
+  }
 
   const payload = {
     as: 'ims-na1',
@@ -277,36 +553,35 @@ test('Ims.getOrganizations(token) returns not JSON', async () => {
   }
 
   // have some return value from request module
-  rp.mockImplementation(() => serverResponse)
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
 
   const token = createTokenFromPayload(payload)
 
   await expect(ims.getOrganizations(token))
-    .resolves.toEqual(serverResponse)
-
-  expect(rp).toHaveBeenCalledWith(expect.objectContaining({
-    uri: expect.stringContaining('/ims/organizations/v6'),
-    auth: { bearer: token }
-  }))
+    .resolves.toEqual(responsePayload)
 })
 
 test('Ims.exchangeJwtToken', async () => {
   const ims = new Ims()
-
   const serverResponsePayload = {
-    access_token: 'my-access-token',
-    refresh_token: 'my-refresh-token'
+    access_token: '',
+    refresh_token: ''
+  }
+
+  const response = {
+    status: 200,
+    text: () => JSON.stringify(serverResponsePayload)
   }
 
   // have some return value from request module
-  rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(response))
 
   const clientId = 'some-client-id'
   const clientSecret = 'some-client-secret'
   const signedJwtToken = 'signed-jwt-token'
 
   return expect(ims.exchangeJwtToken(clientId, clientSecret, signedJwtToken))
-    .resolves.toEqual({ payload: JSON.stringify(serverResponsePayload) })
+    .resolves.toEqual({ payload: serverResponsePayload })
 })
 
 test('Ims.getAccessToken', async () => {
@@ -330,52 +605,88 @@ test('Ims.getAccessToken', async () => {
   authCode = createTokenFromPayload(payload)
 
   await expect(ims.getAccessToken(authCode, clientId, clientSecret, scopes))
-    .rejects.toEqual(new Error('Unknown type of authCode: unknown_type'))
+    .rejects.toThrow('[IMSSDK:UNKNOWN_AUTHCODE_TYPE] Unknown type of authCode: unknown_type')
 
   const serverResponsePayload = {
-    access_token: 'my-access-token',
-    refresh_token: 'my-refresh-token'
+    access_token: '',
+    refresh_token: ''
+  }
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(serverResponsePayload)
   }
 
   // have some return value from request module
-  rp.mockImplementation(() => JSON.stringify(serverResponsePayload))
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
 
   // authorization_code type
   payload.type = 'authorization_code'
   authCode = createTokenFromPayload(payload)
 
   await expect(ims.getAccessToken(authCode, clientId, clientSecret, scopes))
-    .resolves.toEqual({ payload: JSON.stringify(serverResponsePayload) })
+    .resolves.toEqual({ payload: serverResponsePayload })
 
   // refresh_token type
   payload.type = 'refresh_token'
   authCode = createTokenFromPayload(payload)
 
-  return expect(ims.getAccessToken(authCode, clientId, clientSecret, scopes))
-    .resolves.toEqual({ payload: JSON.stringify(serverResponsePayload) })
+  return await expect(ims.getAccessToken(authCode, clientId, clientSecret, scopes))
+    .resolves.toEqual({ payload: serverResponsePayload })
 })
 
 test('Ims.post', async () => {
   const ims = new Ims()
-  const retVal = 'data'
+  const payload = 'data'
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(payload)
+  }
 
   // have some return value from request module
-  rp.mockImplementation(() => retVal)
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(res))
 
-  return expect(ims.post('api', 'token', 'parameters')).resolves.toEqual(retVal)
+  return expect(ims.post('api', 'token', 'parameters')).resolves.toEqual(payload)
+})
+
+test('Ims.post using FormData body', async () => {
+  const ims = new Ims()
+  const serverResponse = {
+    status: 200,
+    text: () => Promise.resolve(true)
+  }
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+  const formData = new FormData()
+  const result = ims.post('api', 'token', formData)
+  await expect(result).resolves.toEqual(true)
+})
+
+test('Ims.post throw error on unsuccessfully request', async () => {
+  const ims = new Ims()
+  const serverResponse = {
+    status: 400,
+    statusText: 'Bad Request'
+  }
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
+  const result = ims.post('api', 'token', 'parameters')
+  await expect(result).rejects.toThrow('400')
 })
 
 test('Ims.get', async () => {
   const ims = new Ims()
-  const retVal = 'data'
+  const payload = 'data'
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(payload)
+  }
 
   // have some return value from request module
-  rp.mockImplementation(() => retVal)
+  mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(res))
 
   // with data
-  await expect(ims.get('api', 'token', 'parameters')).resolves.toEqual(retVal)
-  // no data
-  return expect(ims.get('api', 'token')).resolves.toEqual(retVal)
+  await expect(ims.get('api', 'token', 'parameters')).resolves.toEqual(payload)
 })
 
 test('Ims.getSusiUrl', () => {
@@ -390,4 +701,80 @@ test('Ims.getSusiUrl', () => {
     .toEqual(
       'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&scope=some%2C+scopes&redirect_uri=https%3A%2F%2Fsome-server.com%2Flogin-callback&state=some-state'
     )
+})
+
+test('Ims.getSusiUrl - scopes null', () => {
+  const ims = new Ims('prod')
+
+  const clientId = 'some-client-id'
+  const scopes = null
+  const callbackUrl = 'https://some-server.com/login-callback'
+  const state = 'some-state'
+
+  expect(ims.getSusiUrl(clientId, scopes, callbackUrl, state))
+    .toEqual(
+      'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&redirect_uri=https%3A%2F%2Fsome-server.com%2Flogin-callback&state=some-state'
+    )
+})
+
+test('Ims.getSusiUrl - callbackUrl null', () => {
+  const ims = new Ims('prod')
+
+  const clientId = 'some-client-id'
+  const scopes = 'some, scopes'
+  const callbackUrl = null
+  const state = 'some-state'
+
+  expect(ims.getSusiUrl(clientId, scopes, callbackUrl, state))
+    .toEqual(
+      'https://ims-na1.adobelogin.com/ims/authorize/v1?response_type=code&client_id=some-client-id&scope=some%2C+scopes&state=some-state'
+    )
+})
+
+test('Ims.getAccessTokenByClientCredentials', async () => {
+  const ims = new Ims()
+
+  const clientId = 'some-client-id'
+  const clientSecret = 'some-client-secret'
+  const orgId = 'some-org-id'
+  const scopes = ['some', 'things']
+
+  const serverResponsePayload = {
+    access_token: ''
+  }
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(serverResponsePayload)
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
+
+  await expect(ims.getAccessTokenByClientCredentials(clientId, clientSecret, orgId, scopes))
+    .resolves.toEqual({ payload: serverResponsePayload })
+})
+
+test('Ims.getAccessTokenByClientCredentials - empty scopes', async () => {
+  const ims = new Ims()
+
+  const clientId = 'some-client-id'
+  const clientSecret = 'some-client-secret'
+  const orgId = 'some-org-id'
+  const scopes = undefined
+
+  const serverResponsePayload = {
+    access_token: ''
+  }
+
+  const res = {
+    status: 200,
+    text: () => Promise.resolve(serverResponsePayload)
+  }
+
+  // have some return value from request module
+  mockExponentialBackoff.mockImplementation(() => Promise.resolve(res))
+
+  await expect(ims.getAccessTokenByClientCredentials(clientId, clientSecret, orgId, scopes))
+    .resolves.toEqual({ payload: serverResponsePayload })
 })

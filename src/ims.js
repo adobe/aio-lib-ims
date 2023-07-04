@@ -10,12 +10,14 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const rp = require('request-promise-native')
-const debug = require('debug')('@adobe/aio-cli-ims/ims')
+const FormData = require('form-data')
+const { HttpExponentialBackoff } = require('@adobe/aio-lib-core-networking')
+const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:ims', { provider: 'debug' })
 const url = require('url')
+const { getCliEnv, DEFAULT_ENV } = require('@adobe/aio-lib-env')
+const { codes: errors } = require('./errors')
 
-// default IMS environment
-const DEFAULT_ENVIRONMENT = 'prod'
+const ValidationCache = require('./ValidationCache')
 
 const IMS_ENDPOINTS = {
   stage: 'https://ims-na1-stg1.adobelogin.com',
@@ -31,6 +33,9 @@ const REFRESH_TOKEN = 'refresh_token'
 /** The constant string `authorization_code`.  */
 const AUTHORIZATION_CODE = 'authorization_code'
 
+/** The constant string `client_credentials`.  */
+const CLIENT_CREDENTIALS = 'client_credentials'
+
 /** The constant string `client_id`.  */
 const CLIENT_ID = 'client_id'
 
@@ -45,34 +50,56 @@ const SCOPE = 'scope'
  *
  * @private
  * @param {string} method the http method
- * @param {string} url the url endppoint
+ * @param {string} url the url endpoint
  * @param {string} token the access token authorization
  * @param {object} data the data to send
  * @returns {Promise} Promise that resolves with the request data
  */
 async function _sendRequest (method, url, token, data) {
-  const options = {
-    uri: url,
-    method: method,
+  const requestOptions = {
+    method,
     headers: {
       'User-Agent': 'aio-cli-ims'
-    },
-    json: true
-  }
-
-  if (data) {
-    if (method === 'GET') {
-      options.qs = data
-    } else {
-      options.form = data
     }
   }
 
-  if (token) {
-    options.auth = { bearer: token }
+  if (method === 'POST') {
+    let formData = data
+    if (!(formData instanceof FormData)) {
+      formData = Object.keys(data).reduce((formData, key) => {
+        formData.append(key, data[key])
+        return formData
+      }, new FormData())
+    }
+    requestOptions.body = formData
   }
 
-  return rp(options)
+  if (token) {
+    requestOptions.headers.Authorization = `Bearer ${token}`
+  }
+
+  const retryOptions = { maxRetries: 3, initialDelayInMillis: 500 }
+
+  const validateResponse = (res) => {
+    if (res.status === 200) {
+      return res
+    }
+    throw (new Error(`${res.status} (${res.statusText})`))
+  }
+
+  const handleTextResponse = (text) => {
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      return text
+    }
+  }
+
+  const fetchRetry = new HttpExponentialBackoff()
+  return fetchRetry.exponentialBackoff(url, requestOptions, retryOptions)
+    .then(validateResponse)
+    .then((res) => res.text())
+    .then(handleTextResponse)
 }
 
 /**
@@ -150,25 +177,25 @@ function _getTokenType (token) {
  * @returns {object} the result data
  */
 async function _toTokenResult (apiResponse) {
-  debug('toTokenResult(%o)', apiResponse)
+  aioLogger.debug('toTokenResult(%o)', apiResponse)
   const result = {
     payload: apiResponse
   }
 
   for (const label of [ACCESS_TOKEN, REFRESH_TOKEN]) {
-    debug(' > %s', label)
+    aioLogger.debug(' > %s', label)
     const token = apiResponse[label]
-    debug(' > %o', token)
+    aioLogger.debug(' > %o', token)
     if (token) {
       result[label] = {
-        token: token,
+        token,
         expiry: _calculateExpiry(token)
       }
-      debug(' > %o', result[label])
+      aioLogger.debug(' > %o', result[label])
     }
   }
 
-  debug('<< %o', result)
+  aioLogger.debug('<< %o', result)
   return result
 }
 
@@ -176,7 +203,6 @@ async function _toTokenResult (apiResponse) {
  * Returns the decoded token value as JavaScript object.
  *
  * @param {string} token The token to decode and extract the token value from
- *
  * @returns {object} The decoded token payload data without header and signature
  */
 function getTokenData (token) {
@@ -193,15 +219,17 @@ class Ims {
    *
    * @param {string} env The name of the environment. `prod` and `stage`
    *      are the only values supported. `prod` is default and any value
-   *      other than `prod` or `stage` stage is assumed to be the default
-   *      value of `prod`.
+   *      other than `prod` or `stage` it is assumed to be the default
+   *      value of `prod`. If not set, it will get the global cli env value. See https://github.com/adobe/aio-lib-env
+   *      (which defaults to `prod` as well if not set)
+   * @param {ValidationCache} cache The cache instance to use.
    */
-  constructor (env) {
-    if (!env || !IMS_ENDPOINTS[env]) {
-      env = DEFAULT_ENVIRONMENT
+  constructor (env = getCliEnv(), cache) {
+    this.env = env
+    this.endpoint = IMS_ENDPOINTS[env] || IMS_ENDPOINTS[DEFAULT_ENV]
+    if (cache) {
+      this.cache = cache
     }
-
-    this.endpoint = IMS_ENDPOINTS[env]
   }
 
   /**
@@ -212,7 +240,6 @@ class Ims {
    * to the path.
    *
    * @param {string} api The API (path) for which to return the URL
-   *
    * @returns {string} The absolute URI for the IMS API
    */
   getApiUrl (api) {
@@ -228,17 +255,20 @@ class Ims {
    * @param {string} scopes The list of scopes to request as a blank separated list
    * @param {string} callbackUrl The callback URL after the user signed in
    * @param {string} state Any state value which is passed back from sign in
-   *
    * @returns {string} the OAuth2 login URL
    */
   getSusiUrl (clientId, scopes, callbackUrl, state) {
-    debug('getSusiUrl(%s, %s, %s, %s)', clientId, scopes, callbackUrl, state)
+    aioLogger.debug('getSusiUrl(%s, %s, %s, %s)', clientId, scopes, callbackUrl, state)
 
     const app = new url.URL(this.getApiUrl('/ims/authorize/v1'))
     app.searchParams.set('response_type', 'code')
     app.searchParams.set(CLIENT_ID, clientId)
-    app.searchParams.set(SCOPE, scopes)
-    app.searchParams.set('redirect_uri', callbackUrl)
+    if (scopes) {
+      app.searchParams.set(SCOPE, scopes)
+    }
+    if (callbackUrl) {
+      app.searchParams.set('redirect_uri', callbackUrl)
+    }
     app.searchParams.set('state', state)
     return app.toString()
   }
@@ -250,11 +280,10 @@ class Ims {
    * @param {string} api The IMS API to `GET` from, e.g. `/ims/profile/v1`
    * @param {string} token The IMS access token to call the API
    * @param {Map} parameters A map of request parameters
-   *
    * @returns {Promise} a promise resolving to the result of the request
    */
   async get (api, token, parameters) {
-    debug('get(%s, %s, %o)', api, token, parameters)
+    aioLogger.debug('get(%s, %s, %o)', api, token, parameters)
 
     return _sendGet(this.getApiUrl(api), token, parameters)
   }
@@ -266,11 +295,10 @@ class Ims {
    * @param {string} api The IMS API to `POST` to, e.g. `/ims/profile/v1`
    * @param {string} token The IMS access token to call the API
    * @param {Map} parameters A map of request parameters
-   *
    * @returns {Promise} a promise resolving to the result of the request
    */
   async post (api, token, parameters) {
-    debug('post(%s, %s, %o)', api, token, parameters)
+    aioLogger.debug('post(%s, %s, %o)', api, token, parameters)
 
     return _sendPost(this.getApiUrl(api), token, parameters)
   }
@@ -302,12 +330,11 @@ class Ims {
    * @param {string} clientId The Client ID
    * @param {string} clientSecret The Client Secrete proving client ID ownership
    * @param {string} scopes The list of scopes to request as a blank separated list
-   *
    * @returns {Promise} a promise resolving to a tokens object as described in the
    *      {@link toTokenResult} or rejects to an error message.
    */
   async getAccessToken (authCode, clientId, clientSecret, scopes) {
-    debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
+    aioLogger.debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
 
     // prepare the data with common data
     const postData = {
@@ -328,11 +355,37 @@ class Ims {
       postData.grant_type = REFRESH_TOKEN
       postData.refresh_token = authCode
     } else {
-      return Promise.reject(new Error(`Unknown type of authCode: ${tokenType}`))
+      return Promise.reject(new errors.UNKNOWN_AUTHCODE_TYPE({ messageValues: tokenType }))
     }
 
     return _sendPost(this.getApiUrl('/ims/token/v1'), undefined, postData)
-      .then(response => _toTokenResult(response))
+      .then(_toTokenResult)
+  }
+
+  /**
+   * Request an access token of the Client Credentials Grant Type.
+   *
+   * @param {string} clientId The Client ID
+   * @param {string} clientSecret The Client Secret proving client ID ownership
+   * @param {string} orgId the IMS org Id
+   * @param {Array<string>} scopes The list of scopes to request as a blank separated list
+   * @returns {Promise} a promise resolving to a tokens object as described in the
+   *      {@link toTokenResult} or rejects to an error message.
+   */
+  async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes = []) {
+    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes)
+
+    // prepare the data with common data
+    const postData = {
+      grant_type: CLIENT_CREDENTIALS,
+      client_id: clientId,
+      client_secret: clientSecret,
+      org_id: orgId,
+      scope: scopes.join(',')
+    }
+
+    return _sendPost(this.getApiUrl('/ims/token/v2'), undefined, postData)
+      .then(_toTokenResult)
   }
 
   /**
@@ -352,7 +405,7 @@ class Ims {
    * }
    * ```
    *
-   * Note that there is no `refresh_token` in a JWT tokan exchange.
+   * Note that there is no `refresh_token` in a JWT token exchange.
    *
    * @param {string} clientId The client ID of the owning application
    * @param {string} clientSecret The client's secret
@@ -360,7 +413,7 @@ class Ims {
    * @returns {Promise} returns a Promise that resolves to the token result object
    */
   async exchangeJwtToken (clientId, clientSecret, signedJwtToken) {
-    debug('exchangeJwtToken(%s, %s, %s)', clientId, clientSecret, signedJwtToken)
+    aioLogger.debug('exchangeJwtToken(%s, %s, %s)', clientId, clientSecret, signedJwtToken)
 
     const postData = {
       client_id: clientId,
@@ -368,8 +421,9 @@ class Ims {
       jwt_token: signedJwtToken
     }
 
-    return _sendPost(this.getApiUrl('/ims/exchange/jwt'), undefined, postData)
-      .then(response => _toTokenResult(response))
+    const postURL = this.getApiUrl('/ims/exchange/jwt')
+
+    return _sendPost(postURL, undefined, postData).then(_toTokenResult)
   }
 
   /**
@@ -383,8 +437,7 @@ class Ims {
    * @returns {Promise} Promise that resolves with the request data
    */
   async invalidateToken (token, clientId, clientSecret) {
-    debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
-
+    aioLogger.debug('invalidateToken(%s, %s, %s)', token, clientId, clientSecret)
     if (clientId && clientSecret) {
       const postData = {
         token_type: _getTokenType(token),
@@ -402,28 +455,86 @@ class Ims {
   }
 
   /**
-   * Verifies a given token.
+   * Validates the given token against an allow list.
+   *
+   * Optional: If a cache is provided, the token will be validated against the cache first.
+   *
+   * Note: The cache uses the returned status key to determine if the result should be cached. This is not returned
+   *       to the user.
+   *
+   * @param {string} token the token to validate
+   * @param {Array<string>} allowList the allow list to validate against
+   * @returns {Promise} Promise that resolves with the ims validation result
+   */
+  async validateTokenAllowList (token, allowList) {
+    aioLogger.debug('validateTokenAllowList (token): (%s)', token)
+
+    const validateAllowList = async (token, allowList) => {
+      // Validate the token
+      let validationResponse = await this._validateToken(token)
+
+      // Validate token against the allow list
+      const tokenData = getTokenData(token)
+      const clientId = tokenData.client_id
+      if (allowList) {
+        aioLogger.debug('validateTokenAllowList (allowList): (%s)', allowList.join(', '))
+        if (allowList.indexOf(clientId) === -1) {
+          validationResponse = {
+            status: 403,
+            imsValidation: {
+              valid: false,
+              reason: 'Token is not valid, reason: IMS client is not authorized to call this endpoint. ' +
+              'Please use a JWT from an IMS client on the allow list.'
+            }
+          }
+        }
+      }
+      return validationResponse
+    }
+
+    const { imsValidation } = this.cache ? await this.cache.validateWithCache(validateAllowList, token, allowList, this.env) : await validateAllowList(token, allowList)
+    return imsValidation
+  }
+
+  /**
+   * Validates the given token.
    *
    * @param {string} token the access token
    * @param {string} [clientId] the client id, optional
    * @returns {object} the server response
    */
   async validateToken (token, clientId) {
-    debug('validateToken(%s, %s)', token, clientId)
+    aioLogger.debug('validateToken(%s, %s)', token, clientId)
+    const { imsValidation } = this.cache ? await this.cache.validateWithCache(this._validateToken, token, clientId, this.env) : await this._validateToken(token, clientId)
+    return imsValidation
+  }
+
+  /**
+   * Verifies a given token, returns a status which can be used to determine cache status if this function is passed to the validation cache.
+   *
+   * @param {string} token the access token
+   * @param {string} [clientId] the client id, optional
+   * @returns {object} Status code and the server response
+   */
+  async _validateToken (token, clientId) {
+    aioLogger.debug('_validateToken(%s, %s)', token, clientId)
 
     let tokenData
     try {
       tokenData = getTokenData(token)
     } catch (e) {
       return {
-        valid: false,
-        reason: 'bad payload'
+        status: 401,
+        imsValidation: {
+          valid: false,
+          reason: 'bad payload'
+        }
       }
     }
 
     if (clientId === undefined) {
       clientId = tokenData.client_id
-      debug('extracted clientId from token: %s', clientId)
+      aioLogger.debug('extracted clientId from token: %s', clientId)
     }
 
     const postData = {
@@ -431,12 +542,14 @@ class Ims {
       client_id: clientId
     }
 
-    const res = await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
-    try {
-      return JSON.parse(res)
-    } catch (e) {
-      return res
+    const imsValidation = await _sendPost(this.getApiUrl('/ims/validate_token/v1'), token, postData)
+    if (!imsValidation.valid) {
+      return {
+        status: 401,
+        imsValidation
+      }
     }
+    return { status: 200, imsValidation }
   }
 
   /**
@@ -446,14 +559,9 @@ class Ims {
    * @returns {object} the server response
    */
   async getOrganizations (token) {
-    debug('getOrganizations(%s)', token)
+    aioLogger.debug('getOrganizations(%s)', token)
 
-    const res = await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
-    try {
-      return JSON.parse(res)
-    } catch (e) {
-      return res
-    }
+    return await _sendGet(this.getApiUrl('/ims/organizations/v6'), token, {})
   }
 
   /**
@@ -472,7 +580,6 @@ class Ims {
    * since the epoch.
    *
    * @param {string} token The access token to wrap into a token result
-   *
    * @returns {Promise} a `Promise` resolving to an object as described.
    */
   async toTokenResult (token) {
@@ -486,22 +593,21 @@ class Ims {
  *
  * @param {string} token The access token from which to extract the
  *      environment to setup the `Ims` instancee.
- *
  * @returns {Promise} A `Promise` resolving to the `Ims` instance.
  */
 Ims.fromToken = async token => {
-  debug('Ims.fromToken(%s)', token)
+  aioLogger.debug('Ims.fromToken(%s)', token)
   const as = getTokenData(token).as
   if (as) {
     const url = `https://${as}.adobelogin.com`
     for (const env in IMS_ENDPOINTS) {
       if (url === IMS_ENDPOINTS[env]) {
-        debug('  > %s=%s', env, IMS_ENDPOINTS[env])
+        aioLogger.debug('  > %s=%s', env, IMS_ENDPOINTS[env])
         return Promise.resolve({ token, ims: new Ims(env) })
       }
     }
   }
-  return Promise.reject(new Error('Cannot resolve to IMS environment from token'))
+  return Promise.reject(new errors.CANNOT_RESOLVE_ENVIRONMENT())
 }
 
 module.exports = {
