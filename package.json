@@ -1,7 +1,7 @@
 {
   "name": "@adobe/aio-lib-ims",
   "description": "Adobe IMS (Identity Management System) Support Module providing low level IMS HTTP API access as well as higher level support for getting tokens.",
-  "version": "6.3.0",
+  "version": "6.4.0",
   "author": "Adobe Inc.",
   "bugs": "https://github.com/adobe/aio-lib-ims/issues",
   "dependencies": {
@@ -11,7 +11,7 @@
     "@adobe/aio-lib-core-networking": "^4.1.0",
     "@adobe/aio-lib-env": "^2.0.0",
     "@adobe/aio-lib-ims-jwt": "^4.0.0",
-    "@adobe/aio-lib-ims-oauth": "github:adobe/aio-lib-ims-oauth#story/ACNA-1854",
+    "@adobe/aio-lib-ims-oauth": "^5.3.0",
     "@adobe/aio-lib-state": "^2.0.1",
     "form-data": "^4.0.0",
     "lodash.clonedeep": "^4.5.0",
