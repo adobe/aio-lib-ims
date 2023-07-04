@@ -372,7 +372,7 @@ class Ims {
    *      {@link toTokenResult} or rejects to an error message.
    */
   async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes) {
-    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes = [])
+    aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes || [])
 
     // prepare the data with common data
     const postData = {
