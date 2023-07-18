@@ -35,11 +35,13 @@ if (!ACTION_BUILD) {
   const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
   const imsOAuthSTSPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-oauth_server_to_server')
   const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
+  const imsS2sPlugin = require('@adobe/aio-lib-ims-s2s')
 
   DEFAULT_CREATE_TOKEN_PLUGINS = {
     cli: imsCliPlugin,
     jwt: imsJwtPlugin,
     oauth: imsOAuthPlugin,
+    s2s: imsS2sPlugin,
     oauthSTS: imsOAuthSTSPlugin
   }
 }
