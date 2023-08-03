@@ -203,7 +203,7 @@ describe('setContextValue', () => {
     expect(mockState.init).toHaveBeenCalledTimes(1)
     expect(context.data[keyNames.CONTEXTS]).toEqual({ fake: 'clonedData' })
     expect(mockStateInstance.put).toHaveBeenCalledTimes(0)
-    expect(mockStateInstance.delete).toBeCalledWith(`${keyNames.IMS}.fakens.pkg.action.${keyNames.CONTEXTS}.fake`)
+    expect(mockStateInstance.delete).toHaveBeenCalledWith(`${keyNames.IMS}.fakens.pkg.action.${keyNames.CONTEXTS}.fake`)
     expect(cloneDeep).toHaveBeenCalledWith({ the: 'value' })
   })
   test('key=fake, value={ the: value, access_token: { token: 123, expiry: +1000 }, refresh_token: { token: 456, expiry: +2000 } }, context data = {}', async () => {
