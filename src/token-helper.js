@@ -14,6 +14,7 @@ const { Ims, ACCESS_TOKEN, REFRESH_TOKEN } = require('./ims')
 const aioLogger = require('@adobe/aio-lib-core-logging')('@adobe/aio-lib-ims:token-helper', { provider: 'debug' })
 const { getContext } = require('./context')
 const imsJwtPlugin = require('@adobe/aio-lib-ims-jwt')
+const imsOAuthSTSPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-oauth_server_to_server')
 const { codes: errors } = require('./errors')
 
 /**
@@ -22,8 +23,9 @@ const { codes: errors } = require('./errors')
  *
  * @private
  */
-let DEFAULT_CREATE_TOKEN_PLUGINS = {
-  jwt: imsJwtPlugin
+const CREATE_TOKEN_PLUGINS = {
+  jwt: imsJwtPlugin,
+  oauthSTS: imsOAuthSTSPlugin
 }
 
 /* The global var WEBPACK_ACTION_BUILD is expected to be set during build time
@@ -33,15 +35,9 @@ const ACTION_BUILD = (typeof WEBPACK_ACTION_BUILD === 'undefined') ? false : WEB
 if (!ACTION_BUILD) {
   // use OAuth and CLI imports only when WEBPACK_ACTION_BUILD global is not set
   const imsCliPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-cli')
-  const imsOAuthSTSPlugin = require('@adobe/aio-lib-ims-oauth/src/ims-oauth_server_to_server')
   const imsOAuthPlugin = require('@adobe/aio-lib-ims-oauth')
-
-  DEFAULT_CREATE_TOKEN_PLUGINS = {
-    cli: imsCliPlugin,
-    jwt: imsJwtPlugin,
-    oauth: imsOAuthPlugin,
-    oauthSTS: imsOAuthSTSPlugin
-  }
+  CREATE_TOKEN_PLUGINS.cli = imsCliPlugin
+  CREATE_TOKEN_PLUGINS.oauth = imsOAuthPlugin
 }
 
 const IMS_TOKEN_MANAGER = {
@@ -110,7 +106,7 @@ const IMS_TOKEN_MANAGER = {
   async _generateToken (ims, config, reason, options) {
     aioLogger.debug('_generateToken(reason=%s)', reason)
 
-    const imsLoginPlugins = DEFAULT_CREATE_TOKEN_PLUGINS
+    const imsLoginPlugins = CREATE_TOKEN_PLUGINS
     const pluginErrors = []
 
     for (const name of Object.keys(imsLoginPlugins)) {
