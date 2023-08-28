@@ -169,72 +169,151 @@ test('getTokenWithOptions - string (jwt)', async () => {
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, { testToken: '123abc' })).resolves.toEqual('123abc')
 })
 
-test('getToken - string (oauth)', async () => {
-  const contextName = 'known-context-oauth'
-  const context = {
-    [contextName]: {
-      client_id: 'bar',
-      client_secret: 'baz',
-      redirect_uri: 'url',
-      scope: []
+describe('WEBPACK_ACTION_BUILD set', () => {
+  let ISOLATED_TOKEN_MANAGER
+  beforeEach(() => {
+    jest.isolateModules(() => {
+      global.WEBPACK_ACTION_BUILD = true
+      const tokenHelper = require('../src/token-helper')
+      ISOLATED_TOKEN_MANAGER = tokenHelper.IMS_TOKEN_MANAGER
+    })
+  })
+
+  afterEach(() => {
+    delete global.WEBPACK_ACTION_BUILD
+  })
+
+  test('getToken - string (oauth)', async () => {
+    const contextName = 'known-context-oauth'
+    const context = {
+      [contextName]: {
+        client_id: 'bar',
+        client_secret: 'baz',
+        redirect_uri: 'url',
+        scope: []
+      }
     }
-  }
 
-  setImsPluginMock('oauth', 'abc123')
-  config.get.mockImplementation(
-    createHandlerForContext(context)
-  )
+    setImsPluginMock('oauth', 'abc123')
+    config.get.mockImplementation(
+      createHandlerForContext(context)
+    )
 
-  // no force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+    await expect(ISOLATED_TOKEN_MANAGER.getToken(contextName, false))
+      .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
+  })
 
-  // force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+  test('getToken - string (oauth server to server)', async () => {
+    const contextName = 'known-context-oauth'
+    const context = {
+      [contextName]: {
+        client_id: 'bar',
+        client_secrets: ['baz'],
+        technical_account_email: 'ta-email',
+        technical_account_id: 'ta-id',
+        ims_org_id: 'my-ims-org-id',
+        scopes: ['scope-1', 'scope-1']
+      }
+    }
+
+    setImsPluginMock('oauthSTS', 'abc123')
+    config.get.mockImplementation(
+      createHandlerForContext(context)
+    )
+
+    // no force
+    await expect(ISOLATED_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+
+    // force
+    await expect(ISOLATED_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+  })
+
+  test('getToken - string (cli)', async () => {
+    const contextName = 'known-context-oauth'
+    const context = {
+      [contextName]: {
+        'cli.bare-output': true
+      }
+    }
+
+    setImsPluginMock('cli', 'abc123')
+    config.get.mockImplementation(
+      createHandlerForContext(context)
+    )
+
+    await expect(ISOLATED_TOKEN_MANAGER.getToken(contextName, false))
+      .rejects.toThrow('Cannot generate token because no plugin supports configuration:')
+  })
 })
 
-test('getToken - string (oauth server to server)', async () => {
-  const contextName = 'known-context-oauth'
-  const context = {
-    [contextName]: {
-      client_id: 'bar',
-      client_secrets: ['baz'],
-      technical_account_email: 'ta-email',
-      technical_account_id: 'ta-id',
-      ims_org_id: 'my-ims-org-id',
-      scopes: ['scope-1', 'scope-1']
+describe('WEBPACK_ACTION_BUILD *not* set', () => {
+  test('getToken - string (oauth)', async () => {
+    const contextName = 'known-context-oauth'
+    const context = {
+      [contextName]: {
+        client_id: 'bar',
+        client_secret: 'baz',
+        redirect_uri: 'url',
+        scope: []
+      }
     }
-  }
 
-  setImsPluginMock('oauthSTS', 'abc123')
-  config.get.mockImplementation(
-    createHandlerForContext(context)
-  )
+    setImsPluginMock('oauth', 'abc123')
+    config.get.mockImplementation(
+      createHandlerForContext(context)
+    )
 
-  // no force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+    // no force
+    await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
 
-  // force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
-})
+    // force
+    await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+  })
 
-test('getToken - string (cli)', async () => {
-  const contextName = 'known-context-oauth'
-  const context = {
-    [contextName]: {
-      'cli.bare-output': true
+  test('getToken - string (oauth server to server)', async () => {
+    const contextName = 'known-context-oauth'
+    const context = {
+      [contextName]: {
+        client_id: 'bar',
+        client_secrets: ['baz'],
+        technical_account_email: 'ta-email',
+        technical_account_id: 'ta-id',
+        ims_org_id: 'my-ims-org-id',
+        scopes: ['scope-1', 'scope-1']
+      }
     }
-  }
 
-  setImsPluginMock('cli', 'abc123')
-  config.get.mockImplementation(
-    createHandlerForContext(context)
-  )
+    setImsPluginMock('oauthSTS', 'abc123')
+    config.get.mockImplementation(
+      createHandlerForContext(context)
+    )
 
-  // no force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+    // no force
+    await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
 
-  // force
-  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+    // force
+    await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+  })
+
+  test('getToken - string (cli)', async () => {
+    const contextName = 'known-context-oauth'
+    const context = {
+      [contextName]: {
+        'cli.bare-output': true
+      }
+    }
+
+    setImsPluginMock('cli', 'abc123')
+    config.get.mockImplementation(
+      createHandlerForContext(context)
+    )
+
+    // no force
+    await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+
+    // force
+    await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+  })
 })
 
 test('getToken - object', async () => {
