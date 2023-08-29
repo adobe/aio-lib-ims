@@ -122,12 +122,10 @@ const IMS_TOKEN_MANAGER = {
         }
 
         // plugin doesn't match: we log the specific plugin errors
-        if (typeof canSupport === 'function') {
-          try {
-            await canSupport(config)
-          } catch (e) {
-            pluginErrors.push(`[plugin:${name}]: ${e.message}`)
-          }
+        try {
+          await canSupport(config)
+        } catch (e) {
+          pluginErrors.push(`[plugin:${name}]: ${e.message}`)
         }
       } catch (e) {
         aioLogger.debug('  > Ignoring failure loading or calling plugin %s: %o', name, e)
