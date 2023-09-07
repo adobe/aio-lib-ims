@@ -46,6 +46,13 @@ const CLIENT_SECRET = 'client_secret'
 const SCOPE = 'scope'
 
 /**
+ * @typedef {object} ClientCredentialsResponse
+ * @property {string} access_token The access token issued by IMS
+ * @property {string} token_type The type of the token (in this case 'bearer')
+ * @property {number} expires_in The lifetime in seconds of the access token
+ */
+
+/**
  * Send the request.
  *
  * @private
@@ -369,8 +376,8 @@ class Ims {
    * @param {string} clientSecret The Client Secret proving client ID ownership
    * @param {string} orgId the IMS org Id
    * @param {Array<string>} scopes The list of scopes to request as a blank separated list
-   * @returns {Promise} a promise resolving to a tokens object as described in the
-   *      {@link toTokenResult} or rejects to an error message.
+   * @returns {Promise} a promise resolving to a token object as described in the
+   *      {@link ClientCredentialsResponse} or rejects to an error message.
    */
   async getAccessTokenByClientCredentials (clientId, clientSecret, orgId, scopes = []) {
     aioLogger.debug('getAccessTokenByClientCredentials(%s, %s, %s, %o)', clientId, clientSecret, orgId, scopes)

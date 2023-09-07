@@ -206,7 +206,7 @@ OAuth Server-to-Server (client credentials grant type) configuration requires th
 | client_secrets| An array of IMS (OAUth2) client secrets|
 | technical_account_email| The _Technical Account Email_ from the integration overview screen in the Adobe Developer Console|
 | technical_account_id| The _Technical Account ID_ from the integration overview screen in the Adobe Developer Console|
-| scopes| Scopes to assign to the tokens. This is an array of strings which depends on the services this integration is subscribed to. The list of scopes defined for the OAuth2 Server-to-Server credential is listed under the `Scopes` tab for the credential in Adobe Developer Console.| 
+| scopes| Scopes to assign to the tokens. This is an array of strings which depends on the services this integration is subscribed to. The list of scopes defined for the OAuth2 Server-to-Server credential is listed under the `Scopes` tab for the credential in Adobe Developer Console.|
 |ims_org_id|The Organization ID from the integration overview screen in the Adobe Developer Console.|
 
 ## Token Validation

@@ -19,6 +19,10 @@
 <dt><a href="#Ims">Ims</a></dt>
 <dd><p>The <code>Ims</code> class wraps the IMS API.</p>
 </dd>
+<dt><a href="#ValidationCache">ValidationCache</a></dt>
+<dd></dd>
+<dt><a href="#ValidationCache">ValidationCache</a></dt>
+<dd></dd>
 <dt><a href="#ConfigCliContext">ConfigCliContext</a></dt>
 <dd><p>The <code>ConfigCliContext</code> class stores IMS <code>contexts</code> for the Adobe I/O CLI in the local file
 system using the Adobe I/O Core Configuration Library.</p>
@@ -97,6 +101,17 @@ cloud using the Adobe I/O State Library.</p>
 </dd>
 </dl>
 
+## Typedefs
+
+<dl>
+<dt><a href="#ClientCredentialsResponse">ClientCredentialsResponse</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#ValidationResult">ValidationResult</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#ValidationFunction">ValidationFunction</a> ⇒ <code><a href="#ValidationResult">Promise.&lt;ValidationResult&gt;</a></code></dt>
+<dd></dd>
+</dl>
+
 <a name="module_aio-lib-ims"></a>
 
 ## aio-lib-ims
@@ -106,6 +121,7 @@ The `@adobe/aio-lib-ims` module offers three kinds of elements:1. Managing con
 * [aio-lib-ims](#module_aio-lib-ims)
     * [.getTokenData](#module_aio-lib-ims.getTokenData)
     * [.Ims](#module_aio-lib-ims.Ims)
+    * [.ValidationCache](#module_aio-lib-ims.ValidationCache)
     * [.ACCESS_TOKEN](#module_aio-lib-ims.ACCESS_TOKEN)
     * [.REFRESH_TOKEN](#module_aio-lib-ims.REFRESH_TOKEN)
     * [.AUTHORIZATION_CODE](#module_aio-lib-ims.AUTHORIZATION_CODE)
@@ -126,6 +142,11 @@ The `@adobe/aio-lib-ims` module offers three kinds of elements:1. Managing con
 ### aio-lib-ims.Ims
 **Kind**: static property of [<code>aio-lib-ims</code>](#module_aio-lib-ims)  
 **See**: [`Ims`](#ims)  
+<a name="module_aio-lib-ims.ValidationCache"></a>
+
+### aio-lib-ims.ValidationCache
+**Kind**: static property of [<code>aio-lib-ims</code>](#module_aio-lib-ims)  
+**See**: [`ValidationCache`](#ValidationCache)  
 <a name="module_aio-lib-ims.ACCESS_TOKEN"></a>
 
 ### aio-lib-ims.ACCESS\_TOKEN
@@ -195,7 +216,7 @@ The `Ims` class wraps the IMS API.
 **Kind**: global class  
 
 * [Ims](#Ims)
-    * [new Ims(env)](#new_Ims_new)
+    * [new Ims(env, cache)](#new_Ims_new)
     * _instance_
         * [.getApiUrl(api)](#Ims+getApiUrl) ⇒ <code>string</code>
         * [.getSusiUrl(clientId, scopes, callbackUrl, state)](#Ims+getSusiUrl) ⇒ <code>string</code>
@@ -205,7 +226,9 @@ The `Ims` class wraps the IMS API.
         * [.getAccessTokenByClientCredentials(clientId, clientSecret, orgId, scopes)](#Ims+getAccessTokenByClientCredentials) ⇒ <code>Promise</code>
         * [.exchangeJwtToken(clientId, clientSecret, signedJwtToken)](#Ims+exchangeJwtToken) ⇒ <code>Promise</code>
         * [.invalidateToken(token, clientId, clientSecret)](#Ims+invalidateToken) ⇒ <code>Promise</code>
+        * [.validateTokenAllowList(token, allowList)](#Ims+validateTokenAllowList) ⇒ <code>Promise</code>
         * [.validateToken(token, [clientId])](#Ims+validateToken) ⇒ <code>object</code>
+        * [._validateToken(token, [clientId])](#Ims+_validateToken) ⇒ <code>object</code>
         * [.getOrganizations(token)](#Ims+getOrganizations) ⇒ <code>object</code>
         * [.toTokenResult(token)](#Ims+toTokenResult) ⇒ <code>Promise</code>
     * _static_
@@ -213,13 +236,14 @@ The `Ims` class wraps the IMS API.
 
 <a name="new_Ims_new"></a>
 
-### new Ims(env)
+### new Ims(env, cache)
 Creates a new IMS connector instance for the stage or prod environment
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | env | <code>string</code> | The name of the environment. `prod` and `stage`      are the only values supported. `prod` is default and any value      other than `prod` or `stage` it is assumed to be the default      value of `prod`. If not set, it will get the global cli env value. See https://github.com/adobe/aio-lib-env      (which defaults to `prod` as well if not set) |
+| cache | [<code>ValidationCache</code>](#ValidationCache) | The cache instance to use. |
 
 <a name="Ims+getApiUrl"></a>
 
@@ -297,7 +321,7 @@ Request the access token for the given client providing the accessgrant in the 
 Request an access token of the Client Credentials Grant Type.
 
 **Kind**: instance method of [<code>Ims</code>](#Ims)  
-**Returns**: <code>Promise</code> - a promise resolving to a tokens object as described in the     [toTokenResult](toTokenResult) or rejects to an error message.  
+**Returns**: <code>Promise</code> - a promise resolving to a token object as described in the     [ClientCredentialsResponse](#ClientCredentialsResponse) or rejects to an error message.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -334,13 +358,39 @@ Invalidates the given token. If the token is a refresh token, all theaccess tok
 | clientId | <code>string</code> | the client id |
 | clientSecret | <code>string</code> | the client secret |
 
+<a name="Ims+validateTokenAllowList"></a>
+
+### ims.validateTokenAllowList(token, allowList) ⇒ <code>Promise</code>
+Validates the given token against an allow list.Optional: If a cache is provided, the token will be validated against the cache first.Note: The cache uses the returned status key to determine if the result should be cached. This is not returned      to the user.
+
+**Kind**: instance method of [<code>Ims</code>](#Ims)  
+**Returns**: <code>Promise</code> - Promise that resolves with the ims validation result  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | the token to validate |
+| allowList | <code>Array.&lt;string&gt;</code> | the allow list to validate against |
+
 <a name="Ims+validateToken"></a>
 
 ### ims.validateToken(token, [clientId]) ⇒ <code>object</code>
-Verifies a given token.
+Validates the given token.
 
 **Kind**: instance method of [<code>Ims</code>](#Ims)  
 **Returns**: <code>object</code> - the server response  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | the access token |
+| [clientId] | <code>string</code> | the client id, optional |
+
+<a name="Ims+_validateToken"></a>
+
+### ims.\_validateToken(token, [clientId]) ⇒ <code>object</code>
+Verifies a given token, returns a status which can be used to determine cache status if this function is passed to the validation cache.
+
+**Kind**: instance method of [<code>Ims</code>](#Ims)  
+**Returns**: <code>object</code> - Status code and the server response  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -382,6 +432,86 @@ Creates an instance of the `Ims` class deriving the instance'senvironment from 
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | The access token from which to extract the      environment to setup the `Ims` instancee. |
+
+<a name="ValidationCache"></a>
+
+## ValidationCache
+**Kind**: global class  
+
+* [ValidationCache](#ValidationCache)
+    * [new ValidationCache()](#new_ValidationCache_new)
+    * [new ValidationCache(maxAge, maxValidEntries, maxInvalidEntries)](#new_ValidationCache_new)
+    * [.validateWithCache(validationFunction, ...validationParams)](#ValidationCache+validateWithCache) ⇒ <code>Promise.&lt;object&gt;</code>
+
+<a name="new_ValidationCache_new"></a>
+
+### new ValidationCache()
+A class to cache valid or invalid results. Internally two separate cache entries aremaintained. Each cache entry is about 66Bytes big.
+
+<a name="new_ValidationCache_new"></a>
+
+### new ValidationCache(maxAge, maxValidEntries, maxInvalidEntries)
+Creates a new LRU cache instance.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| maxAge | <code>number</code> | The maximum age in milliseconds of cache validity. |
+| maxValidEntries | <code>number</code> | The maximum number of valid entries that can be contained in the cache. |
+| maxInvalidEntries | <code>number</code> | The maximum number of invalid entries that can be contained in the cache. |
+
+<a name="ValidationCache+validateWithCache"></a>
+
+### validationCache.validateWithCache(validationFunction, ...validationParams) ⇒ <code>Promise.&lt;object&gt;</code>
+Applies a validation function and caches the result. If there is a cache entryavailable returns the cached result without calling the validation function.The cache key is computed from the validation params
+
+**Kind**: instance method of [<code>ValidationCache</code>](#ValidationCache)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - validation result  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| validationFunction | [<code>ValidationFunction</code>](#ValidationFunction) | a function that returns an object of the form `{ status, message }` |
+| ...validationParams | <code>string</code> | parameters for the validationFunction, must be at least one |
+
+<a name="ValidationCache"></a>
+
+## ValidationCache
+**Kind**: global class  
+
+* [ValidationCache](#ValidationCache)
+    * [new ValidationCache()](#new_ValidationCache_new)
+    * [new ValidationCache(maxAge, maxValidEntries, maxInvalidEntries)](#new_ValidationCache_new)
+    * [.validateWithCache(validationFunction, ...validationParams)](#ValidationCache+validateWithCache) ⇒ <code>Promise.&lt;object&gt;</code>
+
+<a name="new_ValidationCache_new"></a>
+
+### new ValidationCache()
+A class to cache valid or invalid results. Internally two separate cache entries aremaintained. Each cache entry is about 66Bytes big.
+
+<a name="new_ValidationCache_new"></a>
+
+### new ValidationCache(maxAge, maxValidEntries, maxInvalidEntries)
+Creates a new LRU cache instance.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| maxAge | <code>number</code> | The maximum age in milliseconds of cache validity. |
+| maxValidEntries | <code>number</code> | The maximum number of valid entries that can be contained in the cache. |
+| maxInvalidEntries | <code>number</code> | The maximum number of invalid entries that can be contained in the cache. |
+
+<a name="ValidationCache+validateWithCache"></a>
+
+### validationCache.validateWithCache(validationFunction, ...validationParams) ⇒ <code>Promise.&lt;object&gt;</code>
+Applies a validation function and caches the result. If there is a cache entryavailable returns the cached result without calling the validation function.The cache key is computed from the validation params
+
+**Kind**: instance method of [<code>ValidationCache</code>](#ValidationCache)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - validation result  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| validationFunction | [<code>ValidationFunction</code>](#ValidationFunction) | a function that returns an object of the form `{ status, message }` |
+| ...validationParams | <code>string</code> | parameters for the validationFunction, must be at least one |
 
 <a name="ConfigCliContext"></a>
 
@@ -606,4 +736,37 @@ Returns the decoded token value as JavaScript object.
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | The token to decode and extract the token value from |
+
+<a name="ClientCredentialsResponse"></a>
+
+## ClientCredentialsResponse : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| access_token | <code>string</code> | The access token issued by IMS |
+| token_type | <code>string</code> | The type of the token (in this case 'bearer') |
+| expires_in | <code>number</code> | The lifetime in seconds of the access token |
+
+<a name="ValidationResult"></a>
+
+## ValidationResult : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| status | <code>number</code> | validation response status code, e.g 200, 401, 403, ... |
+| message | <code>string</code> | validation message, e.g. reason of failed validation |
+
+<a name="ValidationFunction"></a>
+
+## ValidationFunction ⇒ [<code>Promise.&lt;ValidationResult&gt;</code>](#ValidationResult)
+**Kind**: global typedef  
+**Returns**: [<code>Promise.&lt;ValidationResult&gt;</code>](#ValidationResult) - validation result  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ...params | <code>string</code> | validation params used for building the cache key (at least one) |
 
