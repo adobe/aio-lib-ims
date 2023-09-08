@@ -96,7 +96,7 @@ class ValidationCache {
 
   /**
    * @param {Array} params
-   * @returns
+   * @returns {string} the computed hash key
    * @memberof ValidationCache
    * @private
    */
