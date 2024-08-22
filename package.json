@@ -12,7 +12,7 @@
     "@adobe/aio-lib-env": "^3",
     "@adobe/aio-lib-ims-jwt": "^5",
     "@adobe/aio-lib-ims-oauth": "^6",
-    "@adobe/aio-lib-state": "^3",
+    "@adobe/aio-lib-state": "^5",
     "form-data": "^4.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lru-cache": "^5.1.1"
