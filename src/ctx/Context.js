@@ -51,6 +51,7 @@ class Context {
    *
    *   - `name`: The actual context name used
    *   - `data`: The IMS context data
+   *   - `local`: Whether the context data is stored locally or not
    *
    * @param {string} contextName Name of the context information to return.
    * @returns {Promise<object>} The configuration object
@@ -63,14 +64,16 @@ class Context {
     }
 
     if (contextName) {
+      const { data, local } = await this.getContextValue(contextName)
       return {
         name: contextName,
-        data: await this.getContextValue(contextName)
+        data,
+        local
       }
     }
 
     // missing context and no current context
-    return { name: contextName, data: undefined }
+    return { name: contextName, data: undefined, local: false }
   }
 
   /**
@@ -139,7 +142,7 @@ class Context {
 
   /**
    * @param {string} contextName context name
-   * @returns {Promise<any>} context value
+   * @returns {Promise<{data: any, local: boolean}>} context value
    * @protected
    * @ignore
    */

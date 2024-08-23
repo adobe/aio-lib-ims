@@ -47,13 +47,15 @@ const IMS_TOKEN_MANAGER = {
 
     return this._resolveContext(contextName)
       .then(context => { return { ...context, result: this._getOrCreateToken(context.data, options) } })
-      .then(result => this._persistTokens(result.name, result.data, result.result))
+      .then(result => this._persistTokens(result.name, result.data, result.result, result.local))
   },
 
   async invalidateToken (contextName, force) {
     aioLogger.debug('invalidateToken(%s, %s)', contextName, force)
 
     const tokenLabel = force ? REFRESH_TOKEN : ACCESS_TOKEN
+    // check if token is stored locally, important if context is present both globally and locally
+    const { local } = await this._context.get(`${contextName}.${tokenLabel}`)
     const { name, data } = await this._resolveContext(contextName)
     const ims = new Ims(data.env)
     return this.getTokenIfValid(data[tokenLabel])
@@ -66,11 +68,12 @@ const IMS_TOKEN_MANAGER = {
       })
       .then(token => ims.invalidateToken(token, data.client_id, data.client_secret))
       .then(() => {
-        delete data[tokenLabel]
+        // remove only the token(s), in order to avoid accidentally storeing merged local and global values
+        this._context.set(`${contextName}.${tokenLabel}`, undefined, local)
         if (force) {
-          delete data[ACCESS_TOKEN]
+          this._context.set(`${contextName}.${ACCESS_TOKEN}`, undefined, local)
         }
-        return this._context.set(name, data)
+        return this._context.get(name)
       })
   },
 
@@ -144,9 +147,10 @@ const IMS_TOKEN_MANAGER = {
    * @param {string} context the ims context name
    * @param {object} contextData the ims context data to persist
    * @param {Promise} resultPromise the promise that contains the results (access token, or access token and refresh token)
+   * @param {boolean} local whether or not the token should be persisted locally, defaults to false
    * @returns {Promise<string>} resolves to the access token
    */
-  async _persistTokens (context, contextData, resultPromise) {
+  async _persistTokens (context, contextData, resultPromise, local = false) {
     aioLogger.debug('persistTokens(%s, %o, %o)', context, contextData, resultPromise)
 
     const result = await resultPromise
@@ -155,12 +159,11 @@ const IMS_TOKEN_MANAGER = {
     }
 
     return this.getTokenIfValid(result.access_token)
-      .then(() => { contextData.access_token = result.access_token })
+      .then(() => this._context.set(`${context}.${ACCESS_TOKEN}`, result.access_token, local))
       .then(() => this.getTokenIfValid(result.refresh_token))
       .then(
-        () => { contextData.refresh_token = result.refresh_token },
+        () => this._context.set(`${context}.${REFRESH_TOKEN}`, result.refresh_token, local),
         () => true)
-      .then(() => this._context.set(context, contextData))
       .then(() => result.access_token.token)
   },
 

@@ -110,7 +110,10 @@ class ConfigCliContext extends Context {
   /** @private */
   getContextValueFromOptionalSource (key, source) {
     const fullKey = `${this.keyNames.IMS}.${this.keyNames.CONTEXTS}.${key}`
-    return source !== undefined ? this.aioConfig.get(fullKey, source) : this.aioConfig.get(fullKey)
+    return {
+      data: this.aioConfig.get(fullKey, source),
+      local: source === 'local' || (!source && !!this.aioConfig.get(fullKey, 'local'))
+    }
   }
 }
 
