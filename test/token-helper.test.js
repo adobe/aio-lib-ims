@@ -168,15 +168,22 @@ test('getToken - string (jwt) with local=true', async () => {
 
   // Mock _persistTokens to use local=true
   const originalPersistTokens = IMS_TOKEN_MANAGER._persistTokens
-  IMS_TOKEN_MANAGER._persistTokens = jest.fn((context, contextData, resultPromise, local) => {
+  const persistTokensMock = jest.fn((context, contextData, resultPromise, local) => {
     return originalPersistTokens.call(IMS_TOKEN_MANAGER, context, contextData, resultPromise, true)
   })
+  IMS_TOKEN_MANAGER._persistTokens = persistTokensMock
 
   // no force
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
 
   // force
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+
+  // Verify that _persistTokens was called with local=true
+  expect(persistTokensMock).toHaveBeenCalled()
+  persistTokensMock.mock.calls.forEach(call => {
+    expect(call[3]).toBe(true)
+  })
 
   // Restore the original _persistTokens method
   IMS_TOKEN_MANAGER._persistTokens = originalPersistTokens
