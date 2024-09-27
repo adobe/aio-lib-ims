@@ -148,7 +148,6 @@ test('getToken - string (jwt)', async () => {
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
 })
 
-
 test('getTokenWithOptions - string (jwt)', async () => {
   const contextName = 'known-context-jwt'
   const context = {
@@ -168,6 +167,41 @@ test('getTokenWithOptions - string (jwt)', async () => {
   )
 
   await expect(IMS_TOKEN_MANAGER.getToken(contextName, { testToken: '123abc' })).resolves.toEqual('123abc')
+})
+
+test('getToken - string (jwt) with local=false', async () => {
+  const contextName = 'known-context-jwt'
+  const context = {
+    [contextName]: {
+      client_id: 'bar',
+      client_secret: 'baz',
+      technical_account_id: 'foo@bar',
+      meta_scopes: [],
+      ims_org_id: 'ABCDEFG',
+      private_key: 'XYXYXYX'
+    }
+  }
+
+  setImsPluginMock('jwt', 'abc123')
+  config.get.mockImplementation(
+    createHandlerForContext(context)
+  )
+
+  // Mock _persistTokens to use local=false
+  const originalPersistTokens = IMS_TOKEN_MANAGER._persistTokens
+  const persistTokensMock = jest.fn((context, contextData, resultPromise, local) => {
+    return originalPersistTokens.call(IMS_TOKEN_MANAGER, context, contextData, resultPromise)
+  })
+  IMS_TOKEN_MANAGER._persistTokens = persistTokensMock
+
+  // no force
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, false)).resolves.toEqual('abc123')
+
+  // force
+  await expect(IMS_TOKEN_MANAGER.getToken(contextName, true)).resolves.toEqual('abc123')
+
+  // Restore the original _persistTokens method
+  IMS_TOKEN_MANAGER._persistTokens = originalPersistTokens
 })
 
 describe('WEBPACK_ACTION_BUILD set', () => {
