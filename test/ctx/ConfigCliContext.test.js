@@ -11,9 +11,46 @@ governing permissions and limitations under the License.
 */
 
 const TheContext = require('../../src/ctx/ConfigCliContext')
-
+const { merge, getValue, setValue } = require('@adobe/aio-lib-core-config/src/util')
 const aioConfig = require('@adobe/aio-lib-core-config')
 jest.mock('@adobe/aio-lib-core-config')
+
+/**
+ * Utility to merge values into an object. Intended for us within
+ * `mockConfig`'s `configCallback`.
+ * @param obj the object to modify
+ * @param key the dot-separated deep key of the value
+ * @param value the value to assign to the key
+ * @return void
+ * @private
+ */
+function addValue (obj, key, value) {
+  Object.assign(obj, setValue(key, value, obj))
+}
+
+/**
+ * Utility for mocking configs with 'local' and 'global' parts
+ *
+ * @param configCallback callback that receives a "global" and a "local"
+ *                       config object, both of which can be modified
+ * @return returns a function compatible with mockImplementation calls on aioConfig.get()
+ * @private
+ */
+function mockConfig (configCallback) {
+  const config = {
+    global: {},
+    local: {}
+  }
+  configCallback(config.global, config.local)
+
+  return (key, source) => {
+    if (!source) {
+      const result = merge(config.global, config.local)
+      return getValue(result, key)
+    }
+    return getValue(config[source], key)
+  }
+}
 
 const keyNames = {
   IMS: 'a',
@@ -40,9 +77,12 @@ describe('constructor', () => {
 
 describe('getCli', () => {
   test('(<no args>)', async () => {
-    aioConfig.get.mockReturnValue('value')
+    aioConfig.get.mockImplementation(mockConfig((global, _) => {
+      addValue(global, `${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, 'value')
+    }))
     await expect(context.getCli()).resolves.toEqual('value')
-    expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`)
+    expect(aioConfig.get).toHaveBeenNthCalledWith(1, `${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, undefined)
+    expect(aioConfig.get).toHaveBeenNthCalledWith(2, `${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, 'local')
   })
 })
 
@@ -55,7 +95,9 @@ describe('setCli', () => {
   })
 
   test('{ the: value }, prev={ another: fakevalue }', async () => {
-    aioConfig.get.mockReturnValue({ another: 'fakevalue' })
+    aioConfig.get.mockImplementation(mockConfig((global, _) => {
+      addValue(global, `${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { another: 'fakevalue' })
+    }))
     await expect(context.setCli({ the: 'value' })).resolves.toEqual(undefined)
     expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, 'global')
     expect(aioConfig.set).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.${keyNames.CLI}`, { the: 'value', another: 'fakevalue' }, false)
@@ -88,9 +130,14 @@ describe('setCli', () => {
 
 describe('getContextValue', () => {
   test('(fake)', async () => {
-    aioConfig.get.mockReturnValue('value')
-    await expect(context.getContextValue('fake')).resolves.toEqual('value')
-    expect(aioConfig.get).toHaveBeenCalledWith(`${keyNames.IMS}.${keyNames.CONTEXTS}.fake`)
+    aioConfig.get.mockImplementation(mockConfig((global, _) => {
+      addValue(global, `${keyNames.IMS}.${keyNames.CONTEXTS}.fake`, 'value')
+    }))
+    await expect(context.getContextValue('fake')).resolves.toEqual({ data: 'value', local: false })
+    expect(aioConfig.get)
+      .toHaveBeenNthCalledWith(1, `${keyNames.IMS}.${keyNames.CONTEXTS}.fake`, undefined)
+    expect(aioConfig.get)
+      .toHaveBeenNthCalledWith(2, `${keyNames.IMS}.${keyNames.CONTEXTS}.fake`, 'local')
   })
 })
 

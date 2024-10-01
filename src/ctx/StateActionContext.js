@@ -58,7 +58,10 @@ class StateActionContext extends Context {
     aioLogger.debug('getContextValue(%s)', key)
     // on first run load the tokens from the cloud State
     await this.loadTokensOnce()
-    return cloneDeep(this.data[this.keyNames.CONTEXTS][key])
+    return {
+      data: cloneDeep(this.data[this.keyNames.CONTEXTS][key]),
+      local: false
+    }
   }
 
   /**
