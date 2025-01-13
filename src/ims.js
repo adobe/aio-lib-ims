@@ -338,7 +338,7 @@ class Ims {
    * @param {string} clientSecret The Client Secrete proving client ID ownership
    * @param {string} scopes The list of scopes to request as a blank separated list
    * @returns {Promise} a promise resolving to a tokens object as described in the
-   *      {@link toTokenResult} or rejects to an error message.
+   *      an object containing the access token and refresh token or rejects to an error message.
    */
   async getAccessToken (authCode, clientId, clientSecret, scopes) {
     aioLogger.debug('getAccessToken(%s, %s, %s, %o)', authCode, clientId, clientSecret, scopes)
@@ -486,6 +486,7 @@ class Ims {
       if (allowList) {
         aioLogger.debug('validateTokenAllowList (allowList): (%s)', allowList.join(', '))
         if (allowList.indexOf(clientId) === -1) {
+          console.log(`${clientId} not in allow list: ${allowList.join(', ')}`)
           validationResponse = {
             status: 403,
             imsValidation: {
