@@ -107,21 +107,21 @@ describe('setConfigValue', () => {
 
 describe('getContextValue', () => {
   test('key=fake, context data = {}, no state tokens', async () => {
-    await expect(context.getContextValue('fake')).resolves.toEqual(undefined)
+    expect((await context.getContextValue('fake')).data).toEqual(undefined)
     // does interact with state
     expect(context.state).toBe(mockStateInstance)
     expect(mockState.init).toHaveBeenCalledTimes(1)
   })
   test('2 calls: key=fake, context data = {}, no state tokens', async () => {
-    await expect(context.getContextValue('fake')).resolves.toEqual(undefined)
-    await expect(context.getContextValue('fake')).resolves.toEqual(undefined)
+    expect((await context.getContextValue('fake')).data).toEqual(undefined)
+    expect((await context.getContextValue('fake')).data).toEqual(undefined)
     // does interact with state, make sure we init once only
     expect(context.state).toBe(mockStateInstance)
     expect(mockState.init).toHaveBeenCalledTimes(1)
   })
   test('key=fake, context data = { fake: value }, no state tokens', async () => {
     context.data[keyNames.CONTEXTS].fake = 'value'
-    await expect(context.getContextValue('fake')).resolves.toEqual('value')
+    expect((await context.getContextValue('fake')).data).toEqual('value')
     expect(cloneDeep).toHaveBeenCalledWith('value')
     // does interact with state
     expect(context.state).toBe(mockStateInstance)
@@ -131,7 +131,7 @@ describe('getContextValue', () => {
   test('key=fake, context data = { fake: value, fake2: value2 }, no state tokens', async () => {
     context.data[keyNames.CONTEXTS].fake = 'value'
     context.data[keyNames.CONTEXTS].fake2 = 'value2'
-    await expect(context.getContextValue('fake')).resolves.toEqual('value')
+    expect((await context.getContextValue('fake')).data).toEqual('value')
     expect(cloneDeep).toHaveBeenCalledWith('value')
     // does interact with state twice
     expect(context.state).toBe(mockStateInstance)
@@ -150,7 +150,7 @@ describe('getContextValue', () => {
       if (k.endsWith('fake2')) return { value: { access_token: 789, other: 'dontcare' } }
       if (k.endsWith('fake3')) return { value: { refresh_token: 120, other: 'dontcare' } }
     })
-    await expect(context.getContextValue('fake')).resolves.toEqual({ the: 'value', access_token: 123, refresh_token: 456 })
+    expect((await context.getContextValue('fake')).data).toEqual({ the: 'value', access_token: 123, refresh_token: 456 })
     expect(cloneDeep).toHaveBeenCalledWith({ the: 'value', access_token: 123, refresh_token: 456 })
     // does interact with state twice
     expect(context.state).toBe(mockStateInstance)

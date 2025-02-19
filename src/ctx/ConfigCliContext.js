@@ -33,7 +33,7 @@ class ConfigCliContext extends Context {
    */
   async getCli () {
     aioLogger.debug('get cli')
-    return this.getContextValue(this.keyNames.CLI)
+    return (await this.getContextValue(this.keyNames.CLI))?.data
   }
 
   /**
@@ -54,7 +54,7 @@ class ConfigCliContext extends Context {
     // make sure to not merge any global config into local and vice versa
     const getCli = source => this.getContextValueFromOptionalSource(this.keyNames.CLI, source)
     const existingData = merge ? (local ? getCli('local') : getCli('global')) : {}
-    this.setContextValue(`${this.keyNames.CLI}`, { ...existingData, ...contextData }, local)
+    this.setContextValue(`${this.keyNames.CLI}`, { ...existingData.data, ...contextData }, local)
   }
 
   /**
@@ -110,7 +110,10 @@ class ConfigCliContext extends Context {
   /** @private */
   getContextValueFromOptionalSource (key, source) {
     const fullKey = `${this.keyNames.IMS}.${this.keyNames.CONTEXTS}.${key}`
-    return source !== undefined ? this.aioConfig.get(fullKey, source) : this.aioConfig.get(fullKey)
+    return {
+      data: this.aioConfig.get(fullKey, source),
+      local: source === 'local' || (!source && !!this.aioConfig.get(fullKey, 'local'))
+    }
   }
 }
 
