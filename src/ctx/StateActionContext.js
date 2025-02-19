@@ -155,6 +155,12 @@ class StateActionContext extends Context {
 
   /** @private */
   getStateKey (contextName) {
+    // We delegate the validation to State:
+    //   - the namespace is in the `amsorg-project(-workspace)?` format
+    //   - the key follows `^[a-zA-Z0-9-_.]{1,1024}$`
+    //     - it means the action name can't contain spaces nor @ chars allowed by openwhisk: https://github.com/apache/openwhisk/blob/master/docs/reference.md#entity-names
+    //     - the context name must be alphanumerical with dashes, dots and underscores.
+
     // token caching at action level, one state key per action
     // all contexts are stored in separate state keys
     return `${this.keyNames.IMS}.${process.env.__OW_ACTION_NAME.split('/').join('.')}.${this.keyNames.CONTEXTS}.${contextName}`
