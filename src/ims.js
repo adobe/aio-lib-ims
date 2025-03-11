@@ -481,12 +481,11 @@ class Ims {
       let validationResponse = await this._validateToken(token)
 
       // Validate token against the allow list
-      const tokenData = getTokenData(token)
-      const clientId = tokenData.client_id
-      if (allowList) {
+      if (validationResponse.imsValidation.valid && allowList) {
         aioLogger.debug('validateTokenAllowList (allowList): (%s)', allowList.join(', '))
+        const tokenData = getTokenData(token)
+        const clientId = tokenData.client_id
         if (allowList.indexOf(clientId) === -1) {
-          console.log(`${clientId} not in allow list: ${allowList.join(', ')}`)
           validationResponse = {
             status: 403,
             imsValidation: {

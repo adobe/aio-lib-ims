@@ -505,6 +505,36 @@ test('Ims.validateTokenAllowList(token, allowList) clientId not in allow list, w
   expect(mockExponentialBackoff).toHaveBeenCalledTimes(1)
 })
 
+test('Ims.validateTokenAllowList(token, allowList) bad token, with cache', async () => {
+  const cache = new ValidationCache(1, 2, 3)
+  const ims = new Ims('stage', cache)
+  const clientId = 'some-client-id-2'
+  const token = 'fake'
+
+  await expect(ims.validateTokenAllowList(token, [clientId]))
+    .resolves.toEqual({
+      valid: false,
+      reason: 'bad payload'
+    })
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(0)
+})
+
+test('Ims.validateTokenAllowList(token, allowList) bad token in jwt format, with cache', async () => {
+  const cache = new ValidationCache(1, 2, 3)
+  const ims = new Ims('stage', cache)
+  const clientId = 'some-client-id-2'
+  const token = 'fake.fake'
+
+  await expect(ims.validateTokenAllowList(token, [clientId]))
+    .resolves.toEqual({
+      valid: false,
+      reason: 'bad payload'
+    })
+
+  expect(mockExponentialBackoff).toHaveBeenCalledTimes(0)
+})
+
 test('Ims.getOrganizations(token)', async () => {
   const ims = new Ims()
 
