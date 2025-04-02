@@ -696,7 +696,8 @@ test('Ims.post throw error on unsuccessfully request', async () => {
   const ims = new Ims()
   const serverResponse = {
     status: 400,
-    statusText: 'Bad Request'
+    statusText: 'Bad Request',
+    text: () => Promise.resolve('some error message')
   }
   mockExponentialBackoff.mockImplementationOnce(() => Promise.resolve(serverResponse))
   const result = ims.post('api', 'token', 'parameters')
