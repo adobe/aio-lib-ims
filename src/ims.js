@@ -87,11 +87,11 @@ async function _sendRequest (method, url, token, data) {
 
   const retryOptions = { maxRetries: 3, initialDelayInMillis: 500 }
 
-  const validateResponse = (res) => {
+  const validateResponse = async (res) => {
     if (res.status === 200) {
       return res
     }
-    throw (new Error(`${res.status} (${res.statusText})`))
+    throw (new Error(`${res.status} (${res.statusText}): ${await res.text()}`))
   }
 
   const handleTextResponse = (text) => {
