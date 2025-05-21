@@ -36,7 +36,7 @@
     "jest-junit": "^16.0.0",
     "jsdoc-to-markdown": "^8.0.0",
     "stdout-stderr": "^0.1.9",
-    "typescript": "^5.1.6"
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18"
@@ -51,9 +51,11 @@
   ],
   "license": "Apache-2.0",
   "main": "src/index.js",
+  "types": "types/index.d.ts",
   "repository": "https://github.com/adobe/aio-lib-ims",
   "scripts": {
     "lint": "eslint src test",
+    "build:types": "tsc",
     "test": "npm run unit-tests && npm run lint",
     "unit-tests": "jest --config test/jest.config.js --ci",
     "e2e": "jest --config e2e/jest.config.js",
