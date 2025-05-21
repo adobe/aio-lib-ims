@@ -8,7 +8,8 @@
     "maxNodeModuleJsDepth": 0
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/types.check.ts"
   ],
   "exclude": [
     "node_modules"
