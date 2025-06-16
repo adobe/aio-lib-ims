@@ -42,7 +42,8 @@
     "node": ">=18"
   },
   "files": [
-    "/src"
+    "/src",
+    "/types"
   ],
   "homepage": "https://github.com/adobe/aio-lib-ims",
   "keywords": [
