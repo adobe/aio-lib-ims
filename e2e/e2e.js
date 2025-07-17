@@ -17,20 +17,25 @@ require('dotenv').config({ path: path.join(__dirname, '.env') })
 const {
   IMS_CLIENT_ID,
   IMS_CLIENT_SECRET,
-  IMS_SIGNED_JWT
+  IMS_SCOPES,
+  IMS_ORG_ID,
+  IMS_ENV = 'prod'
 } = process.env
 
+/** @type {Ims} */
 let gImsObj
 let gTokens
 
 beforeAll(async () => {
-  gImsObj = new Ims()
+  gImsObj = new Ims(IMS_ENV)
 })
 
 test('init test', async () => {
   expect(IMS_CLIENT_ID).toBeDefined()
   expect(IMS_CLIENT_SECRET).toBeDefined()
-  expect(IMS_SIGNED_JWT).toBeDefined()
+  expect(IMS_SCOPES).toBeDefined()
+  expect(IMS_ORG_ID).toBeDefined()
+  expect(IMS_ENV).toBeDefined()
 
   expect(gImsObj).toBeDefined()
   expect(typeof gImsObj).toEqual('object')
@@ -50,35 +55,11 @@ test('getAccessToken', async () => {
   await expect(result).rejects.toThrow('400') // 400 access_denied
 })
 
-test('valid and non-expired signed jwt', () => {
-  const [, encodedPayload] = IMS_SIGNED_JWT.split('.', 3)
-  const payload = JSON.parse(Buffer.from(encodedPayload, 'base64'))
-
-  expect(payload.exp).toBeDefined()
-  expect(payload.iss).toBeDefined()
-  expect(payload.sub).toBeDefined()
-  expect(payload.aud).toBeDefined()
-  expect(payload.iat).toBeDefined()
-
-  const expiryDate = new Date(payload.exp * 1000).getTime()
-  const now = Date.now()
-  const isExpired = (expiryDate - now) <= 0
-
-  expect(isExpired).not.toEqual(true)
-})
-
-test('exchangeJwtToken', () => {
-  const result = gImsObj.exchangeJwtToken(IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SIGNED_JWT)
+test('getAccessTokenByClientCredentials', async () => {
+  const result = await gImsObj.getAccessTokenByClientCredentials(IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_ORG_ID, IMS_SCOPES.split(','))
   expect(result).toBeDefined()
-  return result
-    .then(tokens => {
-      expect(tokens).toBeDefined()
-      gTokens = tokens
-    })
-    .catch(err => {
-      // should not get here if successful
-      expect(err).not.toBeDefined()
-    })
+
+  gTokens = result
 })
 
 test('getTokenData', async () => {
@@ -99,15 +80,9 @@ test('getOrganizations', async () => {
   expect(gTokens).toBeDefined()
   expect(typeof gTokens).toEqual('object')
 
-  const result = gImsObj.getOrganizations(gTokens.access_token.token)
-  return result
-    .then(data => {
-      expect(Array.isArray(data)).toBeTruthy()
-    })
-    .catch(err => {
-      // should not get here if successful
-      expect(err).not.toBeDefined()
-    })
+  const result = await gImsObj.getOrganizations(gTokens.access_token.token)
+  expect(Array.isArray(result)).toBe(true)
+  expect(JSON.stringify(result)).toContain(IMS_ORG_ID.split('@')[0])
 })
 
 test('validateToken', async () => {
