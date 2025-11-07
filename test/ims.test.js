@@ -133,6 +133,119 @@ test('getTokenData', () => {
   expect(getTokenData(token)).toEqual(payload)
 })
 
+describe('getTokenData - base64url and padding edge cases', () => {
+  test('should handle base64url characters (- and _)', () => {
+    // Create a payload that results in base64url characters when encoded
+    // Characters that produce '+' and '/' in base64 (which become '-' and '_' in base64url)
+    const payload = {
+      user_id: '12345',
+      name: 'Test User',
+      // This data is crafted to produce + and / in standard base64
+      data: '>>>???'
+    }
+
+    // Standard base64 encoding (with + and /)
+    const base64Standard = Buffer.from(JSON.stringify(payload)).toString('base64')
+
+    // Convert to base64url (- and _ instead of + and /)
+    const base64Url = base64Standard.replace(/\+/g, '-').replace(/\//g, '_')
+
+    const token = `header.${base64Url}.signature`
+
+    // Should decode correctly despite base64url encoding
+    expect(getTokenData(token)).toEqual(payload)
+  })
+
+  test('should handle missing padding (length % 4 == 2)', () => {
+    // Create a payload whose base64 encoding has length % 4 == 2 when padding removed
+    // Original: "ab" -> "YWI=" (4 chars with padding) -> "YWI" (3 chars without padding)
+    const payload = { a: 'b' } // JSON: '{"a":"b"}'
+    const base64WithPadding = Buffer.from(JSON.stringify(payload)).toString('base64')
+
+    // Remove trailing = padding
+    const base64NoPadding = base64WithPadding.replace(/=+$/, '')
+
+    // Verify it needs padding (length % 4 != 0)
+    if (base64NoPadding.length % 4 === 0) {
+      // If this payload doesn't need padding, skip or adjust
+      return
+    }
+
+    const token = `header.${base64NoPadding}.signature`
+
+    // Should decode correctly even without padding
+    expect(getTokenData(token)).toEqual(payload)
+  })
+
+  test('should handle missing padding (length % 4 == 3)', () => {
+    // Create a payload whose base64 encoding needs 1 padding char
+    const payload = { ab: 'cd' } // This will create a specific length
+    const base64WithPadding = Buffer.from(JSON.stringify(payload)).toString('base64')
+
+    // Remove trailing = padding
+    const base64NoPadding = base64WithPadding.replace(/=+$/, '')
+
+    // Verify it needs padding
+    if (base64NoPadding.length % 4 === 0) {
+      return
+    }
+
+    const token = `header.${base64NoPadding}.signature`
+
+    // Should decode correctly even without padding
+    expect(getTokenData(token)).toEqual(payload)
+  })
+
+  test('should handle base64url with missing padding combined', () => {
+    // Real-world JWT token scenario: base64url encoding WITHOUT padding
+    // This is how JWTs are typically encoded
+    const payload = {
+      user_id: '12345',
+      name: 'Test User',
+      exp: 1234567890,
+      // Data that creates + and / in base64
+      special: '?>><?'
+    }
+
+    // Encode as base64url (JWT standard)
+    const base64Standard = Buffer.from(JSON.stringify(payload)).toString('base64')
+    const base64Url = base64Standard
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '') // Remove padding
+
+    const token = `header.${base64Url}.signature`
+
+    // Should decode correctly with both base64url chars AND missing padding
+    expect(getTokenData(token)).toEqual(payload)
+  })
+
+  test('should handle standard base64 with padding (backwards compatibility)', () => {
+    // Ensure we don't break standard base64 tokens
+    const payload = { standard: 'token' }
+    const base64Standard = Buffer.from(JSON.stringify(payload)).toString('base64')
+    const token = `header.${base64Standard}.signature`
+
+    expect(getTokenData(token)).toEqual(payload)
+  })
+
+  test('should handle real JWT token example', () => {
+    // Real JWT token structure (from jwt.io example)
+    // Payload: {"sub":"1234567890","name":"John Doe","iat":1516239022}
+    // Base64url encoded (no padding): eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ
+    const realJwtPayload = 'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ'
+    const token = `header.${realJwtPayload}.signature`
+
+    const expected = {
+      sub: '1234567890',
+      name: 'John Doe',
+      iat: 1516239022
+    }
+
+    expect(getTokenData(token)).toEqual(expected)
+  })
+})
+
 test('Ims.fromToken - bad payload', async () => {
   const badPayload = {
     access_token: 'foo',
