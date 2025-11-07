@@ -211,10 +211,15 @@ async function _toTokenResult (apiResponse) {
  *
  * @param {string} token The token to decode and extract the token value from
  * @returns {object} The decoded token payload data without header and signature
+ * @throws {Error} If the token is invalid or cannot be decoded
  */
 function getTokenData (token) {
   const [, payload] = token.split('.', 3)
-  return JSON.parse(Buffer.from(payload, 'base64'))
+  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+  // add padding if necessary
+  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
+  const decoded = Buffer.from(padded, 'base64').toString('utf-8')
+  return JSON.parse(decoded)
 }
 
 /**
