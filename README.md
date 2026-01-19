@@ -92,9 +92,9 @@ const token = await getToken('my-config')
 
 ## Running in an Adobe I/O Runtime action
 
-**Note: Please prefer the more lightweight [@adobe/aio-lib-core-auth](https://github.com/adobe-developer-platform/app-builder-aio-lib-core-auth) library to generate OAuth tokens from an Adobe I/O Runtime action.**
+**Note: Please prefer the more lightweight [@adobe/aio-lib-core-auth](https://github.com/adobe-developer-platform/app-builder-aio-lib-core-auth) library to generate OAuth tokens from an Adobe I/O Runtime action. The core library focuses on generating OAuth tokens efficiently and doesn't rely on the complex context/plugin logic needed in the CLI. It also uses in-memory caching instead of App Builder State storage, which may run into usage limitations**
 
-The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Adobe I/O Cloud State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
+The AIO IMS Library can also be used in an Adobe I/O Runtime action. In this case the IMS configuration must be set beforehand. The library is relying on the [Adobe App Builder State Library](https://github.com/adobe/aio-lib-state) to persist the access tokens across action invocations and reduce the number of requests to IMS.
 
 Here is an Adobe I/O Runtime action example that leverages the AIO IMS:
 
