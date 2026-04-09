@@ -18,7 +18,7 @@
     "lru-cache": "^5.1.1"
   },
   "devDependencies": {
-    "@adobe/aio-lib-test-proxy": "^1.0.0",
+    "@adobe/aio-lib-test-proxy": "^2.1.0",
     "@adobe/eslint-config-aio-lib-config": "^4.0.0",
     "@types/jest": "^29.5.0",
     "dotenv": "^16.3.1",
